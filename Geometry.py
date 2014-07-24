@@ -24,6 +24,45 @@ class Geometry(object):
                        [0., sA, cA]])
         return rA.dot(rB).dot(rC)
 
+    def projectPointToPlane(self, pts, P):
+        # http://docs.scipy.org/doc/numpy/reference/generated/numpy.tensordot.html
+        # Find a point on the plane
+        z = -1. * (P[3, 0]) / P[2, 0]
+        orgPt = np.array([[0], [0], [z], [1]])
+
+        # 1
+        v = pts - orgPt
+        v[:, 3, 0] = 1
+
+        # 2
+        dist = np.tensordot(v[:, :3, :], P[:3, :], axes=([1, 0])).reshape(-1)
+
+        # 3
+        N = pts.shape[0]
+        ppts = np.zeros((N, 4, 1))
+        for i in range(N):
+            ppts[i, :, :] = pts[i, :, :]
+            ppts[i, :3, 0] -= dist[i] * P[:3, 0]
+        return ppts
+
+    def twoPointsToRay(self, pt1, pt2):
+        R = np.zeros((5, 1))
+        R[:3, :] = pt1[:3, :]
+
+        diff = pt2[:3, 0] - pt1[:3, 0]
+
+        # theta = arctan(y / x)
+        theta = np.arctan2(diff[1, 0], diff[0, 0])
+        R[3, :] = theta
+
+        # phi : arctan(z / dist): dist is the projected ray
+        #       on x-y plane
+        dist = np.sqrt(diff[0, 0] ** 2 + diff[1, 0] ** 2)
+        phi = -np.arctan2(diff[2, 0], dist)
+        R[4, :] = phi
+
+        return R
+
     # Calculate semi inverse function of projection transformation
     def uvToXYZ(self, KInv, T_WC, uv1, F=1):
         XYZ1 = np.ones((4, 1))
