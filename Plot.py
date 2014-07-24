@@ -93,19 +93,119 @@ class Plot(object):
         self.plotLine(pt3, pt7, color)
         self.plotLine(pt4, pt8, color)
 
-    def plotCam(self, pt1, pt2, pt3, pt4, pt5, color='-k'):
+    def plotCam(self, param0, param1=None, param2=None, param3=None,
+                param4=None, color='-k'):
+        msg = "usage:\n" \
+            "    :plotCam(T, [A[, (w, h)[, s]]][, color])\n" \
+            "     T         : 3x3, 3x4, 4x4 transformation matrix\n" \
+            "     A         : 3x3 intrinsic parameter\n" \
+            "     (w, h)    : width and height of an image in pixel\n" \
+            "     s         : camera scale\n" \
+            "     color     : matplotlib color\n" \
+            "\n" \
+            "    :plotCam(pt0, pt1, pt2, pt3, pt4[, color])\n" \
+            "     pt1 - pt5 : 3x1, 4x1 points\n" \
+            "     color     : matplotlib color\n"
+        if not isinstance(param0, np.ndarray):
+            raise TypeError(msg)
+        if len(param0.shape) != 2:
+            raise TypeError(msg)
+
+        M, N = param0.shape
+        if M != 3 and M != 4:
+            raise TypeError(msg)
+
+        if N == 1:
+            # Check other points
+            cond2 = not isinstance(param1, np.ndarray)
+            cond3 = not isinstance(param2, np.ndarray)
+            cond4 = not isinstance(param3, np.ndarray)
+            cond5 = not isinstance(param4, np.ndarray)
+            if cond2 or cond3 or cond4 or cond5:
+                raise TypeError(msg)
+
+            cond2 = len(param1.shape) != 2
+            cond3 = len(param2.shape) != 2
+            cond4 = len(param3.shape) != 2
+            cond5 = len(param4.shape) != 2
+            if cond2 or cond3 or cond4 or cond5:
+                raise TypeError(msg)
+
+            M2, N2 = param1.shape
+            M3, N3 = param2.shape
+            M4, N4 = param3.shape
+            M5, N5 = param4.shape
+            cond2 = M != M2 or N != N2
+            cond3 = M != M3 or N != N3
+            cond4 = M != M4 or N != N4
+            cond5 = M != M5 or N != N5
+            if cond2 or cond3 or cond4 or cond5:
+                raise TypeError(msg)
+
+            pt0 = param0
+            pt1 = param1
+            pt2 = param2
+            pt3 = param3
+            pt4 = param4
+
+        if N >= 3 and N <= 4:
+            # Plot using transformation matrix
+            fx, fy = 1., 1.
+            cx, cy = 0.5, 0.5
+            w, h = 1., 1.
+            d = 1
+
+            if param1 is not None:
+                if not isinstance(param1, np.ndarray):
+                    raise TypeError(msg)
+                if len(param1.shape) != 2:
+                    raise TypeError(msg)
+                if param1.shape[0] != 3 or param1.shape[1] != 3:
+                    raise TypeError(msg)
+                fx = param1[0, 0]
+                fy = param1[1, 1]
+                cx, cy = param1[:2, 2]
+
+            if param2 is not None:
+                if not isinstance(param2, tuple):
+                    raise TypeError(msg)
+                if len(param2) != 2:
+                    raise TypeError(msg)
+                w, h = param2
+
+            if param3 is not None:
+                if not isinstance(param3, (int, float, long)):
+                    raise TypeError(msg)
+                d = param3
+
+            T = np.zeros((4, 4))
+            T[:M, :N] = param0[:, :]
+            T[3, 3] = 1
+
+            h1 = -cy * d / fy
+            w1 = -cx * d / fx
+            h2 = (h - cy) * d / fy
+            w2 = (w - cx) * d / fx
+
+            pt0 = T.dot(np.array([[0, 0, 0, 1]]).T)
+            pt1 = T.dot(np.array([[w1, h1, d, 1]]).T)
+            pt2 = T.dot(np.array([[w2, h1, d, 1]]).T)
+            pt3 = T.dot(np.array([[w1, h2, d, 1]]).T)
+            pt4 = T.dot(np.array([[w2, h2, d, 1]]).T)
+
+        # Plot using 5 pts
+        self.plotLine(pt0, pt1, color)
+        self.plotLine(pt0, pt2, color)
+        self.plotLine(pt0, pt3, color)
+        self.plotLine(pt0, pt4, color)
+
         self.plotLine(pt1, pt2, color)
         self.plotLine(pt1, pt3, color)
-        self.plotLine(pt1, pt4, color)
-        self.plotLine(pt1, pt5, color)
-
-        self.plotLine(pt2, pt3, color)
+        self.plotLine(pt2, pt4, color)
         self.plotLine(pt3, pt4, color)
-        self.plotLine(pt4, pt5, color)
-        self.plotLine(pt5, pt2, color)
 
-        self.plotPoint(pt2, '.r')
-        self.plotPoint(pt3, '.g')
+        self.plotPoint(pt1, '.r')
+        self.plotPoint(pt2, '.g')
 
     def plotAxis(self, R=None, scale=1.):
         pt0 = np.matrix(np.array([[0., 0., 0., 1.]]).T)
