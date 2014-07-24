@@ -49,7 +49,7 @@ class Geometry(object):
         R = np.zeros((5, 1))
         R[:3, :] = pt1[:3, :]
 
-        diff = pt2[:3, 0] - pt1[:3, 0]
+        diff = pt2[:3, :] - pt1[:3, :]
 
         # theta = arctan(y / x)
         theta = np.arctan2(diff[1, 0], diff[0, 0])
