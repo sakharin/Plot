@@ -229,7 +229,8 @@ class Plot(object):
 
     def plotRay(self, R, scale=1., color='r'):
         pt1 = R[:3, :]
-        T = self.geo.getRMatrixEulerAngles(0, R[4, 0], R[3, 0])
+        T = self.geo.getRMatrixEulerAngles(0, 0, R[3, 0])
+        T = T.dot(self.geo.getRMatrixEulerAngles(0, R[4, 0], 0))
         pt2 = T.dot(np.array([[scale, 0, 0]]).T) + pt1
         self.plotPoint(pt1, '.' + color)
         self.plotLine(pt1, pt2, '-' + color)
@@ -321,13 +322,11 @@ if __name__ == "__main__":
     R[3, 3] = 1
     p.plotAirplane(R, scale=5)
 
-    thetas = [0, np.pi / 8, 2 * np.pi / 8, 3 * np.pi / 8, 4 * np.pi / 8]
-    phis = [-2 * np.pi / 4, -np.pi / 4, 0, np.pi / 4, 2 * np.pi / 4]
-    thetas = np.pi / 32 * np.arange(32)
-
+    thetas = np.pi / 16 * np.arange(16)
+    phis = np.pi / 4 * np.arange(-8, 4)
     for theta in thetas:
         for phi in phis:
-            R = np.array([[-5, 5, 2, theta, phi]]).T
-            p.plotRay(R, 3)
+            R = np.array([[-10, 5, 2, theta, phi]]).T
+            p.plotRay(R, 3, 'c')
 
     p.show(50, -75)
