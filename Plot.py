@@ -6,6 +6,8 @@ from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.patches import FancyArrowPatch
 from mpl_toolkits.mplot3d import proj3d
 
+from Geometry import Geometry
+
 
 class Plot(object):
     def __init__(self):
@@ -17,6 +19,8 @@ class Plot(object):
         self.xmx, self.xmn = -1e6, 1e6
         self.ymx, self.ymn = -1e6, 1e6
         self.zmx, self.zmn = -1e6, 1e6
+
+        self.geo = Geometry()
 
     def show(self, elev=0., azim=0.):
         self.ax.set_xlabel("x")
@@ -223,6 +227,13 @@ class Plot(object):
         self.plotLine(pt0, pty, '-g')
         self.plotLine(pt0, ptz, '-b')
 
+    def plotRay(self, R, scale=1., color='r'):
+        pt1 = R[:3, :]
+        T = self.geo.getRMatrixEulerAngles(0, R[4, 0], R[3, 0])
+        pt2 = T.dot(np.array([[scale, 0, 0]]).T) + pt1
+        self.plotPoint(pt1, '.' + color)
+        self.plotLine(pt1, pt2, '-' + color)
+
     def plotAirplane(self, R=None, scale=1.):
         # plot an airplane centered at (0, 0, 0) heading to x direction
 
@@ -309,4 +320,14 @@ if __name__ == "__main__":
     R[:3, 3] = np.array([5, -5, -2])
     R[3, 3] = 1
     p.plotAirplane(R, scale=5)
+
+    thetas = [0, np.pi / 8, 2 * np.pi / 8, 3 * np.pi / 8, 4 * np.pi / 8]
+    phis = [-2 * np.pi / 4, -np.pi / 4, 0, np.pi / 4, 2 * np.pi / 4]
+    thetas = np.pi / 32 * np.arange(32)
+
+    for theta in thetas:
+        for phi in phis:
+            R = np.array([[-5, 5, 2, theta, phi]]).T
+            p.plotRay(R, 3)
+
     p.show(50, -75)
