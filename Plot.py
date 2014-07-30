@@ -246,6 +246,8 @@ class Plot(object):
     def plotArrow(self, pt1, pt2, color='r'):
         a = Arrow3D(pt1, pt2, mutation_scale=20, lw=1, arrowstyle="-|>", color=color)
         self.ax.add_artist(a)
+        self.updateRegion(pt1)
+        self.updateRegion(pt2)
 
     def plotRay(self, R, scale=1., color='r'):
         pt1 = R[:3, :]
