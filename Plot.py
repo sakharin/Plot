@@ -9,6 +9,22 @@ from mpl_toolkits.mplot3d import proj3d
 from Geometry import Geometry
 
 
+class Arrow3D(FancyArrowPatch):
+    #http://stackoverflow.com/questions/11140163/python-matplotlib-plotting-a-3d-cube-a-sphere-and-a-vector
+    def __init__(self, pt1, pt2, *args, **kwargs):
+        FancyArrowPatch.__init__(self, (0, 0), (0, 0), *args, **kwargs)
+        x = [pt1[0, 0], pt2[0, 0]]
+        y = [pt1[1, 0], pt2[1, 0]]
+        z = [pt1[2, 0], pt2[2, 0]]
+        self._verts3d = x, y, z
+
+    def draw(self, renderer):
+        xs3d, ys3d, zs3d = self._verts3d
+        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
+        self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
+        FancyArrowPatch.draw(self, renderer)
+
+
 class Plot(object):
     def __init__(self):
         self.fig = plt.figure()
@@ -227,13 +243,16 @@ class Plot(object):
         self.plotLine(pt0, pty, '-g')
         self.plotLine(pt0, ptz, '-b')
 
+    def plotArrow(self, pt1, pt2, color='r'):
+        a = Arrow3D(pt1, pt2, mutation_scale=20, lw=1, arrowstyle="-|>", color=color)
+        self.ax.add_artist(a)
+
     def plotRay(self, R, scale=1., color='r'):
         pt1 = R[:3, :]
         T = self.geo.getRMatrixEulerAngles(0, 0, R[3, 0])
         T = T.dot(self.geo.getRMatrixEulerAngles(0, R[4, 0], 0))
         pt2 = T.dot(np.array([[scale, 0, 0]]).T) + pt1
-        self.plotPoint(pt1, '.' + color)
-        self.plotLine(pt1, pt2, '-' + color)
+        self.plotArrow(pt1, pt2, color)
 
     def plotAirplane(self, R=None, scale=1.):
         # plot an airplane centered at (0, 0, 0) heading to x direction
