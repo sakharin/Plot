@@ -55,18 +55,17 @@ class Geometry(object):
         theta = np.arctan2(diff[1, 0], diff[0, 0])
         R[3, :] = theta
 
-        # phi : arctan(z / dist): dist is the projected ray
-        #       on x-y plane
-        dist = np.sqrt(diff[0, 0] ** 2 + diff[1, 0] ** 2)
-        phi = -np.arctan2(diff[2, 0], dist)
+        # phi : arctan(dist / z): dist is the length of the ray
+        diffSq = diff ** 2
+        dist = np.sqrt(diffSq.sum())
+        phi = np.arctan2(dist, diff[2, 0])
         R[4, :] = phi
-
         return R
 
     # Calculate semi inverse function of projection transformation
-    def uvToXYZ(self, KInv, T_WC, uv1, F=1):
+    def uvToXYZ(self, KInv, T_WC, uv, F=1):
         XYZ1 = np.ones((4, 1))
-        XYZ1[:3, :] = (KInv * F).dot(uv1)
+        XYZ1[:3, :] = (KInv * F).dot(uv)
         return T_WC.dot(XYZ1)
 
 
