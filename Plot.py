@@ -253,7 +253,7 @@ class Plot(object):
         pt1 = R[:3, :]
         T = self.geo.getRMatrixEulerAngles(0, 0, R[3, 0])
         T = T.dot(self.geo.getRMatrixEulerAngles(0, R[4, 0], 0))
-        pt2 = T.dot(np.array([[scale, 0, 0]]).T) + pt1
+        pt2 = T.dot(np.array([[0, 0, scale]]).T) + pt1
         self.plotArrow(pt1, pt2, color)
 
     def plotAirplane(self, R=None, scale=1.):
@@ -343,8 +343,8 @@ if __name__ == "__main__":
     R[3, 3] = 1
     p.plotAirplane(R, scale=5)
 
-    thetas = np.pi / 16 * np.arange(16)
-    phis = np.pi / 4 * np.arange(-8, 4)
+    thetas = np.pi / 16 * np.arange(32)
+    phis = np.pi / 4 * np.arange(5)
     for theta in thetas:
         for phi in phis:
             R = np.array([[-10, 5, 2, theta, phi]]).T
