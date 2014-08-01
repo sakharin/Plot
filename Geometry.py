@@ -63,10 +63,19 @@ class Geometry(object):
         return R
 
     # Calculate semi inverse function of projection transformation
-    def uvToXYZ(self, KInv, T_WC, uv, F=1):
+    def uvToXYZ(self, K, T_CW, uv):
         XYZ1 = np.ones((4, 1))
-        XYZ1[:3, :] = (KInv * F).dot(uv)
-        return T_WC.dot(XYZ1)
+        uvDot = np.ones((3, 1))
+        uvDot[:2, 0] = uv[:2, 0]
+
+        T = T_CW[:3, :3]
+        C = T_CW[:3, 3:4]
+
+        KInv = np.linalg.inv(K)
+        TInv = np.linalg.inv(T)
+
+        XYZ1[:3, :1] = TInv.dot(KInv.dot(uvDot) - C)
+        return XYZ1
 
 
 if __name__ == "__main__":
