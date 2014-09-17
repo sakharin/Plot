@@ -51,15 +51,15 @@ class Geometry(object):
 
         diff = pt2[:3, :] - pt1[:3, :]
 
-        # theta = arctan(y / x)
-        theta = np.arctan2(diff[1, 0], diff[0, 0])
-        R[3, :] = theta
+        # phi = arctan(y / x)
+        phi = np.arctan2(diff[1, 0], diff[0, 0])
+        R[4, :] = phi
 
-        # phi : arctan(dist / z): dist is the length of the ray
+        # theta : arccos(z / dist): dist is the length of the ray
         diffSq = diff ** 2
         dist = np.sqrt(diffSq.sum())
-        phi = np.arctan2(dist, diff[2, 0])
-        R[4, :] = phi
+        theta = np.arccos(diff[2, 0] / dist)
+        R[3, :] = theta
         return R
 
     # Calculate semi inverse function of projection transformation

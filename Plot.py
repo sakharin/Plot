@@ -84,6 +84,17 @@ class Plot(object):
                      [pt1[1, 0], pt2[1, 0]],
                      [pt1[2, 0], pt2[2, 0]], color)
 
+    def plotPlane(self, P, color='-r'):
+        f = lambda a, b: -(a * P[0, 0] + b * P[1, 0] + P[3, 0]) / P[2, 0]
+        pt1 = np.matrix(np.array([[-0.5, 0.5, f(-0.5, 0.5), 1.0]]).T)
+        pt2 = np.matrix(np.array([[0.5, 0.5, f(0.5, 0.5), 1.0]]).T)
+        pt3 = np.matrix(np.array([[0.5, -0.5, f(0.5, -0.5), 1.0]]).T)
+        pt4 = np.matrix(np.array([[-0.5, -0.5, f(-0.5, -0.5), 1.0]]).T)
+        self.plotLine(pt1, pt2, color)
+        self.plotLine(pt2, pt3, color)
+        self.plotLine(pt3, pt4, color)
+        self.plotLine(pt4, pt1, color)
+
     def plotBox(self, pt1, pt2, pt3=None, pt4=None, pt5=None, pt6=None, pt7=None, pt8=None, color='-r'):
         if pt3 is None:
             x1, y1, z1 = pt1[:, 0]
@@ -249,10 +260,10 @@ class Plot(object):
         self.updateRegion(pt1)
         self.updateRegion(pt2)
 
-    def plotRay(self, R, scale=1., color='r'):
+    def plotRay(self, R, color='r', scale=1.):
         pt1 = R[:3, :]
-        T = self.geo.getRMatrixEulerAngles(0, 0, R[3, 0])
-        T = T.dot(self.geo.getRMatrixEulerAngles(0, R[4, 0], 0))
+        T = self.geo.getRMatrixEulerAngles(0, 0, R[4, 0])
+        T = T.dot(self.geo.getRMatrixEulerAngles(0, R[3, 0], 0))
         pt2 = T.dot(np.array([[0, 0, scale]]).T) + pt1
         self.plotArrow(pt1, pt2, color)
 
