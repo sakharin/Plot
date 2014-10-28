@@ -269,6 +269,28 @@ class Plot(object):
         self.updateRegion(pt2)
         self.plotArrow(pt1, pt2, color)
 
+    def plotVector(self, vec, origin=None, color='r'):
+        if origin is None:
+            origin = np.zeros((3, 1))
+        ray = np.zeros((5, 1))
+        ray[:3, :] = origin
+        norm = np.sqrt((vec ** 2).sum())
+        if norm == 0:
+            ray[3, 0] = 0
+            ray[4, 0] = 0
+        elif vec[0, 0] == 0:
+            ray[3, 0] = np.arccos(vec[2, 0] / norm)
+            if vec[1, 0] == 0:
+                ray[4, 0] = 0
+            elif vec[1, 0] > 0:
+                ray[4, 0] = np.pi / 2.
+            else:
+                ray[4, 0] = 3 * np.pi / 2.
+        else:
+            ray[3, 0] = np.arccos(vec[2, 0] / norm)
+            ray[4, 0] = np.arctan2(vec[1, 0], vec[0, 0])
+        self.plotRay(ray, color, norm)
+
     def plotAirplane(self, R=None, scale=1.):
         # plot an airplane centered at (0, 0, 0) heading to x direction
 
@@ -361,6 +383,15 @@ if __name__ == "__main__":
     for theta in thetas:
         for phi in phis:
             R = np.array([[-10, 5, 2, theta, phi]]).T
-            p.plotRay(R, 'c', 8)
+            p.plotRay(R, 'c', 3)
+
+            vec = np.zeros((3, 1))
+            vec[0, 0] = np.sin(theta)
+            vec[2, 0] = np.cos(theta)
+            vec[1, 0] = vec[0, 0] * np.sin(phi)
+            vec[0, 0] = vec[0, 0] * np.cos(phi)
+            vec *= 2
+            pt = np.array([[0, -10, 0]]).T
+            p.plotVector(vec, pt, 'm')
 
     p.show(50, -75)
