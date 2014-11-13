@@ -24,7 +24,41 @@ class Geometry(object):
                        [0., sA, cA]])
         return rA.dot(rB).dot(rC)
 
-    def projectPointToPlane(self, pts, P):
+    def angleDiff(self, angle1, angle2):
+        # http://stackoverflow.com/questions/12234574/calculating-if-an-angle-is-between-two-angles
+        # Return diff in range [-pi, pi]
+        return (angle1 - angle2 + np.pi) % (2 * np.pi) - np.pi
+
+    def lineCrossingPlane(self, P0, u, V0, n):
+        # http://geomalgorithms.com/a05-_intersect-1.html
+        # L: x = P0 + s u
+        # P: 0 = n.(x - V0)
+        shape = u.shape
+        if len(shape) == 2:
+            Si = n.T.dot(V0 - P0) / n.T.dot(u)
+            return P0 + Si * u
+        else:
+            num = n.T.dot(V0 - P0)
+            den = (n.reshape(1, 1, 3) * u).sum(axis=2)
+            Si = num / den
+            points = P0.reshape((1, 1, 3)) + \
+                Si.reshape((shape[0], shape[1], 1)) * u
+            return points
+
+    def distPoint2Line(self, P, P0, u):
+        # http://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
+        shape = u.shape
+        if len(shape) == 2:
+            diff = P0 - P
+            return np.sqrt(((diff - diff.T.dot(u) * u) ** 2).sum())
+        else:
+            diff = P0 - P
+            diffTDotu = (diff.reshape((1, 1, 3)) * u).sum(axis=2)
+            diffTDotuTimesu = diffTDotu.reshape((shape[0], shape[1], 1)) * u
+            diffMinusdiffTDotuTimesu = diff.reshape((1, 1, 3)) - diffTDotuTimesu
+            return np.sqrt((diffMinusdiffTDotuTimesu ** 2).sum(axis=2))
+
+    def projectPoint2Plane(self, pts, P):
         # http://docs.scipy.org/doc/numpy/reference/generated/numpy.tensordot.html
         # Find a point on the plane
         z = -1. * (P[3, 0]) / P[2, 0]
@@ -45,25 +79,83 @@ class Geometry(object):
             ppts[i, :3, 0] -= dist[i] * P[:3, 0]
         return ppts
 
-    def twoPointsToRay(self, pt1, pt2):
-        R = np.zeros((5, 1))
-        R[:3, :] = pt1[:3, :]
+    def twoPoints2Ray(self, P1, P2):
+        ray = np.zeros((5, 1))
+        ray[0:3, 0:1] = P1
+        diff = P2 - P1
+        norm = np.sqrt((diff ** 2).sum())
+        if norm == 0:
+            ray[3, 0] = 0
+            ray[4, 0] = 0
+        elif diff[0, 0] == 0:
+            ray[3, 0] = np.arccos(diff[2, 0] / norm)
+            if diff[1, 0] == 0:
+                ray[4, 0] = 0
+            elif diff[1, 0] > 0:
+                ray[4, 0] = np.pi / 2.
+            else:
+                ray[4, 0] = 3 * np.pi / 2.
+        else:
+            ray[3, 0] = np.arccos(diff[2, 0] / norm)
+            ray[4, 0] = np.arctan2(diff[1, 0], diff[0, 0])
+        return ray
 
-        diff = pt2[:3, :] - pt1[:3, :]
+    def twoPoints2Vec(self, P1, P2):
+        sP1 = P1.shape
+        sP2 = P2.shape
+        if len(sP1) == 2 and len(sP2) == 2:
+            diff = P2 - P1
+            norm = np.sqrt((diff ** 2).sum())
+            vec = diff / norm
+        elif len(sP1) == 2 and len(sP2) == 3:
+            diff = P2 - P1.reshape((1, 3))
+            norm = np.sqrt((diff ** 2).sum(axis=2))
+            vec = diff / norm.reshape(sP2[0], sP2[1], 1)
+        return vec
 
-        # phi = arctan(y / x)
-        phi = np.arctan2(diff[1, 0], diff[0, 0])
-        R[4, :] = phi
+    def vec2Ray(self, vec, P1):
+        ray = np.zeros((5, 1))
+        ray[:3, 0:1] = P1
+        x, y, z = vec[:3, 0]
+        norm = np.sqrt((P1 ** 2).sum())
+        if norm == 0:
+            ray[3, 0] = 0
+            ray[4, 0] = 0
+        if x == 0:
+            ray[3, 0] = np.arccos(z / norm)
+            if y == 0:
+                ray[4, 0] = 0
+            elif y > 0:
+                ray[4, 0] = np.py / 2.
+            else:
+                ray[4, 0] = 3 * np.py / 2.
+        else:
+            ray[4, 0] = np.arccos(z / norm)
+            ray[4, 0] = np.arctan2(y, x)
+        return ray
 
-        # theta : arccos(z / dist): dist is the length of the ray
-        diffSq = diff ** 2
-        dist = np.sqrt(diffSq.sum())
-        theta = np.arccos(diff[2, 0] / dist)
-        R[3, :] = theta
-        return R
+    def rays2Vecs(self, Rs):
+        shape = Rs.shape
+        if len(shape) == 2:
+            thetas = Rs[3, 0].reshape((1, 1, 1, 1))
+            phis = Rs[4, 0].reshape((1, 1, 1, 1))
+            return self.angles2Vecs(thetas, phis).reshape((3, 1))
+        elif len(shape) == 4:
+            thetas = Rs[:, :, 3, 0]
+            phis = Rs[:, :, 4, 0]
+            return self.angles2Vecs(thetas, phis)
+
+    def angles2Vecs(self, thetas, phis):
+        h, w = thetas.shape[:2]
+        res = np.zeros((h, w, 3))
+        res[:, :, 0] = np.sin(thetas)
+        res[:, :, 2] = np.cos(thetas)
+        res[:, :, 1] = res[:, :, 0] * np.sin(phis)
+        res[:, :, 0] = res[:, :, 0] * np.cos(phis)
+        return res
 
     # Calculate semi inverse function of projection transformation
-    def uvToXYZ(self, K, T_CW, uv):
+    def uv2XYZ(self, K, T_CW, uv):
         XYZ1 = np.ones((4, 1))
         uvDot = np.ones((3, 1))
         uvDot[:2, 0] = uv[:2, 0]
