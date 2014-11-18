@@ -80,25 +80,48 @@ class Geometry(object):
         return ppts
 
     def twoPoints2Ray(self, P1, P2):
-        ray = np.zeros((5, 1))
-        ray[0:3, 0:1] = P1
-        diff = P2 - P1
-        norm = np.sqrt((diff ** 2).sum())
-        if norm == 0:
-            ray[3, 0] = 0
-            ray[4, 0] = 0
-        elif diff[0, 0] == 0:
-            ray[3, 0] = np.arccos(diff[2, 0] / norm)
-            if diff[1, 0] == 0:
+        shape = P2.shape
+        if len(shape) == 2:
+            ray = np.zeros((5, 1))
+            ray[0:3, 0:1] = P1
+            diff = P2 - P1
+            norm = np.sqrt((diff ** 2).sum())
+            if norm == 0:
+                ray[3, 0] = 0
                 ray[4, 0] = 0
-            elif diff[1, 0] > 0:
-                ray[4, 0] = np.pi / 2.
+            elif diff[0, 0] == 0:
+                ray[3, 0] = np.arccos(diff[2, 0] / norm)
+                if diff[1, 0] == 0:
+                    ray[4, 0] = 0
+                elif diff[1, 0] > 0:
+                    ray[4, 0] = np.pi / 2.
+                else:
+                    ray[4, 0] = 3 * np.pi / 2.
             else:
-                ray[4, 0] = 3 * np.pi / 2.
+                ray[3, 0] = np.arccos(diff[2, 0] / norm)
+                ray[4, 0] = np.arctan2(diff[1, 0], diff[0, 0])
+            return ray
         else:
-            ray[3, 0] = np.arccos(diff[2, 0] / norm)
-            ray[4, 0] = np.arctan2(diff[1, 0], diff[0, 0])
-        return ray
+            rays = np.zeros((shape[0], shape[1], 5))
+            rays[:, :, :3] = P1.reshape((1, 3))
+            diff = P2 - P1.reshape((1, 3))
+            norm = np.sqrt((diff ** 2).sum(axis=2))
+
+            m1 = norm == 0
+            m2 = diff[:, :, 0] == 0
+            m3 = diff[:, :, 1] > 0
+
+            acos = np.arccos(diff[:, :, 2] / norm)
+            atan = np.arctan2(diff[:, :, 1], diff[:, :, 0])
+
+            rays[:, :, 3] += m2 * acos
+            rays[:, :, 4] += m2 * m3 * (np.pi / 2.)
+            rays[:, :, 4] += m2 * (1 - m3) * (3 * np.pi / 2.)
+
+            rays[:, :, 3] += (1 - m1) * (1 - m2) * acos
+            rays[:, :, 4] += (1 - m1) * (1 - m2) * atan
+
+            return rays
 
     def twoPoints2Vec(self, P1, P2):
         sP1 = P1.shape
@@ -153,6 +176,13 @@ class Geometry(object):
         res[:, :, 1] = res[:, :, 0] * np.sin(phis)
         res[:, :, 0] = res[:, :, 0] * np.cos(phis)
         return res
+
+    def minMaxAng(self, ang):
+        ang = ang % (2 * np.pi)
+        ang += 2 * np.pi
+        minAng = np.min(ang) - 2 * np.pi
+        maxAng = np.max(ang) - 2 * np.pi
+        return minAng, maxAng
 
     # Calculate semi inverse function of projection transformation
     def uv2XYZ(self, K, T_CW, uv):
