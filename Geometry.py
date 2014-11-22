@@ -47,15 +47,22 @@ class Geometry(object):
 
     def distPoint2Line(self, P, P0, u):
         # http://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
-        shape = u.shape
-        if len(shape) == 2:
+        P0Shape = P0.shape
+        uShape = u.shape
+        if len(uShape) == 2:
             diff = P0 - P
             return np.sqrt(((diff - diff.T.dot(u) * u) ** 2).sum())
-        else:
+        elif len(P0Shape) == 2:
             diff = P0 - P
             diffTDotu = (diff.reshape((1, 1, 3)) * u).sum(axis=2)
-            diffTDotuTimesu = diffTDotu.reshape((shape[0], shape[1], 1)) * u
+            diffTDotuTimesu = diffTDotu.reshape((uShape[0], uShape[1], 1)) * u
             diffMinusdiffTDotuTimesu = diff.reshape((1, 1, 3)) - diffTDotuTimesu
+            return np.sqrt((diffMinusdiffTDotuTimesu ** 2).sum(axis=2))
+        elif len(P0Shape) == 3:
+            diff = P0 - P.reshape((1, 1, 3))
+            diffTDotu = (diff * u).sum(axis=2)
+            diffTDotuTimesu = diffTDotu.reshape((uShape[0], uShape[1], 1)) * u
+            diffMinusdiffTDotuTimesu = diff - diffTDotuTimesu
             return np.sqrt((diffMinusdiffTDotuTimesu ** 2).sum(axis=2))
 
     def projectPoint2Plane(self, pts, P):
@@ -178,10 +185,16 @@ class Geometry(object):
         return res
 
     def minMaxAng(self, ang):
-        ang = ang % (2 * np.pi)
-        ang += 2 * np.pi
-        minAng = np.min(ang) - 2 * np.pi
-        maxAng = np.max(ang) - 2 * np.pi
+        # Assume that all angs are within a half circle
+        ang = ang.reshape(-1)
+        mean = np.mean(ang)
+        if np.any(np.abs(ang - mean) > np.pi):
+            ang = (ang + 0.5 * np.pi) % (2 * np.pi)
+            minAng = np.min(ang) - 0.5 * np.pi
+            maxAng = np.max(ang) - 0.5 * np.pi
+        else:
+            minAng = np.min(ang - mean) + mean
+            maxAng = np.max(ang - mean) + mean
         return minAng, maxAng
 
     # Calculate semi inverse function of projection transformation
