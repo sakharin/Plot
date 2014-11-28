@@ -164,6 +164,13 @@ class Geometry(object):
             ray[4, 0] = np.arctan2(y, x)
         return ray
 
+    def pointAngles2Ray(self, pt, theta, phi):
+        ray = np.zeros((5, 1))
+        ray[:3, :] = pt
+        ray[3, 0] = theta
+        ray[4, 0] = phi
+        return ray
+
     def rays2Vecs(self, Rs):
         shape = Rs.shape
         if len(shape) == 2:
