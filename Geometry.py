@@ -86,32 +86,43 @@ class Geometry(object):
             ppts[i, :3, 0] -= dist[i] * P[:3, 0]
         return ppts
 
-    def twoPoints2Ray(self, P1, P2):
-        shape = P2.shape
-        if len(shape) == 2:
-            ray = np.zeros((5, 1))
-            ray[0:3, 0:1] = P1
+    def twoPoints2Vec(self, P1, P2):
+        sP1 = P1.shape
+        sP2 = P2.shape
+        if len(sP1) == 2 and len(sP2) == 2:
             diff = P2 - P1
             norm = np.sqrt((diff ** 2).sum())
-            if norm == 0:
-                ray[3, 0] = 0
-                ray[4, 0] = 0
-            elif diff[0, 0] == 0:
-                ray[3, 0] = np.arccos(diff[2, 0] / norm)
-                if diff[1, 0] == 0:
-                    ray[4, 0] = 0
-                elif diff[1, 0] > 0:
-                    ray[4, 0] = np.pi / 2.
-                else:
-                    ray[4, 0] = 3 * np.pi / 2.
-            else:
-                ray[3, 0] = np.arccos(diff[2, 0] / norm)
-                ray[4, 0] = np.arctan2(diff[1, 0], diff[0, 0])
-            return ray
-        else:
-            rays = np.zeros((shape[0], shape[1], 5))
-            rays[:, :, :3] = P1.reshape((1, 3))
+            vec = diff / norm
+            return vec
+        elif len(sP1) == 2 and len(sP2) == 3:
             diff = P2 - P1.reshape((1, 3))
+            norm = np.sqrt((diff ** 2).sum(axis=2))
+            vec = diff / norm.reshape(sP2[0], sP2[1], 1)
+            return vec
+
+    def vec2Angs(self, vec):
+        shape = vec.shape
+        if len(shape) == 2:
+            diff = vec
+            norm = np.sqrt((diff ** 2).sum())
+            theta, phi = 0, 0
+            if norm == 0:
+                theta = 0
+                phi = 0
+            elif diff[0, 0] == 0:
+                theta = np.arccos(diff[2, 0] / norm)
+                if diff[1, 0] == 0:
+                    phi[4, 0] = 0
+                elif diff[1, 0] > 0:
+                    phi[4, 0] = np.pi / 2.
+                else:
+                    phi[4, 0] = 3 * np.pi / 2.
+            else:
+                theta = np.arccos(diff[2, 0] / norm)
+                phi = np.arctan2(diff[1, 0], diff[0, 0])
+            return theta, phi
+        else:
+            diff = vec
             norm = np.sqrt((diff ** 2).sum(axis=2))
 
             m1 = norm == 0
@@ -121,68 +132,19 @@ class Geometry(object):
             acos = np.arccos(diff[:, :, 2] / norm)
             atan = np.arctan2(diff[:, :, 1], diff[:, :, 0])
 
-            rays[:, :, 3] += m2 * acos
-            rays[:, :, 4] += m2 * m3 * (np.pi / 2.)
-            rays[:, :, 4] += m2 * (1 - m3) * (3 * np.pi / 2.)
+            theta = np.zeros((shape[0], shape[1]))
+            phi = np.zeros((shape[0], shape[1]))
 
-            rays[:, :, 3] += (1 - m1) * (1 - m2) * acos
-            rays[:, :, 4] += (1 - m1) * (1 - m2) * atan
+            theta += m2 * acos
+            phi += m2 * m3 * (np.pi / 2.)
+            phi += m2 * (1 - m3) * (3 * np.pi / 2.)
 
-            return rays
+            theta += (1 - m1) * (1 - m2) * acos
+            phi += (1 - m1) * (1 - m2) * atan
 
-    def twoPoints2Vec(self, P1, P2):
-        sP1 = P1.shape
-        sP2 = P2.shape
-        if len(sP1) == 2 and len(sP2) == 2:
-            diff = P2 - P1
-            norm = np.sqrt((diff ** 2).sum())
-            vec = diff / norm
-        elif len(sP1) == 2 and len(sP2) == 3:
-            diff = P2 - P1.reshape((1, 3))
-            norm = np.sqrt((diff ** 2).sum(axis=2))
-            vec = diff / norm.reshape(sP2[0], sP2[1], 1)
-        return vec
+            return theta, phi
 
-    def vec2Ray(self, vec, P1):
-        ray = np.zeros((5, 1))
-        ray[:3, 0:1] = P1
-        x, y, z = vec[:3, 0]
-        norm = np.sqrt((P1 ** 2).sum())
-        if norm == 0:
-            ray[3, 0] = 0
-            ray[4, 0] = 0
-        if x == 0:
-            ray[3, 0] = np.arccos(z / norm)
-            if y == 0:
-                ray[4, 0] = 0
-            elif y > 0:
-                ray[4, 0] = np.py / 2.
-            else:
-                ray[4, 0] = 3 * np.py / 2.
-        else:
-            ray[4, 0] = np.arccos(z / norm)
-            ray[4, 0] = np.arctan2(y, x)
-        return ray
-
-    def pointAngles2Ray(self, pt, theta, phi):
-        ray = np.zeros((5, 1))
-        ray[:3, :] = pt
-        ray[3, 0] = theta
-        ray[4, 0] = phi
-        return ray
-
-    def rays2Vecs(self, Rs):
-        shape = Rs.shape
-        if len(shape) == 2:
-            thetas = Rs[3, 0].reshape((1, 1, 1, 1))
-            phis = Rs[4, 0].reshape((1, 1, 1, 1))
-            return self.angles2Vecs(thetas, phis).reshape((3, 1))
-        elif len(shape) == 4:
-            thetas = Rs[:, :, 3, 0]
-            phis = Rs[:, :, 4, 0]
-            return self.angles2Vecs(thetas, phis)
-
-    def angles2Vecs(self, thetas, phis):
+    def angs2Vec(self, thetas, phis):
         h, w = thetas.shape[:2]
         res = np.zeros((h, w, 3))
         res[:, :, 0] = np.sin(thetas)
@@ -190,6 +152,80 @@ class Geometry(object):
         res[:, :, 1] = res[:, :, 0] * np.sin(phis)
         res[:, :, 0] = res[:, :, 0] * np.cos(phis)
         return res
+
+    def vec2Ray(self, vec, P1):
+        shape = vec.shape
+        if len(shape) == 2:
+            ray = np.zeros((5, 1))
+            ray[:3, 0:1] = P1
+            theta, phi = self.vec2Angs(vec)
+            ray[3, 0] = theta
+            ray[4, 0] = phi
+            return ray
+        else:
+            rays = np.zeros((shape[0], shape[1], 5))
+            if len(P1.shape) == 2:
+                rays[:, :, :3] = P1[:, 0]
+            else:
+                rays[:, :, :3] = P1[:, :, :]
+            theta, phi = self.vec2Angs(vec)
+            rays[:, :, 3] = theta
+            rays[:, :, 4] = phi
+            return rays
+
+    def ray2Vec(self, Rs):
+        shape = Rs.shape
+        if len(shape) == 2:
+            thetas = Rs[3, 0]
+            phis = Rs[4, 0]
+            return self.angs2Vec(thetas, phis)
+        elif len(shape) == 3:
+            thetas = Rs[:, :, 3]
+            phis = Rs[:, :, 4]
+            return self.angs2Vec(thetas, phis)
+
+    def twoPts2Ang(self, P1, P2):
+        shape = P2.shape
+        if len(shape) == 2:
+            diff = P2 - P1
+            return self.vec2Angs(diff)
+        else:
+            diff = P2 - P1.reshape((1, 3))
+            return self.vec2Angs(diff)
+
+    def twoPts2Ray(self, P1, P2):
+        shape = P2.shape
+        theta, phi = self.twoPts2Ang(P1, P2)
+        if len(shape) == 2:
+            ray = np.zeros((5, 1))
+            ray[0:3, 0:1] = P1
+            ray[3, 0] = theta
+            ray[4, 0] = phi
+            return ray
+        else:
+            rays = np.zeros((shape[0], shape[1], 5))
+            rays[:, :, :3] = P1.reshape((1, 3))
+            rays[:, :, 3] = theta
+            rays[:, :, 4] = phi
+            return rays
+
+    def ptAngles2Ray(self, pt, theta, phi):
+        if isinstance(theta, (int, long, float)):
+            ray = np.zeros((5, 1))
+            ray[:3, 0] = pt[:, 0]
+            ray[3, 0] = theta
+            ray[4, 0] = phi
+            return ray
+        else:
+            shape = theta.shape
+            ray = np.zeros((shape[0], shape[1], 5))
+            if len(pt.shape) == 2:
+                ray[:, :, :3] = pt.reshape((1, 1, 3))
+            elif len(pt.shape) == 3:
+                ray[:, :, :3] = pt[:, :, :3]
+            ray[:, :, 3] = theta
+            ray[:, :, 4] = phi
+            return ray
 
     def minMaxAng(self, ang):
         # Assume that all angs are within a half circle

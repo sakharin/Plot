@@ -269,7 +269,7 @@ class Plot(object):
         self.updateRegion(pt2)
         self.plotArrow(pt1, pt2, color)
 
-    def plotVector(self, vec, origin=None, color='r'):
+    def plotVec(self, vec, origin=None, color='r'):
         if origin is None:
             origin = np.zeros((3, 1))
         ray = np.zeros((5, 1))
