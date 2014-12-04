@@ -57,7 +57,7 @@ if __name__ == "__main__":
     xyz[0, 32, :] = [0, 1, -1]
     xyz[0, 33, :] = [0, -1, -1]
 
-    vec1 = geo.twoPoints2Vec(P0, xyz)
+    vec1 = geo.twoPts2Vec(P0, xyz)
     theta2, phi2 = geo.vec2Angs(vec1)
     vec3 = geo.angs2Vec(theta2, phi2)
     ray4 = geo.vec2Ray(vec3, P0)
