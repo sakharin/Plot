@@ -228,16 +228,14 @@ class Geometry(object):
             return ray
 
     def minMaxAng(self, ang):
-        # Assume that all angs are within a half circle
-        ang = ang.reshape(-1)
-        mean = np.mean(ang)
-        if np.any(np.abs(ang - mean) > np.pi):
-            ang = (ang + 0.5 * np.pi) % (2 * np.pi)
-            minAng = np.min(ang) - 0.5 * np.pi
-            maxAng = np.max(ang) - 0.5 * np.pi
-        else:
-            minAng = np.min(ang - mean) + mean
-            maxAng = np.max(ang - mean) + mean
+        ang = ang.reshape(-1) % (2 * np.pi)
+        x = np.mean(np.cos(ang))
+        y = np.mean(np.sin(ang))
+        ang0 = np.arctan2(y, x)
+        ang -= ang0 + np.pi
+        ang %= (2 * np.pi)
+        minAng = (ang.min() + ang0 - np.pi) % (2 * np.pi)
+        maxAng = (ang.max() + ang0 - np.pi) % (2 * np.pi)
         return minAng, maxAng
 
     # Calculate semi inverse function of projection transformation

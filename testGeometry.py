@@ -81,3 +81,17 @@ if __name__ == "__main__":
             p.plotRay(ray8[0, i, :].reshape((5, 1)), 'b')
     p.plotAxis()
     p.show(90, 180)
+
+if __name__ == "__main__1":
+    # Test minMaxAng function
+    errorMax = 1e-6
+    for i in range(1000):
+        geo = Geometry.Geometry()
+        ang1 = np.random.randint(-360, 360)
+        ang2 = ang1 + np.random.randint(27)
+        angs = np.deg2rad(np.arange(ang1, ang2 + 1)) % (2 * np.pi)
+        minAng, maxAng = np.rad2deg(geo.minMaxAng(angs))
+        if abs(minAng - (ang1 % 360)) > errorMax or abs(maxAng - (ang2 % 360)) > errorMax:
+            print "Error !"
+            print minAng, maxAng, ang1, ang2
+    print "Tested."
