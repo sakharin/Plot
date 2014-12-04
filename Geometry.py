@@ -86,7 +86,7 @@ class Geometry(object):
             ppts[i, :3, 0] -= dist[i] * P[:3, 0]
         return ppts
 
-    def twoPoints2Vec(self, P1, P2):
+    def twoPts2Vec(self, P1, P2):
         sP1 = P1.shape
         sP2 = P2.shape
         if len(sP1) == 2 and len(sP2) == 2:
