@@ -144,14 +144,22 @@ class Geometry(object):
 
             return theta, phi
 
-    def angs2Vec(self, thetas, phis):
-        h, w = thetas.shape[:2]
-        res = np.zeros((h, w, 3))
-        res[:, :, 0] = np.sin(thetas)
-        res[:, :, 2] = np.cos(thetas)
-        res[:, :, 1] = res[:, :, 0] * np.sin(phis)
-        res[:, :, 0] = res[:, :, 0] * np.cos(phis)
-        return res
+    def angs2Vec(self, theta, phi):
+        if isinstance(theta, (int, long, float)):
+            res = np.zeros((3, 1))
+            res[0] = np.sin(theta)
+            res[2] = np.cos(theta)
+            res[1] = res[0] * np.sin(phi)
+            res[0] = res[0] * np.cos(phi)
+            return res
+        else:
+            h, w = theta.shape[:2]
+            res = np.zeros((h, w, 3))
+            res[:, :, 0] = np.sin(theta)
+            res[:, :, 2] = np.cos(theta)
+            res[:, :, 1] = res[:, :, 0] * np.sin(phi)
+            res[:, :, 0] = res[:, :, 0] * np.cos(phi)
+            return res
 
     def vec2Ray(self, vec, P1):
         shape = vec.shape
