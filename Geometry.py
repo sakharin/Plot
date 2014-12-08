@@ -112,11 +112,11 @@ class Geometry(object):
             elif diff[0, 0] == 0:
                 theta = np.arccos(diff[2, 0] / norm)
                 if diff[1, 0] == 0:
-                    phi[4, 0] = 0
+                    phi = 0
                 elif diff[1, 0] > 0:
-                    phi[4, 0] = np.pi / 2.
+                    phi = np.pi / 2.
                 else:
-                    phi[4, 0] = 3 * np.pi / 2.
+                    phi = 3 * np.pi / 2.
             else:
                 theta = np.arccos(diff[2, 0] / norm)
                 phi = np.arctan2(diff[1, 0], diff[0, 0])
