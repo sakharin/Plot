@@ -240,8 +240,7 @@ class Geometry(object):
         x = np.mean(np.cos(ang))
         y = np.mean(np.sin(ang))
         ang0 = np.arctan2(y, x)
-        ang -= ang0 + np.pi
-        ang %= (2 * np.pi)
+        ang = ((ang - ang0) % (2 * np.pi) + np.pi) % (2 * np.pi)
         minAng = (ang.min() + ang0 - np.pi) % (2 * np.pi)
         maxAng = (ang.max() + ang0 - np.pi) % (2 * np.pi)
         return minAng, maxAng
