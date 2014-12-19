@@ -2,6 +2,9 @@
 import cv2
 import numpy as np
 
+PI = np.pi
+TWOPI = 2 * PI
+
 
 class Geometry(object):
     def __init__(self):
@@ -27,7 +30,7 @@ class Geometry(object):
     def angleDiff(self, angle1, angle2):
         # http://stackoverflow.com/questions/12234574/calculating-if-an-angle-is-between-two-angles
         # Return diff in range [-pi, pi]
-        return (angle1 - angle2 + np.pi) % (2 * np.pi) - np.pi
+        return (angle1 - angle2 + PI) % TWOPI - PI
 
     def lineCrossingPlane(self, P0, u, V0, n):
         # http://geomalgorithms.com/a05-_intersect-1.html
@@ -45,7 +48,16 @@ class Geometry(object):
                 Si.reshape((shape[0], shape[1], 1)) * u
             return points
 
-    def distPoint2Line(self, P, P0, u):
+    def distPts(self, P0, P1):
+        shapeP0 = P0.shape
+        if len(shapeP0) == 2:
+            shapeP1 = P1.shape
+            if len(shapeP1) == 2:
+                return np.sqrt(((P0 - P1) ** 2).sum())
+            elif len(shapeP1) == 3:
+                return np.sqrt(((P0.reshape((1, 1, 3)) - P1) ** 2).sum(axis=2))
+
+    def distPt2Line(self, P, P0, u):
         # http://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
         P0Shape = P0.shape
         uShape = u.shape
@@ -65,7 +77,7 @@ class Geometry(object):
             diffMinusdiffTDotuTimesu = diff - diffTDotuTimesu
             return np.sqrt((diffMinusdiffTDotuTimesu ** 2).sum(axis=2))
 
-    def projectPoint2Plane(self, pts, P):
+    def projectPt2Plane(self, pts, P):
         # http://docs.scipy.org/doc/numpy/reference/generated/numpy.tensordot.html
         # Find a point on the plane
         z = -1. * (P[3, 0]) / P[2, 0]
@@ -85,6 +97,72 @@ class Geometry(object):
             ppts[i, :, :] = pts[i, :, :]
             ppts[i, :3, 0] -= dist[i] * P[:3, 0]
         return ppts
+
+    def projectVecs2Depth(self, T, vA, vB):
+        shape = vB.shape
+        if len(shape) == 2:
+            vC = vA + vB
+            A = np.linalg.norm(vA)
+            B = np.linalg.norm(vB)
+            C = np.linalg.norm(vC)
+
+            vADotvB = (vA * vB).sum()
+            vBDotvC = (vB * -vC).sum()
+            vADotvC = (-vC * vA).sum()
+            alpha = np.arccos(vADotvB / (A * B))
+            beta = np.arccos(vBDotvC / (B * C))
+            gamma = np.arccos(vADotvC / (A * C))
+
+            if alpha == PI:
+                return vA / A * T
+            if alpha == 0:
+                return vA / A * -T
+            if alpha + beta + gamma != PI:
+                alpha = PI - alpha
+
+            beta = np.arcsin(A * np.sin(alpha) / T)
+            gamma = PI - alpha - beta
+            B_new = np.sin(gamma) * T / np.sin(alpha)
+            vB = vB / B * B_new
+            vC = vA + vB
+            return vC
+        if len(shape) == 3:
+            h, w, d = shape
+
+            vA = vA.reshape((1, 1, 3))
+            vC = vA + vB
+            A = self.normVec(vA)
+            B = self.normVec(vB)
+            C = self.normVec(vC)
+
+            vADotvB = (vA * vB).sum(axis=2)
+            vBDotvC = (vB * -vC).sum(axis=2)
+            vADotvC = (-vC * vA).sum(axis=2)
+            alpha = np.arccos(vADotvB / (A * B))
+            beta = np.arccos(vBDotvC / (B * C))
+            gamma = np.arccos(vADotvC / (A * C))
+
+            mask1 = alpha == 0
+            mask2 = alpha + beta + gamma != PI
+            alpha = alpha * np.bitwise_not(mask2) + \
+                PI - alpha * mask2
+            # Avoid division by zero
+            alpha += 1 * mask1
+            beta = np.arcsin(A * np.sin(alpha) / T)
+            gamma = PI - alpha - beta
+            B_new = np.sin(gamma) * T / np.sin(alpha)
+            vB = vB * (B_new / B).reshape((h, w, 1))
+            vC = vA + vB
+            vC = vC * np.bitwise_not(mask1).reshape((h, w, 1)) + \
+                (vA / A * T * mask1.reshape((h, w, 1)))
+            return vC
+
+    def normVec(self, vec):
+        shape = vec.shape
+        if len(shape) == 2:
+            return np.sqrt((vec ** 2).sum())
+        elif len(shape) == 3:
+            return np.sqrt((vec ** 2).sum(axis=2))
 
     def twoPts2Vec(self, P1, P2):
         sP1 = P1.shape
@@ -114,9 +192,9 @@ class Geometry(object):
                 if diff[1, 0] == 0:
                     phi = 0
                 elif diff[1, 0] > 0:
-                    phi = np.pi / 2.
+                    phi = PI / 2.
                 else:
-                    phi = 3 * np.pi / 2.
+                    phi = 3 * PI / 2.
             else:
                 theta = np.arccos(diff[2, 0] / norm)
                 phi = np.arctan2(diff[1, 0], diff[0, 0])
@@ -136,8 +214,8 @@ class Geometry(object):
             phi = np.zeros((shape[0], shape[1]))
 
             theta += m2 * acos
-            phi += m2 * m3 * (np.pi / 2.)
-            phi += m2 * (1 - m3) * (3 * np.pi / 2.)
+            phi += m2 * m3 * (PI / 2.)
+            phi += m2 * (1 - m3) * (3 * PI / 2.)
 
             theta += (1 - m1) * (1 - m2) * acos
             phi += (1 - m1) * (1 - m2) * atan
@@ -236,13 +314,13 @@ class Geometry(object):
             return ray
 
     def minMaxAng(self, ang):
-        ang = ang.reshape(-1) % (2 * np.pi)
+        ang = ang.reshape(-1) % (2 * PI)
         x = np.mean(np.cos(ang))
         y = np.mean(np.sin(ang))
         ang0 = np.arctan2(y, x)
-        ang = ((ang - ang0) % (2 * np.pi) + np.pi) % (2 * np.pi)
-        minAng = (ang.min() + ang0 - np.pi) % (2 * np.pi)
-        maxAng = (ang.max() + ang0 - np.pi) % (2 * np.pi)
+        ang = ((ang - ang0) % TWOPI + PI) % TWOPI
+        minAng = (ang.min() + ang0 - PI) % TWOPI
+        maxAng = (ang.max() + ang0 - PI) % TWOPI
         return minAng, maxAng
 
     # Calculate semi inverse function of projection transformation
