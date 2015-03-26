@@ -68,7 +68,7 @@ void Geometry::vec2Angs(cv::Mat *vecs, cv::Mat *thetas, cv::Mat *phis) {
     CV_Assert(vecs->rows == thetas->rows && vecs->cols == thetas->cols);
     CV_Assert(vecs->rows == phis->rows && vecs->cols == phis->cols);
 
-    CV_Assert(vecs->type() == CV_32F);
+    CV_Assert(vecs->type() == CV_32FC3);
     CV_Assert(thetas->type() == CV_32F);
     CV_Assert(phis->type() == CV_32F);
 
