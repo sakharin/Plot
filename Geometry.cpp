@@ -3,6 +3,38 @@
 Geometry::Geometry() {
 }
 
+void Geometry::getRMatrixEulerAngles(cv::Mat *R, float A=0, float B=0, float C=0) {
+    CV_Assert(R->data != NULL);
+    CV_Assert(R->rows == 3 && R->cols == 3);
+    CV_Assert(R->type() == CV_32F);
+
+    //Graphic Gems IV, Paul S. Heckbert, 1994
+    float sA = sin(A);
+    float sB = sin(B);
+    float sC = sin(C);
+
+    float cA = cos(A);
+    float cB = cos(B);
+    float cC = cos(C);
+
+    float rC[] = {cC, -sC, 0.,
+                  sC, cC, 0.,
+                  0., 0., 1.};
+    float rB[] = {cB, 0., sB,
+                  0., 1., 0.,
+                  -sB, 0., cB};
+    float rA[] = {1., 0., 0.,
+                  0., cA, -sA,
+                  0., sA, cA};
+
+    cv::Mat mrC(3, 3, CV_32FC1, rC);
+    cv::Mat mrB(3, 3, CV_32FC1, rB);
+    cv::Mat mrA(3, 3, CV_32FC1, rA);
+
+    cv::Mat tmp = mrA * mrB * mrC;
+    tmp.copyTo(*R);
+}
+
 void Geometry::vecElem2Angs(float x, float y, float z, float* theta, float* phi) {
     float r;
     r = std::sqrt(x * x + y * y + z * z);
