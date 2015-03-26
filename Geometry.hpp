@@ -20,5 +20,6 @@ class Geometry {
         void getRMatrixEulerAngles(cv::Mat*, float, float, float);
         void vec2Angs(cv::Mat*, float *, float *);
         void vec2Angs(cv::Mat*, cv::Mat*, cv::Mat*);
+        void twoPts2Vec(cv::Mat, cv::Mat, cv::Mat*);
 };
 #endif

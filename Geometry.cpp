@@ -109,3 +109,24 @@ void Geometry::vec2Angs(cv::Mat *vecs, cv::Mat *thetas, cv::Mat *phis) {
         }
     }
 }
+
+void Geometry::twoPts2Vec(cv::Mat P1, cv::Mat P2, cv::Mat *P) {
+    CV_Assert(P1.data != NULL);
+    CV_Assert(P1.rows == 3 && P1.cols == 1);
+    CV_Assert(P1.type() == CV_32F);
+
+    CV_Assert(P2.data != NULL);
+    CV_Assert(P2.rows == 3 && P2.cols == 1);
+    CV_Assert(P2.type() == CV_32F);
+
+    CV_Assert(P->data != NULL);
+    CV_Assert(P->rows == 3 && P->cols == 1);
+    CV_Assert(P->type() == CV_32F);
+
+    *P = P2 - P1;
+    float x = P->at<float>(0, 0);
+    float y = P->at<float>(1, 0);
+    float z = P->at<float>(2, 0);
+    float norm = x * x + y * y + z * z;
+    *P /= norm;
+}
