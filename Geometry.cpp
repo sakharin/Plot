@@ -41,18 +41,9 @@ void Geometry::vecElem2Angs(float x, float y, float z, float* theta, float* phi)
     if(r == 0) {
         *theta = 0;
         *phi = 0;
-    } else if(x == 0) {
-        *theta = std::acos(z / r);
-        if(y == 1) {
-            *phi = 0;
-        } else if(y > 0) {
-            *phi = PIOTWO;
-        } else {
-            *phi = 3 * PIOTWO;
-        }
     } else {
         *theta = std::acos(z / r);
-        *phi = std::atan2(y, x);
+        *phi = std::fmod(std::atan2(y, x) + TWOPI, TWOPI);
     }
 }
 
