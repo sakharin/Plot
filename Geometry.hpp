@@ -21,5 +21,7 @@ class Geometry {
         void vec2Angs(cv::Mat*, float *, float *);
         void vec2Angs(cv::Mat*, cv::Mat*, cv::Mat*);
         void twoPts2Vec(cv::Mat, cv::Mat, cv::Mat*);
+        void twoPts2Angs(cv::Mat, cv::Mat, float*, float*);
+        void twoPts2Angs(cv::Mat, cv::Mat, cv::Mat*, cv::Mat*);
 };
 #endif

@@ -12,6 +12,10 @@ void test_vec2Angs();
 void test_vec2Angs_Scalar();
 void test_vec2Angs_CvMat();
 
+void test_twoPts2Angs();
+void test_twoPts2Angs_Scalar();
+void test_twoPts2Angs_CvMat();
+
 void test_vec2Angs() {
     test_vec2Angs_Scalar();
     test_vec2Angs_CvMat();
@@ -79,7 +83,77 @@ void test_vec2Angs_CvMat() {
     }
 }
 
+void test_twoPts2Angs() {
+    test_twoPts2Angs_Scalar();
+    test_twoPts2Angs_CvMat();
+}
+
+void test_twoPts2Angs_Scalar() {
+    Geometry geo = Geometry();
+    float arr1[] = {1, 2, 3};
+    float arr2[] = {7, 8, 9};
+    cv::Mat P1 = cv::Mat(3, 1, CV_32F, arr1);
+    cv::Mat P2 = cv::Mat(3, 1, CV_32F, arr2);
+    float theta, phi;
+
+    geo.twoPts2Angs(P1, P2, &theta, &phi);
+
+    float x, y, z;
+    x = arr1[0] - arr2[0];
+    y = arr1[1] - arr2[1];
+    z = arr1[2] - arr2[2];
+
+    assert(std::abs(phi - std::fmod(std::atan2(y, x) + TWOPI, TWOPI)) < 0.000001);
+}
+
+void test_twoPts2Angs_CvMat() {
+    Geometry geo = Geometry();
+    int h = 6, w = 10;
+    cv::Mat P1 = cv::Mat::zeros(h, w, CV_32FC3);
+    cv::Mat P2 = cv::Mat::zeros(h, w, CV_32FC3);
+    cv::Mat thetas = cv::Mat::zeros(h, w, CV_32F);
+    cv::Mat phis = cv::Mat::zeros(h, w, CV_32F);
+
+    float *p1, *p2;
+    for(int i = 0; i < h; i++) {
+        p1 = P1.ptr<float>(i);
+        p2 = P2.ptr<float>(i);
+        for(int j = 0; j < w; j++) {
+            (*p1++) = i * h + j;
+            (*p1++) = j * w + i;
+            (*p1++) = i + j;
+
+            (*p2++) = i * w + j;
+            (*p2++) = j * h + i;
+            (*p2++) = i + j * 2;
+        }
+    }
+    geo.twoPts2Angs(P1, P2, &thetas, &phis);
+
+    P1 = P1 - P2;
+    float x, y, z, r;
+    for(int i = 0; i < h; i++) {
+        p1 = P1.ptr<float>(i);
+        for(int j = 0; j < w; j++) {
+            x = *p1++;
+            y = *p1++;
+            z = *p1++;
+
+            r = std::sqrt(x * x + y * y + z * z);
+            if(r == 0) {
+                assert(std::abs(thetas.at<float>(i, j)) < 0.000001);
+                assert(std::abs(phis.at<float>(i, j)) < 0.000001);
+            } else {
+                assert(std::abs(thetas.at<float>(i, j) - std::acos(z / r)) < 0.000001);
+                assert(std::abs(phis.at<float>(i, j) - std::fmod(std::atan2(y, x) + TWOPI, TWOPI)) < 0.000001);
+            }
+
+        }
+    }
+}
+
 int main (int argc, char *argv[]) {
     test_vec2Angs();
+    test_twoPts2Angs();
     return 0;
 }

@@ -121,3 +121,64 @@ void Geometry::twoPts2Vec(cv::Mat P1, cv::Mat P2, cv::Mat *P) {
     float norm = x * x + y * y + z * z;
     *P /= norm;
 }
+
+void Geometry::twoPts2Angs(cv::Mat P1, cv::Mat P2, float *theta, float *phi) {
+    CV_Assert(P1.data != NULL);
+    CV_Assert(P1.rows == 3 && P1.cols == 1);
+    CV_Assert(P1.type() == CV_32F);
+
+    CV_Assert(P2.data != NULL);
+    CV_Assert(P2.rows == 3 && P2.cols == 1);
+    CV_Assert(P2.type() == CV_32F);
+
+    float x = P1.at<float>(0, 0) - P2.at<float>(0, 0);
+    float y = P1.at<float>(1, 0) - P2.at<float>(1, 0);
+    float z = P1.at<float>(2, 0) - P2.at<float>(2, 0);
+    vecElem2Angs(x, y, z, theta, phi);
+}
+
+void Geometry::twoPts2Angs(cv::Mat P1, cv::Mat P2, cv::Mat *thetas, cv::Mat *phis) {
+    CV_Assert(P1.data != NULL);
+    CV_Assert(P2.data != NULL);
+    CV_Assert(thetas->data != NULL);
+    CV_Assert(phis->data != NULL);
+
+    CV_Assert(P1.rows == P2.rows && P1.cols == P2.cols);
+    CV_Assert(P1.rows == thetas->rows && P1.cols == thetas->cols);
+    CV_Assert(P1.rows == phis->rows && P1.cols == phis->cols);
+
+    CV_Assert(P1.type() == CV_32FC3);
+    CV_Assert(P2.type() == CV_32FC3);
+    CV_Assert(thetas->type() == CV_32F);
+    CV_Assert(phis->type() == CV_32F);
+
+    int h = P1.rows;
+    int w = P1.cols;
+
+    if(P1.isContinuous() &&
+       P2.isContinuous() &&
+       thetas->isContinuous() &&
+       phis->isContinuous()) {
+        w *= h;
+        h = 1;
+    }
+
+    int i, j;
+    float *p1, *p2;
+    float *t, *p;
+    float x, y, z;
+    for(i = 0; i < h; i++) {
+        p1 = P1.ptr<float>(i);
+        p2 = P2.ptr<float>(i);
+
+        t = thetas->ptr<float>(i);
+        p = phis->ptr<float>(i);
+        for(j = 0; j < w; j++) {
+            x = (*p1++ - *p2++);
+            y = (*p1++ - *p2++);
+            z = (*p1++ - *p2++);
+
+            vecElem2Angs(x, y, z, t++, p++);
+        }
+    }
+}
