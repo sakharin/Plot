@@ -163,9 +163,9 @@ void Geometry::twoPts2VecPtMat(cv::Mat P1, cv::Mat P2, cv::Mat *P) {
         y3 = x3 + 1;
         z3 = x3 + 2;
         for(j = 0; j < w; j++) {
-            x = x1 - *x2;
-            y = y1 - *y2;
-            z = z1 - *z2;
+            x = *x2 - x1;
+            y = *y2 - y1;
+            z = *z2 - z1;
             norm = std::sqrt(x * x + y * y + z * z);
             *x3 = x / norm;
             *y3 = y / norm;

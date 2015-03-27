@@ -100,7 +100,7 @@ void test_twoPts2Vec_PtPt() {
     geo.twoPts2Vec(P1, P2, &vec);
 
     float x, y, z, norm;
-    P1 = P1 - P2;
+    P1 = P2 - P1;
     x = P1.at<float>(0, 0);
     y = P1.at<float>(1, 0);
     z = P1.at<float>(2, 0);
@@ -111,16 +111,18 @@ void test_twoPts2Vec_PtPt() {
 
     assert(std::abs(vec.at<float>(0, 0) - x) < 0.000001);
     assert(std::abs(vec.at<float>(1, 0) - y) < 0.000001);
-    assert(std::abs(vec.at<float>(2, 0) - y) < 0.000001);
+    assert(std::abs(vec.at<float>(2, 0) - z) < 0.000001);
 }
 
 void test_twoPts2Vec_PtMat() {
     Geometry geo = Geometry();
     cv::Mat P1 = cv::Mat(3, 1, CV_32F);
-    cv::Mat P2 = cv::Mat(H, W, CV_32F);
+    cv::Mat P2 = cv::Mat(H, W, CV_32FC3);
     cv::Mat vec = cv::Mat::zeros(H, W, CV_32FC3);
     cv::randu(P1, cv::Scalar(-1000), cv::Scalar(1000));
     cv::randu(P2, cv::Scalar(-1000), cv::Scalar(1000));
+
+    geo.twoPts2Vec(P1, P2, &vec);
 
     float x1 = P1.at<float>(0, 0);
     float y1 = P1.at<float>(1, 0);
@@ -137,14 +139,17 @@ void test_twoPts2Vec_PtMat() {
         y3 = x3 + 1;
         z3 = x3 + 2;
         for(int j =0; j < W; j++) {
-            x = x1 - *x2;
-            y = y1 - *y2;
-            z = z1 - *z2;
+            x = *x2 - x1;
+            y = *y2 - y1;
+            z = *z2 - z1;
             norm = std::sqrt(x * x + y *y + z * z);
+            x /= norm;
+            y /= norm;
+            z /= norm;
 
             assert(std::abs(*x3 - x) < 0.000001);
             assert(std::abs(*y3 - y) < 0.000001);
-            assert(std::abs(*y3 - y) < 0.000001);
+            assert(std::abs(*z3 - z) < 0.000001);
             x2 += 3;
             y2 += 3;
             z2 += 3;
@@ -231,6 +236,7 @@ void test_twoPts2Angs_PtMat() {
 
 int main (int argc, char *argv[]) {
     test_vec2Angs();
+    test_twoPts2Vec();
     test_twoPts2Angs();
     return 0;
 }
