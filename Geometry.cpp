@@ -103,23 +103,83 @@ void Geometry::vec2Angs(cv::Mat *vecs, cv::Mat *thetas, cv::Mat *phis) {
 
 void Geometry::twoPts2Vec(cv::Mat P1, cv::Mat P2, cv::Mat *P) {
     CV_Assert(P1.data != NULL);
-    CV_Assert(P1.rows == 3 && P1.cols == 1);
-    CV_Assert(P1.type() == CV_32F);
-
     CV_Assert(P2.data != NULL);
-    CV_Assert(P2.rows == 3 && P2.cols == 1);
-    CV_Assert(P2.type() == CV_32F);
-
     CV_Assert(P->data != NULL);
-    CV_Assert(P->rows == 3 && P->cols == 1);
-    CV_Assert(P->type() == CV_32F);
 
+    if(P1.rows == 3 && P1.cols == 1 &&
+       P2.rows == 3 && P2.cols == 1 &&
+       P->rows == 3 && P->cols == 1) {
+        CV_Assert(P1.type() == CV_32F);
+        CV_Assert(P2.type() == CV_32F);
+        CV_Assert(P->type() == CV_32F);
+        twoPts2VecPtPt(P1, P2, P);
+    } else if(P1.rows == 3 && P1.cols == 1 &&
+       P2.rows == P->rows && P2.cols == P->cols) {
+        CV_Assert(P1.type() == CV_32F);
+        CV_Assert(P2.type() == CV_32FC3);
+        CV_Assert(P->type() == CV_32FC3);
+        twoPts2VecPtMat(P1, P2, P);
+    } else {
+        CV_Assert((P1.rows == 3 && P1.cols == 1 &&
+       P2.rows == 3 && P2.cols == 1 &&
+       P->rows == 3 && P->cols == 1) or
+       (P1.rows == 3 && P1.cols == 1 &&
+       P2.rows == P->rows && P2.cols == P->cols));
+    }
+}
+
+void Geometry::twoPts2VecPtPt(cv::Mat P1, cv::Mat P2, cv::Mat *P) {
     *P = P2 - P1;
     float x = P->at<float>(0, 0);
     float y = P->at<float>(1, 0);
     float z = P->at<float>(2, 0);
-    float norm = x * x + y * y + z * z;
+    float norm = std::sqrt(x * x + y * y + z * z);
     *P /= norm;
+}
+
+void Geometry::twoPts2VecPtMat(cv::Mat P1, cv::Mat P2, cv::Mat *P) {
+    int h = P2.rows;
+    int w = P2.cols;
+
+    if(P2.isContinuous() && P->isContinuous()) {
+        w *= h;
+        h = 1;
+    }
+
+    int i, j;
+    float x1 = P1.at<float>(0, 0);
+    float y1 = P1.at<float>(1, 0);
+    float z1 = P1.at<float>(2, 0);
+    float x, y, z;
+    float *x2, *y2, *z2;
+    float *x3, *y3, *z3;
+    float norm;
+    for(i = 0; i < h; i++) {
+        x2 = P2.ptr<float>(i);
+        y2 = x2 + 1;
+        z2 = x2 + 2;
+
+        x3 = P->ptr<float>(i);
+        y3 = x3 + 1;
+        z3 = x3 + 2;
+        for(j = 0; j < w; j++) {
+            x = x1 - *x2;
+            y = y1 - *y2;
+            z = z1 - *z2;
+            norm = std::sqrt(x * x + y * y + z * z);
+            *x3 = x / norm;
+            *y3 = y / norm;
+            *z3 = z / norm;
+
+            x2 += 3;
+            y2 += 3;
+            z2 += 3;
+
+            x3 += 3;
+            y3 += 3;
+            z3 += 3;
+        }
+    }
 }
 
 void Geometry::twoPts2Angs(cv::Mat P1, cv::Mat P2, float *theta, float *phi) {

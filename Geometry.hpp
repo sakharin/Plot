@@ -15,6 +15,8 @@ class Geometry {
     protected:
         int a;
         void vecElem2Angs(float, float, float, float*, float*);
+        void twoPts2VecPtPt(cv::Mat, cv::Mat, cv::Mat*);
+        void twoPts2VecPtMat(cv::Mat, cv::Mat, cv::Mat*);
     public:
         Geometry();
         void getRMatrixEulerAngles(cv::Mat*, float, float, float);
