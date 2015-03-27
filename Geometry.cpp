@@ -199,24 +199,24 @@ void Geometry::twoPts2Angs(cv::Mat P1, cv::Mat P2, float *theta, float *phi) {
 
 void Geometry::twoPts2Angs(cv::Mat P1, cv::Mat P2, cv::Mat *thetas, cv::Mat *phis) {
     CV_Assert(P1.data != NULL);
+    CV_Assert(P1.rows == 3 && P1.cols == 1);
+    CV_Assert(P1.type() == CV_32F);
+
     CV_Assert(P2.data != NULL);
     CV_Assert(thetas->data != NULL);
     CV_Assert(phis->data != NULL);
 
-    CV_Assert(P1.rows == P2.rows && P1.cols == P2.cols);
-    CV_Assert(P1.rows == thetas->rows && P1.cols == thetas->cols);
-    CV_Assert(P1.rows == phis->rows && P1.cols == phis->cols);
+    CV_Assert(P2.rows == thetas->rows && P2.cols == thetas->cols);
+    CV_Assert(P2.rows == phis->rows && P2.cols == phis->cols);
 
-    CV_Assert(P1.type() == CV_32FC3);
     CV_Assert(P2.type() == CV_32FC3);
     CV_Assert(thetas->type() == CV_32F);
     CV_Assert(phis->type() == CV_32F);
 
-    int h = P1.rows;
-    int w = P1.cols;
+    int h = P2.rows;
+    int w = P2.cols;
 
-    if(P1.isContinuous() &&
-       P2.isContinuous() &&
+    if(P2.isContinuous() &&
        thetas->isContinuous() &&
        phis->isContinuous()) {
         w *= h;
@@ -224,21 +224,28 @@ void Geometry::twoPts2Angs(cv::Mat P1, cv::Mat P2, cv::Mat *thetas, cv::Mat *phi
     }
 
     int i, j;
-    float *p1, *p2;
-    float *t, *p;
+    float x1 = P1.at<float>(0, 0);
+    float y1 = P1.at<float>(1, 0);
+    float z1 = P1.at<float>(2, 0);
     float x, y, z;
+    float *x2, *y2, *z2;
+    float *t, *p;
     for(i = 0; i < h; i++) {
-        p1 = P1.ptr<float>(i);
-        p2 = P2.ptr<float>(i);
+        x2 = P2.ptr<float>(i);
+        y2 = x2 + 1;
+        z2 = x2 + 2;
 
         t = thetas->ptr<float>(i);
         p = phis->ptr<float>(i);
         for(j = 0; j < w; j++) {
-            x = (*p1++ - *p2++);
-            y = (*p1++ - *p2++);
-            z = (*p1++ - *p2++);
+            x = x1 - *x2;
+            y = y1 - *y2;
+            z = z1 - *z2;
 
             vecElem2Angs(x, y, z, t++, p++);
+            x2 += 3;
+            y2 += 3;
+            z2 += 3;
         }
     }
 }

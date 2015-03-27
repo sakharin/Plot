@@ -186,35 +186,28 @@ void test_twoPts2Angs_PtPt() {
 void test_twoPts2Angs_PtMat() {
     Geometry geo = Geometry();
     int h = 6, w = 10;
-    cv::Mat P1 = cv::Mat::zeros(h, w, CV_32FC3);
-    cv::Mat P2 = cv::Mat::zeros(h, w, CV_32FC3);
+    cv::Mat P1 = cv::Mat(3, 1, CV_32F);
+    cv::Mat P2 = cv::Mat(h, w, CV_32FC3);
     cv::Mat thetas = cv::Mat::zeros(h, w, CV_32F);
     cv::Mat phis = cv::Mat::zeros(h, w, CV_32F);
+    cv::randu(P1, cv::Scalar(-100), cv::Scalar(10));
+    cv::randu(P2, cv::Scalar(-100), cv::Scalar(10));
 
-    float *p1, *p2;
-    for(int i = 0; i < h; i++) {
-        p1 = P1.ptr<float>(i);
-        p2 = P2.ptr<float>(i);
-        for(int j = 0; j < w; j++) {
-            (*p1++) = i * h + j;
-            (*p1++) = j * w + i;
-            (*p1++) = i + j;
 
-            (*p2++) = i * w + j;
-            (*p2++) = j * h + i;
-            (*p2++) = i + j * 2;
-        }
-    }
+    float x1 = P1.at<float>(0, 0);
+    float y1 = P1.at<float>(1, 0);
+    float z1 = P1.at<float>(2, 0);
+
     geo.twoPts2Angs(P1, P2, &thetas, &phis);
 
-    P1 = P1 - P2;
     float x, y, z, r;
+    float *p2;
     for(int i = 0; i < h; i++) {
-        p1 = P1.ptr<float>(i);
+        p2 = P2.ptr<float>(i);
         for(int j = 0; j < w; j++) {
-            x = *p1++;
-            y = *p1++;
-            z = *p1++;
+            x = x1 - *p2++;
+            y = y1 - *p2++;
+            z = z1 - *p2++;
 
             r = std::sqrt(x * x + y * y + z * z);
             if(r == 0) {
