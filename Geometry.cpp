@@ -3,7 +3,7 @@
 Geometry::Geometry() {
 }
 
-void Geometry::getRMatrixEulerAngles(cv::Mat *R, float A=0, float B=0, float C=0) {
+void Geometry::getRMatrixEulerAngles(float A, float B, float C, cv::Mat *R) {
     CV_Assert(R->data != NULL);
     CV_Assert(R->rows == 3 && R->cols == 3);
     CV_Assert(R->type() == CV_32F);
@@ -47,35 +47,35 @@ void Geometry::vecElem2Angs(float x, float y, float z, float* theta, float* phi)
     }
 }
 
-void Geometry::vec2Angs(cv::Mat *vec, float *theta, float *phi) {
-    CV_Assert(vec->data != NULL);
-    CV_Assert(vec->rows == 3 && vec->cols == 1);
-    CV_Assert(vec->type() == CV_32F);
+void Geometry::vec2Angs(cv::Mat vec, float *theta, float *phi) {
+    CV_Assert(vec.data != NULL);
+    CV_Assert(vec.rows == 3 && vec.cols == 1);
+    CV_Assert(vec.type() == CV_32F);
 
     float x, y, z;
 
-    x = vec->at<float>(0, 0);
-    y = vec->at<float>(1, 0);
-    z = vec->at<float>(2, 0);
+    x = vec.at<float>(0, 0);
+    y = vec.at<float>(1, 0);
+    z = vec.at<float>(2, 0);
     vecElem2Angs(x, y, z, theta, phi);
 }
 
-void Geometry::vec2Angs(cv::Mat *vecs, cv::Mat *thetas, cv::Mat *phis) {
-    CV_Assert(vecs->data != NULL);
+void Geometry::vec2Angs(cv::Mat vecs, cv::Mat *thetas, cv::Mat *phis) {
+    CV_Assert(vecs.data != NULL);
     CV_Assert(thetas->data != NULL);
     CV_Assert(phis->data != NULL);
 
-    CV_Assert(vecs->rows == thetas->rows && vecs->cols == thetas->cols);
-    CV_Assert(vecs->rows == phis->rows && vecs->cols == phis->cols);
+    CV_Assert(vecs.rows == thetas->rows && vecs.cols == thetas->cols);
+    CV_Assert(vecs.rows == phis->rows && vecs.cols == phis->cols);
 
-    CV_Assert(vecs->type() == CV_32FC3);
+    CV_Assert(vecs.type() == CV_32FC3);
     CV_Assert(thetas->type() == CV_32F);
     CV_Assert(phis->type() == CV_32F);
 
-    int h = vecs->rows;
-    int w = vecs->cols;
+    int h = vecs.rows;
+    int w = vecs.cols;
 
-    if(vecs->isContinuous() && thetas->isContinuous() && phis->isContinuous()) {
+    if(vecs.isContinuous() && thetas->isContinuous() && phis->isContinuous()) {
         w *= h;
         h = 1;
     }
@@ -84,7 +84,7 @@ void Geometry::vec2Angs(cv::Mat *vecs, cv::Mat *thetas, cv::Mat *phis) {
     float *x, *y, *z, *t, *p;
     float r;
     for(i = 0; i < h; i++) {
-        x = vecs->ptr<float>(i);
+        x = vecs.ptr<float>(i);
         y = x + 1;
         z = x + 2;
 

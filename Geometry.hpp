@@ -28,9 +28,9 @@ class Geometry {
         void twoPts2VecPtMat(cv::Mat, cv::Mat, cv::Mat*);
     public:
         Geometry();
-        void getRMatrixEulerAngles(cv::Mat*, float, float, float);
-        void vec2Angs(cv::Mat*, float *, float *);
-        void vec2Angs(cv::Mat*, cv::Mat*, cv::Mat*);
+        void getRMatrixEulerAngles(float, float, float, cv::Mat*);
+        void vec2Angs(cv::Mat, float *, float *);
+        void vec2Angs(cv::Mat, cv::Mat*, cv::Mat*);
         void twoPts2Vec(cv::Mat, cv::Mat, cv::Mat*);
         void twoPts2Angs(cv::Mat, cv::Mat, float*, float*);
         void twoPts2Angs(cv::Mat, cv::Mat, cv::Mat*, cv::Mat*);

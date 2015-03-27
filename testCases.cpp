@@ -37,7 +37,7 @@ void test_vec2Angs_Vec() {
     vec.at<float>(0, 0) = 0;
     vec.at<float>(1, 0) = 0;
     vec.at<float>(2, 0) = 0;
-    geo.vec2Angs(&vec, &theta, &phi);
+    geo.vec2Angs(vec, &theta, &phi);
     assert(theta == 0 && phi == 0);
 
     for(int i = 0; i < 360; i++) {
@@ -48,7 +48,7 @@ void test_vec2Angs_Vec() {
         vec.at<float>(1, 0) = y * (i + 1);
         vec.at<float>(2, 0) = z * (i + 1);
 
-        geo.vec2Angs(&vec, &theta, &phi);
+        geo.vec2Angs(vec, &theta, &phi);
         assert(std::abs(phi - (i / 360. * TWOPI)) < 0.000001);
         assert(std::abs(theta - PIOTWO) < 0.000001);
     }
@@ -61,7 +61,7 @@ void test_vec2Angs_Mat() {
     cv::Mat phis = cv::Mat::zeros(H, W, CV_32F);
     cv::randu(vecs, cv::Scalar(-1000), cv::Scalar(1000));
 
-    geo.vec2Angs(&vecs, &thetas, &phis);
+    geo.vec2Angs(vecs, &thetas, &phis);
 
     float *p;
     float x, y, z, r;
