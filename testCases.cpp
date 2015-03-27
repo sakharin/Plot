@@ -9,19 +9,20 @@
 
 
 void test_vec2Angs();
-void test_vec2Angs_Scalar();
-void test_vec2Angs_CvMat();
+void test_vec2Angs_Vec();
+void test_vec2Angs_Mat();
 
 void test_twoPts2Angs();
-void test_twoPts2Angs_Scalar();
-void test_twoPts2Angs_CvMat();
+void test_twoPts2Angs_PtPt();
+void test_twoPts2Angs_PtMat();
+
 
 void test_vec2Angs() {
-    test_vec2Angs_Scalar();
-    test_vec2Angs_CvMat();
+    test_vec2Angs_Vec();
+    test_vec2Angs_Mat();
 }
 
-void test_vec2Angs_Scalar() {
+void test_vec2Angs_Vec() {
     Geometry geo = Geometry();
     cv::Mat vec = cv::Mat::zeros(3, 1, CV_32F);
     float theta, phi;
@@ -47,7 +48,7 @@ void test_vec2Angs_Scalar() {
     }
 }
 
-void test_vec2Angs_CvMat() {
+void test_vec2Angs_Mat() {
     Geometry geo = Geometry();
     int h = 6, w = 10;
     cv::Mat vecs = cv::Mat::zeros(h, w, CV_32FC3);
@@ -84,11 +85,11 @@ void test_vec2Angs_CvMat() {
 }
 
 void test_twoPts2Angs() {
-    test_twoPts2Angs_Scalar();
-    test_twoPts2Angs_CvMat();
+    test_twoPts2Angs_PtPt();
+    test_twoPts2Angs_PtMat();
 }
 
-void test_twoPts2Angs_Scalar() {
+void test_twoPts2Angs_PtPt() {
     Geometry geo = Geometry();
     float arr1[] = {1, 2, 3};
     float arr2[] = {7, 8, 9};
@@ -106,7 +107,7 @@ void test_twoPts2Angs_Scalar() {
     assert(std::abs(phi - std::fmod(std::atan2(y, x) + TWOPI, TWOPI)) < 0.000001);
 }
 
-void test_twoPts2Angs_CvMat() {
+void test_twoPts2Angs_PtMat() {
     Geometry geo = Geometry();
     int h = 6, w = 10;
     cv::Mat P1 = cv::Mat::zeros(h, w, CV_32FC3);
