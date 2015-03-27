@@ -7,9 +7,18 @@
 
 #include <iostream>
 
+#ifndef PI
 #define PI 3.14159265359
+#endif
+
+#ifndef TWOPI
 #define TWOPI 6.28318530718
+#endif
+
+#ifndef PIOTWO
 #define PIOTWO 1.57079632679
+#endif
+
 
 class Geometry {
     protected:
