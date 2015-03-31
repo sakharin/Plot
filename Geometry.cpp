@@ -27,9 +27,9 @@ void Geometry::getRMatrixEulerAngles(float A, float B, float C, cv::Mat *R) {
                   0., cA, -sA,
                   0., sA, cA};
 
-    cv::Mat mrC(3, 3, CV_32FC1, rC);
-    cv::Mat mrB(3, 3, CV_32FC1, rB);
-    cv::Mat mrA(3, 3, CV_32FC1, rA);
+    cv::Mat mrC(3, 3, CV_32F, rC);
+    cv::Mat mrB(3, 3, CV_32F, rB);
+    cv::Mat mrA(3, 3, CV_32F, rA);
 
     cv::Mat tmp = mrA * mrB * mrC;
     tmp.copyTo(*R);
@@ -43,7 +43,7 @@ void Geometry::vecElem2Angs(float x, float y, float z, float* theta, float* phi)
         *phi = 0;
     } else {
         *theta = std::acos(z / r);
-        *phi = std::fmod(std::atan2(y, x) + TWOPI, TWOPI);
+        *phi = std::atan2(y, x);
     }
 }
 

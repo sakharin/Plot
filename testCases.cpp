@@ -49,7 +49,7 @@ void test_vec2Angs_Vec() {
         vec.at<float>(2, 0) = z * (i + 1);
 
         geo.vec2Angs(vec, &theta, &phi);
-        assert(std::abs(phi - (i / 360. * TWOPI)) < 0.000001);
+        assert(std::abs(phi - std::atan2(y, x)) < 0.000001);
         assert(std::abs(theta - PIOTWO) < 0.000001);
     }
 }
@@ -78,7 +78,7 @@ void test_vec2Angs_Mat() {
                 assert(std::abs(phis.at<float>(i, j)) < 0.000001);
             } else {
                 assert(std::abs(thetas.at<float>(i, j) - std::acos(z / r)) < 0.000001);
-                assert(std::abs(phis.at<float>(i, j) - std::fmod(std::atan2(y, x) + TWOPI, TWOPI)) < 0.000001);
+                assert(std::abs(phis.at<float>(i, j) - std::atan2(y, x)) < 0.000001);
             }
         }
     }
@@ -191,7 +191,7 @@ void test_twoPts2Angs_PtPt() {
                 assert(std::abs(phi) < 0.000001);
             } else {
                 assert(std::abs(theta - std::acos(z / r)) < 0.000001);
-                assert(std::abs(phi - std::fmod(std::atan2(y, x) + TWOPI, TWOPI)) < 0.000001);
+                assert(std::abs(phi - std::atan2(y, x)) < 0.000001);
             }
         }
     }
