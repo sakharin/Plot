@@ -98,6 +98,25 @@ class Geometry(object):
             ppts[i, :3, 0] -= dist[i] * P[:3, 0]
         return ppts
 
+    def calLnLnIntersection(self, p1, v1, p2, v2):
+        a = np.linalg.norm(np.cross((p2 - p1).T, v2.T)) / \
+            np.linalg.norm(np.cross(v1.T, v2.T))
+        return p1 + a * v1
+
+    def calPtPlIntersection(self, p0, n, l0, l):
+        # http://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection
+        lDotn = l.T.dot(n)
+        if lDotn == 0:
+            # parallel case
+            if(p0 - l0).T.dot(n) == 0:
+                # line is on the plane
+                return False
+            else:
+                # no intersection
+                return False
+        d = (p0 - l0).T.dot(n) / lDotn
+        return d * l + l0
+
     def projectVecs2Depth(self, T, vA, vB):
         shape = vB.shape
         if len(shape) == 2:
