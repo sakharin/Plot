@@ -103,7 +103,7 @@ class Geometry(object):
             np.linalg.norm(np.cross(v1.T, v2.T))
         return p1 + a * v1
 
-    def calPtPlIntersection(self, p0, n, l0, l):
+    def calPlLnIntersection(self, p0, n, l0, l):
         # http://en.wikipedia.org/wiki/Line%E2%80%93plane_intersection
         lDotn = l.T.dot(n)
         if lDotn == 0:
