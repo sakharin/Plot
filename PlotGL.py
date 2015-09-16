@@ -269,6 +269,39 @@ class PlotGL(object):
         gl.glEnd()
         gl.glPopMatrix()
 
+    def plotSphere(self, p0, r, color=None, numSegments=(16, 32)):
+        vec = np.array([[0], [0], [1]])
+        gl.glPushMatrix()
+        gl.glTranslatef(*p0)
+
+        for i in range(numSegments[0]):
+            theta = i * np.pi / numSegments[0]
+            gl.glBegin(gl.GL_LINE_LOOP)
+            gl.glColor3f(*color)
+            for j in range(numSegments[1]):
+                phi = j * 2 * np.pi / numSegments[1]
+
+                m = self.geo.getRMatrixEulerAngles(0, 0, phi)
+                m = m.dot(self.geo.getRMatrixEulerAngles(0, theta, 0))
+
+                rVec = r * m.dot(vec)
+                gl.glVertex3f(*rVec)
+            gl.glEnd()
+
+        for j in range(numSegments[1]):
+            phi = j * 2 * np.pi / numSegments[1]
+            gl.glBegin(gl.GL_LINE_LOOP)
+            gl.glColor3f(*color)
+            for i in range(numSegments[0] + 1):
+                theta = i * np.pi / numSegments[0]
+                m = self.geo.getRMatrixEulerAngles(0, 0, phi)
+                m = m.dot(self.geo.getRMatrixEulerAngles(0, theta, 0))
+
+                rVec = r * m.dot(vec)
+                gl.glVertex3f(*rVec)
+            gl.glEnd()
+        gl.glPopMatrix()
+
     def plotCamera(self, pC, vC, cameraSizeH, cameraSizeW, cameraF, cameraScale):
         vX = np.array([[1], [0], [0]])
         vY = np.array([[0], [1], [0]])
