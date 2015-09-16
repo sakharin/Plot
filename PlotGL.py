@@ -269,6 +269,38 @@ class PlotGL(object):
         gl.glEnd()
         gl.glPopMatrix()
 
+    def plotCamera(self, pC, vC, cameraSizeH, cameraSizeW, cameraF, cameraScale):
+        vX = np.array([[1], [0], [0]])
+        vY = np.array([[0], [1], [0]])
+        vZ = np.array([[0], [0], [1]])
+        pC0 = np.zeros((3, 1))
+        pC1 = cameraF * vZ + cameraSizeW / 2 * vY - cameraSizeH / 2 * vX
+        pC2 = cameraF * vZ - cameraSizeW / 2 * vY - cameraSizeH / 2 * vX
+        pC3 = cameraF * vZ + cameraSizeW / 2 * vY + cameraSizeH / 2 * vX
+        pC4 = cameraF * vZ - cameraSizeW / 2 * vY + cameraSizeH / 2 * vX
+
+        theta, phi = self.geo.vec2Angs(vC)
+        m = self.geo.getRMatrixEulerAngles(0, 0, phi)
+        m = m.dot(self.geo.getRMatrixEulerAngles(0, theta, 0))
+
+        pC0 = cameraScale * m.dot(pC0) + pC
+        pC1 = cameraScale * m.dot(pC1) + pC
+        pC2 = cameraScale * m.dot(pC2) + pC
+        pC3 = cameraScale * m.dot(pC3) + pC
+        pC4 = cameraScale * m.dot(pC4) + pC
+
+        self.plotLine(pC0, pC1, color=self.blue)
+        self.plotLine(pC0, pC2, color=self.blue)
+        self.plotLine(pC0, pC3, color=self.blue)
+        self.plotLine(pC0, pC4, color=self.blue)
+
+        self.plotLine(pC1, pC2, color=self.blue)
+        self.plotLine(pC1, pC3, color=self.blue)
+        self.plotLine(pC2, pC4, color=self.blue)
+        self.plotLine(pC3, pC4, color=self.blue)
+        self.plotPoint(pC1, color=self.red)
+        self.plotPoint(pC2, color=self.green)
+
     def show(self):
         self.Clock = pygame.time.Clock()
         while True:
