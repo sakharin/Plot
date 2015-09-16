@@ -176,6 +176,16 @@ class Geometry(object):
                 (vA / A * T * mask1.reshape((h, w, 1)))
             return vC
 
+    def getPerpendicularVector2D(self, v):
+        if v[0, 0] == 0 and v[1, 0] == 0:
+            if v[2, 0] == 0:
+                # v is Vector(0, 0, 0)
+                raise ValueError('Zero Vector')
+
+            # v is Vector(0, 0, v.z)
+            return np.array([[0], [1], [0]])
+        return np.array([[-v[1, 0]], [v[0, 0]], [0]])
+
     def normVec(self, vec):
         shape = vec.shape
         if len(shape) == 2:
