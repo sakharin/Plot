@@ -347,14 +347,18 @@ class PlotGL(object):
 
             self.setView()
 
-            cam = np.array([[0], [0], [1]])
+            move = np.array([[self.move[1]], [-self.move[0]], [0]])
+            eye = np.array([[0], [0], [1]])
+            center = np.array([[0], [0], [0]])
             up = np.array([[-1], [0], [0]])
             R = self.geo.getRMatrixEulerAngles(0, 0, np.deg2rad(self.viewAngle[0] - 180))
             R = R.dot(self.geo.getRMatrixEulerAngles(0, np.deg2rad(-self.viewAngle[1]), 0))
-            c = R.dot(cam)
+            m = R.dot(move)
+            e = R.dot(eye) + m
+            c = R.dot(center) + m
             u = R.dot(up)
-            glu.gluLookAt(c[0, 0], c[1, 0], c[2, 0],
-                          0.0, 0.0, 0.0,
+            glu.gluLookAt(e[0, 0], e[1, 0], e[2, 0],
+                          c[0, 0], c[1, 0], c[2, 0],
                           u[0, 0], u[1, 0], u[2, 0])
 
             self.draw()
