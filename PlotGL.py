@@ -65,6 +65,7 @@ class PlotGL(object):
         self.setColor()
         self.setPoint()
         self.setLine()
+        self.setText()
         self.setView()
 
     def setColor(self):
@@ -186,15 +187,17 @@ class PlotGL(object):
     def draw(self):
         pass
 
-    def plotPoint(self, p0, color=None):
+    def plotPoint(self, p0, color=None, text=None):
         if color is None:
             color = self.red
         gl.glBegin(gl.GL_POINTS)
         gl.glColor3f(*color)
         gl.glVertex3f(*p0)
         gl.glEnd()
+        if text is not None:
+            self.plotText(p0, text)
 
-    def plotLine(self, p0, p1, color=None):
+    def plotLine(self, p0, p1, color=None, text=None):
         if color is None:
             color = self.red
         gl.glColor3f(*color)
@@ -202,8 +205,12 @@ class PlotGL(object):
         gl.glVertex3f(*p0)
         gl.glVertex3f(*p1)
         gl.glEnd()
+        if text is not None:
+            p2 = (p0 + p1) / 2
+            self.plotPoint(p2, color=color)
+            self.plotText(p2, text)
 
-    def plotArrow(self, p0, p1, color=None, isInverse=False):
+    def plotArrow(self, p0, p1, color=None, isInverse=False, text=None):
         if color is None:
             color = self.red
 
@@ -222,7 +229,12 @@ class PlotGL(object):
         finally:
             gl.glPopMatrix()
 
-    def plotAxis(self, scale=1.):
+        if text is not None:
+            p2 = (p0 + p1) / 2
+            self.plotPoint(p2, color=color)
+            self.plotText(p2, text)
+
+    def plotAxis(self, scale=1., isText=False):
         pO = np.array([[0], [0], [0]])
         vX = np.array([[1], [0], [0]])
         vY = np.array([[0], [1], [0]])
@@ -230,6 +242,10 @@ class PlotGL(object):
         self.plotArrow(pO, pO + scale * vX, color=self.red)
         self.plotArrow(pO, pO + scale * vY, color=self.green)
         self.plotArrow(pO, pO + scale * vZ, color=self.blue)
+        if isText:
+            self.plotText(pO + scale * vX, "x")
+            self.plotText(pO + scale * vY, "y")
+            self.plotText(pO + scale * vZ, "z")
 
     def plotRectangle(self, p0, p1, color=None):
         if color is None:
@@ -346,13 +362,20 @@ class PlotGL(object):
         self.plotPoint(pC1, color=self.red)
         self.plotPoint(pC2, color=self.green)
 
-    def plotText(self, pos, text, size=24, color=None, bgColor=None):
-        font = pygame.font.Font(None, size)
-        if color is None:
-            color = self.white
-        if bgColor is None:
-            bgColor = self.black
-        textSurface = font.render(text, True, color * 255, bgColor * 255)
+    def setText(self, size=24, color=None, bgColor=None):
+        self.textSize = size
+        self.textColor = color
+        if self.textColor is None:
+            self.textColor = self.white
+        self.textBgColor = bgColor
+        if self.textBgColor is None:
+            self.textBgColor = self.black
+
+    def plotText(self, pos, text):
+        font = pygame.font.Font(None, self.textSize)
+        textSurface = font.render(text, True,
+                                  self.textColor * 255,
+                                  self.textBgColor * 255)
         textData = pygame.image.tostring(textSurface, "RGBA", True)
         gl.glRasterPos3d(*pos)
         gl.glDrawPixels(textSurface.get_width(),
