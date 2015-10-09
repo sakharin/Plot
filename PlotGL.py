@@ -346,6 +346,19 @@ class PlotGL(object):
         self.plotPoint(pC1, color=self.red)
         self.plotPoint(pC2, color=self.green)
 
+    def plotText(self, pos, text, size=24, color=None, bgColor=None):
+        font = pygame.font.Font(None, size)
+        if color is None:
+            color = self.white
+        if bgColor is None:
+            bgColor = self.black
+        textSurface = font.render(text, True, color * 255, bgColor * 255)
+        textData = pygame.image.tostring(textSurface, "RGBA", True)
+        gl.glRasterPos3d(*pos)
+        gl.glDrawPixels(textSurface.get_width(),
+                        textSurface.get_height(),
+                        gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, textData)
+
     def show(self):
         self.Clock = pygame.time.Clock()
         while True:
