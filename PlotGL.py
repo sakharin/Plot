@@ -122,6 +122,7 @@ class PlotGL(object):
 
         self.keyboardEventsZoom(key)
         self.keyboardEventsNavigation(key)
+        self.keyboardEventSave(key)
 
     def keyboardEventsNavigation(self, key):
         if key == pygame.K_LEFT:
@@ -161,6 +162,17 @@ class PlotGL(object):
 
         self.zoom = self.zoomMax if self.zoom > self.zoomMax else self.zoom
         self.zoom = self.zoomMin if self.zoom < self.zoomMin else self.zoom
+
+    def keyboardEventSave(self, key):
+        if key == pygame.K_F2:
+            gl.glReadBuffer(gl.GL_FRONT)
+            data = gl.glReadPixels(0, 0,
+                                   self.w, self.h,
+                                   gl.GL_RGB, gl.GL_UNSIGNED_BYTE)
+            surface = pygame.image.fromstring(str(buffer(data)),
+                                              (self.w, self.h), 'RGB', True)
+            fileName = "res.png"
+            pygame.image.save(surface, fileName)
 
     def mouseEvents(self, button):
         pass
