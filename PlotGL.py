@@ -330,7 +330,7 @@ class PlotGL(object):
             gl.glEnd()
         gl.glPopMatrix()
 
-    def plotCamera(self, pC, vC, cameraSizeH, cameraSizeW, cameraF, cameraScale):
+    def plotCamera(self, pC, vC, cameraSizeH=0.024, cameraSizeW=0.036, cameraF=0.035, cameraScale=10):
         vX = np.array([[1], [0], [0]])
         vY = np.array([[0], [1], [0]])
         vZ = np.array([[0], [0], [1]])
@@ -340,15 +340,19 @@ class PlotGL(object):
         pC3 = cameraF * vZ + cameraSizeW / 2 * vY + cameraSizeH / 2 * vX
         pC4 = cameraF * vZ - cameraSizeW / 2 * vY + cameraSizeH / 2 * vX
 
-        theta, phi = self.geo.vec2Angs(vC)
-        m = self.geo.getRMatrixEulerAngles(0, 0, phi)
-        m = m.dot(self.geo.getRMatrixEulerAngles(0, theta, 0))
+        m, n = vC.shape
+        if m == 3 and n == 1:
+            theta, phi = self.geo.vec2Angs(vC)
+            M = self.geo.getRMatrixEulerAngles(0, 0, phi)
+            M = M.dot(self.geo.getRMatrixEulerAngles(0, theta, 0))
+        elif m >= 3 and m <= 4 and n >= 3 and n <= 4:
+            M = vC[:3, :3]
 
-        pC0 = cameraScale * m.dot(pC0) + pC
-        pC1 = cameraScale * m.dot(pC1) + pC
-        pC2 = cameraScale * m.dot(pC2) + pC
-        pC3 = cameraScale * m.dot(pC3) + pC
-        pC4 = cameraScale * m.dot(pC4) + pC
+        pC0 = cameraScale * M.dot(pC0) + pC
+        pC1 = cameraScale * M.dot(pC1) + pC
+        pC2 = cameraScale * M.dot(pC2) + pC
+        pC3 = cameraScale * M.dot(pC3) + pC
+        pC4 = cameraScale * M.dot(pC4) + pC
 
         self.plotLine(pC0, pC1, color=self.blue)
         self.plotLine(pC0, pC2, color=self.blue)
