@@ -220,12 +220,12 @@ class PlotGL(object):
         gl.glPushMatrix()
         try:
             self.plotLine(p0, p1, color)
-            pt = p1 - 0.2 * lineVec
+            pt = p1 - 0.1 * lineVec
             theta, phi = self.geo.vec2Angs(p1 - p0)
             gl.glTranslatef(pt[0, 0], pt[1, 0], pt[2, 0])
             gl.glRotatef(np.rad2deg(phi) + 90, 0, 0, 1)
             gl.glRotatef(np.rad2deg(theta), 1, 0, 0)
-            glut.glutSolidCone(0.1 * lenVec, 0.2 * lenVec, 50, 10)
+            glut.glutSolidCone(0.05 * lenVec, 0.1 * lenVec, 50, 10)
         finally:
             gl.glPopMatrix()
 
