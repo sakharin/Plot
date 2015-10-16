@@ -335,17 +335,20 @@ class PlotGL(object):
         vY = np.array([[0], [1], [0]])
         vZ = np.array([[0], [0], [1]])
         pC0 = np.zeros((3, 1))
-        pC1 = cameraF * vZ + cameraSizeW / 2 * vY - cameraSizeH / 2 * vX
-        pC2 = cameraF * vZ - cameraSizeW / 2 * vY - cameraSizeH / 2 * vX
-        pC3 = cameraF * vZ + cameraSizeW / 2 * vY + cameraSizeH / 2 * vX
-        pC4 = cameraF * vZ - cameraSizeW / 2 * vY + cameraSizeH / 2 * vX
+        pC1 = -cameraSizeW / 2 * vX - cameraSizeH / 2 * vY + cameraF * vZ
+        pC2 = cameraSizeW / 2 * vX - cameraSizeH / 2 * vY + cameraF * vZ
+        pC3 = -cameraSizeW / 2 * vX + cameraSizeH / 2 * vY + cameraF * vZ
+        pC4 = cameraSizeW / 2 * vX + cameraSizeH / 2 * vY + cameraF * vZ
 
         m, n = vC.shape
         if m == 3 and n == 1:
+            # Vector
             theta, phi = self.geo.vec2Angs(vC)
-            M = self.geo.getRMatrixEulerAngles(0, 0, phi)
-            M = M.dot(self.geo.getRMatrixEulerAngles(0, theta, 0))
+            M = self.geo.getRMatrixEulerAngles(0, 0, -np.pi / 2.)
+            M = self.geo.getRMatrixEulerAngles(0, theta, 0).dot(M)
+            M = self.geo.getRMatrixEulerAngles(0, 0, phi).dot(M)
         elif m >= 3 and m <= 4 and n >= 3 and n <= 4:
+            # Rotation matrix
             M = vC[:3, :3]
 
         pC0 = cameraScale * M.dot(pC0) + pC
