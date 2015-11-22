@@ -26,7 +26,19 @@ class Plot(object):
 
         return params
 
+    def setDefaultParamsLine(self, **params):
+        if params.get('color') is None:
+            params.update({'color': self.Cblack})
+
+        if params.get('line_width') is None:
+            params.update({'line_width': 1})
+
+        return params
+
     def plotPoint(self, pt1, **params):
+        pass
+
+    def plotLine(self, pt1, pt2, **params):
         pass
 
     def draw(self):

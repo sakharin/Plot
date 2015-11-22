@@ -181,6 +181,12 @@ class PlotGL(Plot):
         gl.glPointSize(params.get('point_size'))
         return params
 
+    def setDefaultParamsLine(self, **params):
+        params = super(PlotGL, self).setDefaultParamsLine(**params)
+        lineWidth = params.get('line_width')
+        gl.glLineWidth(lineWidth)
+        return params
+
     def plotPoint(self, pt1, **params):
         super(PlotGL, self).plotPoint(pt1, **params)
         params = self.setDefaultParamsPoint(**params)
@@ -191,6 +197,20 @@ class PlotGL(Plot):
         gl.glEnd()
         if params.get('text') is not None:
             self.plotText(pt1, params.get('text'))
+
+    def plotLine(self, pt1, pt2, **params):
+        super(PlotGL, self).plotLine(pt1, pt2, **params)
+        params = self.setDefaultParamsLine(**params)
+        color = params.get('color')
+        gl.glColor3f(*color)
+        gl.glBegin(gl.GL_LINES)
+        gl.glVertex3f(*pt1)
+        gl.glVertex3f(*pt2)
+        gl.glEnd()
+        if params.get('text') is not None:
+            pt3 = (pt1 + pt2) / 2
+            self.plotPoint(pt3, color=color)
+            self.plotText(pt3, params.get('text'))
 
     def show(self):
         self.Clock = pygame.time.Clock()

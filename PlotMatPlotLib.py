@@ -53,6 +53,17 @@ class PlotMatPlotLib(Plot):
 
         return params
 
+    def setDefaultParamsLine(self, **params):
+        params = super(PlotMatPlotLib, self).setDefaultParamsLine(**params)
+
+        c1 = params.get('linestyle') is None
+        c2 = params.get('line_width') is None
+        if c1 and not c2:
+            params.update({'linestyle': '-'})
+        del params['line_width']
+
+        return params
+
     def plotPoint(self, pt1, **params):
         super(PlotMatPlotLib, self).plotPoint(pt1, **params)
         params = self.setDefaultParamsPoint(**params)
@@ -60,6 +71,15 @@ class PlotMatPlotLib(Plot):
         self.ax.plot([pt1[0, 0]],
                      [pt1[1, 0]],
                      [pt1[2, 0]], **params)
+
+    def plotLine(self, pt1, pt2, **params):
+        params = self.setDefaultParamsLine(**params)
+        self.updateRegion(pt1)
+        self.updateRegion(pt2)
+        self.ax.plot([pt1[0, 0], pt2[0, 0]],
+                     [pt1[1, 0], pt2[1, 0]],
+                     [pt1[2, 0], pt2[2, 0]],
+                     **params)
 
     def show(self):
         self.draw()

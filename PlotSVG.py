@@ -75,12 +75,44 @@ class PlotSVG(Plot):
 
         return params
 
+    def setDefaultParamsLine(self, **params):
+        c1 = params.get('stroke') is None
+        c2 = params.get('color') is None
+        if c1 and c2:
+            params.update({'stroke': self.black})
+        elif c1 and not c2:
+            params.update({'stroke': params.get('color')})
+            del params['color']
+
+        if params.get('stroke_width') is not None:
+            params.update({'line_width': params.get('stroke_width')})
+            del params['stroke_width']
+
+        if params.get('stroke_linecap') is None:
+            params.update({'stroke_linecap': 'round'})
+
+        if params.get('fill') is None:
+            params.update({'fill': 'none'})
+
+        params = super(PlotSVG, self).setDefaultParamsLine(**params)
+
+        params.update({'stroke_width': params.get('line_width')})
+        del params['line_width']
+
+        return params
+
     def plotPoint(self, pt1, **params):
         super(PlotSVG, self).plotPoint(pt1, **params)
         params = self.setDefaultParamsPoint(**params)
         size = params.get('stroke_width')
         p1 = self.project(pt1)
         self.add(self.dwg.circle(p1, size, **params))
+
+    def plotLine(self, pt1, pt2, **params):
+        params = self.setDefaultParamsLine(**params)
+        pt1_ = self.project(pt1)
+        pt2_ = self.project(pt2)
+        self.add(self.dwg.line(pt1_, pt2_, **params))
 
     def show(self):
         self.draw()
