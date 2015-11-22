@@ -1,10 +1,8 @@
 #!/usr/bin/env python
 import numpy as np
-import subprocess
 import os
 import svgwrite
 
-from Geometry import Geometry
 from Plot import Plot
 
 

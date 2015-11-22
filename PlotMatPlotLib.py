@@ -1,12 +1,9 @@
 #!/usr/bin/env python
-import cv2
-import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.patches import FancyArrowPatch
 from mpl_toolkits.mplot3d import proj3d
 
-from Geometry import Geometry
 from Plot import Plot
 
 
@@ -25,8 +22,6 @@ class PlotMatPlotLib(Plot):
         # For viewing direction
         self.elev = 0.
         self.azim = 0.
-
-        self.setColors()
 
     def updateRegion(self, pt):
         x, y, z = pt[:3, 0]
