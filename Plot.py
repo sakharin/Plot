@@ -77,9 +77,12 @@ class Plot(object):
             self.vX_ = R[:3, 3:4] + R[:3, :3].dot(self.vX_)
             self.vY_ = R[:3, 3:4] + R[:3, :3].dot(self.vY_)
             self.vZ_ = R[:3, 3:4] + R[:3, :3].dot(self.vZ_)
-        self.plotArrow(self.pt1_, self.pt1_ + scale * self.vX_, color=self.Cred)
-        self.plotArrow(self.pt1_, self.pt1_ + scale * self.vY_, color=self.Cgreen)
-        self.plotArrow(self.pt1_, self.pt1_ + scale * self.vZ_, color=self.Cblue)
+        params.update({'color': self.Cred})
+        self.plotArrow(self.pt1_, self.pt1_ + scale * self.vX_, **params)
+        params.update({'color': self.Cgreen})
+        self.plotArrow(self.pt1_, self.pt1_ + scale * self.vY_, **params)
+        params.update({'color': self.Cblue})
+        self.plotArrow(self.pt1_, self.pt1_ + scale * self.vZ_, **params)
 
     def draw(self):
         pass
