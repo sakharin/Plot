@@ -54,17 +54,8 @@ class PlotGL(Plot):
         self.move = [self.moveReset[0], self.moveReset[1]]
         self.viewAngle = [self.viewAngleReset[0], self.viewAngleReset[1]]
 
-        self.setText()
         self.setView()
-
-    def setText(self, size=24, color=None, bgColor=None):
-        self.textSize = size
-        self.textColor = color
-        if self.textColor is None:
-            self.textColor = self.Cwhite
-        self.textBgColor = bgColor
-        if self.textBgColor is None:
-            self.textBgColor = self.Cblack
+        self.setText()
 
     def setView(self):
         gl.glEnable(gl.GL_TEXTURE_2D)
@@ -80,6 +71,26 @@ class PlotGL(Plot):
         #                   self.zNear, self.zFar)
         gl.glOrtho(-0.5 / self.zoom, 0.5 / self.zoom, -0.5 / self.zoom, 0.5 / self.zoom, self.zNear, self.zFar)
         gl.glMatrixMode(gl.GL_MODELVIEW)
+
+    def setText(self, size=24, color=None, bgColor=None):
+        self.textSize = size
+        self.textColor = color
+        if self.textColor is None:
+            self.textColor = self.Cwhite
+        self.textBgColor = bgColor
+        if self.textBgColor is None:
+            self.textBgColor = self.Cblack
+
+    def plotText(self, pos, text):
+        font = pygame.font.Font(None, self.textSize)
+        textSurface = font.render(text, True,
+                                  self.textColor * 255,
+                                  self.textBgColor * 255)
+        textData = pygame.image.tostring(textSurface, "RGBA", True)
+        gl.glRasterPos3d(*pos)
+        gl.glDrawPixels(textSurface.get_width(),
+                        textSurface.get_height(),
+                        gl.GL_RGBA, gl.GL_UNSIGNED_BYTE, textData)
 
     def eventHandler(self):
         for event in pygame.event.get():
@@ -233,6 +244,13 @@ class PlotGL(Plot):
             p2 = (pt1 + pt2) / 2
             self.plotPoint(p2, **params)
             self.plotText(p2, params.get('text'))
+
+    def plotAxis(self, pt1=None, scale=1, isText=False, **params):
+        super(PlotGL, self).plotAxis(pt1, scale=scale, **params)
+        if isText:
+            self.plotText(self.pt1_ + scale * self.vX_, "x")
+            self.plotText(self.pt1_ + scale * self.vY_, "y")
+            self.plotText(self.pt1_ + scale * self.vZ_, "z")
 
     def show(self):
         self.Clock = pygame.time.Clock()

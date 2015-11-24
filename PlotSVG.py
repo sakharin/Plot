@@ -31,7 +31,9 @@ class PlotSVG(Plot):
         self.T = np.array([[0], [0], [1]])
 
     def project(self, p):
-        p_ = self.K.dot(self.R.dot(p) + self.T)
+        # Avoid division by zero
+        e = 1e-6
+        p_ = self.K.dot(self.R.dot(p) + self.T) + e
         return (p_[0, 0] / p_[2, 0], p_[1, 0] / p_[2, 0])
 
     def add(self, obj):

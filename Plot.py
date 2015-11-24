@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+import numpy as np
+
 from Color import ColorSet01
 from Geometry import Geometry
 
@@ -61,6 +63,23 @@ class Plot(object):
 
     def plotArrow(self, pt1, pt2, **params):
         pass
+
+    def plotAxis(self, pt1=None, scale=1, R=None, **params):
+        if pt1 is None:
+            pt1 = np.zeros((3, 1))
+        self.pt1_ = pt1
+        self.vX_ = np.array([[1], [0], [0]])
+        self.vY_ = np.array([[0], [1], [0]])
+        self.vZ_ = np.array([[0], [0], [1]])
+
+        if R is not None:
+            self.pt1_ = R[:3, 3:4] + R[:3, :3].dot(self.pt1_)
+            self.vX_ = R[:3, 3:4] + R[:3, :3].dot(self.vX_)
+            self.vY_ = R[:3, 3:4] + R[:3, :3].dot(self.vY_)
+            self.vZ_ = R[:3, 3:4] + R[:3, :3].dot(self.vZ_)
+        self.plotArrow(self.pt1_, self.pt1_ + scale * self.vX_, color=self.Cred)
+        self.plotArrow(self.pt1_, self.pt1_ + scale * self.vY_, color=self.Cgreen)
+        self.plotArrow(self.pt1_, self.pt1_ + scale * self.vZ_, color=self.Cblue)
 
     def draw(self):
         pass
