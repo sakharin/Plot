@@ -5,20 +5,35 @@ from PlotMatPlotLib import PlotMatPlotLib
 from PlotSVG import PlotSVG
 
 
-class testPlot(PlotGL):
+#class testPlot(PlotGL):
 #class testPlot(PlotMatPlotLib):
-#class testPlot(PlotSVG):
+class testPlot(PlotSVG):
     def __init__(self):
         super(testPlot, self).__init__()
         self.N = 100
         self.pointPoint = \
-            [np.random.uniform(-1, 1, 3).reshape((3, 1)) for i in range(self.N)]
+            [np.array([np.random.uniform(1, 2, 1),
+                       np.random.uniform(0, 1, 1),
+                       np.random.uniform(-1, 1, 1)])
+                for i in range(self.N)]
         self.sizePoint = \
             [np.random.uniform(0, 10, 1)[0] for i in range(self.N)]
+
         self.pointLine = \
-            [np.random.uniform(-5, 0, 3).reshape((3, 1)) for i in range(2 * self.N)]
+            [np.array([np.random.uniform(0, 1, 1),
+                       np.random.uniform(0, 1, 1),
+                       np.random.uniform(-1, 1, 1)])
+                for i in range(2 * self.N)]
         self.sizeLine = \
-            [np.random.uniform(0, 10, 1)[0] for i in range(self.N)]
+            [np.random.uniform(0, 5, 1)[0] for i in range(self.N)]
+
+        self.pointArrow = \
+            [np.array([np.random.uniform(-1, 0, 1),
+                       np.random.uniform(0, 1, 1),
+                       np.random.uniform(-1, 1, 1)])
+                for i in range(2 * self.N)]
+        self.sizeArrow = \
+            [np.random.uniform(0, 5, 1)[0] for i in range(self.N)]
 
     def draw(self):
         # Test plotPoint
@@ -33,10 +48,18 @@ class testPlot(PlotGL):
             for i in range(self.N):
                 pt1 = self.pointLine[i * 2]
                 pt2 = self.pointLine[i * 2 + 1]
-                size = self.sizePoint[i]
+                size = self.sizeLine[i]
                 self.plotLine(pt1, pt2, color=self.Cgreen, line_width=size)
+
+        # Test plotArrow
+        if True:
+            for i in range(self.N):
+                pt1 = self.pointArrow[i * 2]
+                pt2 = self.pointArrow[i * 2 + 1]
+                size = self.sizeArrow[i]
+                self.plotArrow(pt1, pt2, color=self.Cgreen, line_width=size)
 
 
 if __name__ == "__main__":
-    p = testPlot()
-    p.show()
+    with testPlot() as p:
+        p.show()

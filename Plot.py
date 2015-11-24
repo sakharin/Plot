@@ -9,6 +9,12 @@ class Plot(object):
         self.colors = ColorSet01().colors
         self.setColors()
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, type, value, traceback):
+        pass
+
     def setColors(self):
         for c in self.colors:
             setattr(self, 'C' + c['name'],
@@ -35,10 +41,25 @@ class Plot(object):
 
         return params
 
+    def setDefaultParamsArrow(self, **params):
+        if params.get('color') is None:
+            params.update({'color': self.Cblack})
+
+        if params.get('line_width') is None:
+            params.update({'line_width': 1})
+
+        if params.get('head_size') is None:
+            params.update({'head_size': 0.05})
+
+        return params
+
     def plotPoint(self, pt1, **params):
         pass
 
     def plotLine(self, pt1, pt2, **params):
+        pass
+
+    def plotArrow(self, pt1, pt2, **params):
         pass
 
     def draw(self):

@@ -49,12 +49,6 @@ class PlotGL(Plot):
 
         self.setParams()
 
-    def __enter__(self):
-        return self
-
-    def __exit__(self, type, value, traceback):
-        pass
-
     def setParams(self):
         self.zoom = self.zoomReset
         self.move = [self.moveReset[0], self.moveReset[1]]
@@ -187,6 +181,10 @@ class PlotGL(Plot):
         gl.glLineWidth(lineWidth)
         return params
 
+    def setDefaultParamsArrow(self, **params):
+        params = super(PlotGL, self).setDefaultParamsArrow(**params)
+        return self.setDefaultParamsLine(**params)
+
     def plotPoint(self, pt1, **params):
         super(PlotGL, self).plotPoint(pt1, **params)
         params = self.setDefaultParamsPoint(**params)
@@ -211,6 +209,30 @@ class PlotGL(Plot):
             pt3 = (pt1 + pt2) / 2
             self.plotPoint(pt3, color=color)
             self.plotText(pt3, params.get('text'))
+
+    def plotArrow(self, pt1, pt2, **params):
+        super(PlotGL, self).plotArrow(pt1, pt2, **params)
+        params = self.setDefaultParamsArrow(**params)
+        headSize = params.get('head_size')
+
+        lineVec = pt2 - pt1
+        lenVec = np.linalg.norm(lineVec)
+
+        gl.glPushMatrix()
+        try:
+            self.plotLine(pt1, pt2, **params)
+            theta, phi = self.geo.vec2Angs(pt2 - pt1)
+            gl.glTranslatef(pt2[0, 0], pt2[1, 0], pt2[2, 0])
+            gl.glRotatef(np.rad2deg(phi) + 90, 0, 0, 1)
+            gl.glRotatef(np.rad2deg(theta), 1, 0, 0)
+            glut.glutSolidCone(0.5 * headSize * lenVec, headSize * lenVec, 50, 10)
+        finally:
+            gl.glPopMatrix()
+
+        if params.get('text') is not None:
+            p2 = (pt1 + pt2) / 2
+            self.plotPoint(p2, **params)
+            self.plotText(p2, params.get('text'))
 
     def show(self):
         self.Clock = pygame.time.Clock()

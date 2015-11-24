@@ -7,6 +7,22 @@ from mpl_toolkits.mplot3d import proj3d
 from Plot import Plot
 
 
+class Arrow3D(FancyArrowPatch):
+    #http://stackoverflow.com/questions/11140163/python-matplotlib-plotting-a-3d-cube-a-sphere-and-a-vector
+    def __init__(self, pt1, pt2, *args, **kwargs):
+        FancyArrowPatch.__init__(self, (0, 0), (0, 0), *args, **kwargs)
+        x = [pt1[0, 0], pt2[0, 0]]
+        y = [pt1[1, 0], pt2[1, 0]]
+        z = [pt1[2, 0], pt2[2, 0]]
+        self._verts3d = x, y, z
+
+    def draw(self, renderer):
+        xs3d, ys3d, zs3d = self._verts3d
+        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
+        self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
+        FancyArrowPatch.draw(self, renderer)
+
+
 class PlotMatPlotLib(Plot):
     def __init__(self):
         super(PlotMatPlotLib, self).__init__()
@@ -20,8 +36,8 @@ class PlotMatPlotLib(Plot):
         self.zmx, self.zmn = -1e6, 1e6
 
         # For viewing direction
-        self.elev = 0.
-        self.azim = 0.
+        self.elev = -90.
+        self.azim = -90.
 
     def updateRegion(self, pt):
         x, y, z = pt[:3, 0]
@@ -64,6 +80,10 @@ class PlotMatPlotLib(Plot):
 
         return params
 
+    def setDefaultParamsArrow(self, **params):
+        params = super(PlotMatPlotLib, self).setDefaultParamsArrow(**params)
+        return self.setDefaultParamsLine(**params)
+
     def plotPoint(self, pt1, **params):
         super(PlotMatPlotLib, self).plotPoint(pt1, **params)
         params = self.setDefaultParamsPoint(**params)
@@ -80,6 +100,13 @@ class PlotMatPlotLib(Plot):
                      [pt1[1, 0], pt2[1, 0]],
                      [pt1[2, 0], pt2[2, 0]],
                      **params)
+
+    def plotArrow(self, pt1, pt2, **params):
+        params = self.setDefaultParamsArrow(**params)
+        a = Arrow3D(pt1, pt2, mutation_scale=20, lw=1, arrowstyle="-|>", color=params.get('color'))
+        self.ax.add_artist(a)
+        self.updateRegion(pt1)
+        self.updateRegion(pt2)
 
     def show(self):
         self.draw()

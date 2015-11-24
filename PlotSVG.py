@@ -101,6 +101,32 @@ class PlotSVG(Plot):
 
         return params
 
+    def setDefaultParamsArrow(self, **params):
+        c1 = params.get('stroke') is None
+        c2 = params.get('color') is None
+        if c1 and c2:
+            params.update({'stroke': self.black})
+        elif c1 and not c2:
+            params.update({'stroke': params.get('color')})
+            del params['color']
+
+        if params.get('stroke_width') is not None:
+            params.update({'line_width': params.get('stroke_width')})
+            del params['stroke_width']
+
+        if params.get('stroke_linecap') is None:
+            params.update({'stroke_linecap': 'round'})
+
+        if params.get('fill') is None:
+            params.update({'fill': params.get('stroke')})
+
+        params = super(PlotSVG, self).setDefaultParamsArrow(**params)
+
+        params.update({'stroke_width': params.get('line_width')})
+        del params['line_width']
+
+        return params
+
     def plotPoint(self, pt1, **params):
         super(PlotSVG, self).plotPoint(pt1, **params)
         params = self.setDefaultParamsPoint(**params)
@@ -113,6 +139,35 @@ class PlotSVG(Plot):
         pt1_ = self.project(pt1)
         pt2_ = self.project(pt2)
         self.add(self.dwg.line(pt1_, pt2_, **params))
+
+    def plotArrow(self, pt1, pt2, **params):
+        params = self.setDefaultParamsArrow(**params)
+        numSegments = 32
+        headSize = params.get('head_size')
+        del params['head_size']
+
+        pt2_ = self.project(pt2)
+        self.plotLine(pt1, pt2, **params)
+
+        # Draw arrow head
+        params.update({'stroke_dasharray': 'none'})
+        params.update({'fill': params.get('stroke')})
+        lineVec = pt2 - pt1
+        lenVec = np.linalg.norm(lineVec)
+        r = headSize / 2. * lenVec
+        pt3 = pt2 - headSize * lineVec
+
+        theta, phi = self.geo.vec2Angs(lineVec / lenVec)
+        m = self.geo.getRMatrixEulerAngles(0, 0, phi)
+        m = m.dot(self.geo.getRMatrixEulerAngles(0, theta, 0))
+        for i in range(numSegments):
+            angA = i * 2 * np.pi / numSegments
+            angB = (i + 1) * 2 * np.pi / numSegments
+            pA = r * np.array([[np.cos(angA)], [np.sin(angA)], [0]])
+            pB = r * np.array([[np.cos(angB)], [np.sin(angB)], [0]])
+            pA_ = self.project(pt3 + m.dot(pA))
+            pB_ = self.project(pt3 + m.dot(pB))
+            self.add(self.dwg.polygon([pt2_, pA_, pB_], **params))
 
     def show(self):
         self.draw()
