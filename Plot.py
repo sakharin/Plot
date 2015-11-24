@@ -73,10 +73,11 @@ class Plot(object):
         self.vZ_ = np.array([[0], [0], [1]])
 
         if R is not None:
-            self.pt1_ = R[:3, 3:4] + R[:3, :3].dot(self.pt1_)
-            self.vX_ = R[:3, 3:4] + R[:3, :3].dot(self.vX_)
-            self.vY_ = R[:3, 3:4] + R[:3, :3].dot(self.vY_)
-            self.vZ_ = R[:3, 3:4] + R[:3, :3].dot(self.vZ_)
+            if R.shape[1] == 4:
+                self.pt1_ = R[:3, 3:4]
+            self.vX_ = R[:3, :3].dot(self.vX_)
+            self.vY_ = R[:3, :3].dot(self.vY_)
+            self.vZ_ = R[:3, :3].dot(self.vZ_)
         params.update({'color': self.Cred})
         self.plotArrow(self.pt1_, self.pt1_ + scale * self.vX_, **params)
         params.update({'color': self.Cgreen})

@@ -42,6 +42,11 @@ class testPlot(PlotGL):
                 for i in range(self.N)]
         self.scaleAxis = \
             [np.random.uniform(0, 0.3, 1)[0] for i in range(self.N)]
+        thetas = np.random.uniform(0, np.pi, self.N)
+        phis = np.random.uniform(0, 2 * np.pi, 2 * self.N)
+        self.rotationAxis = \
+            [self.geo.getRMatrixEulerAngles(0, 0, phis[i]).dot(self.geo.getRMatrixEulerAngles(0, thetas[i], 0))
+                for i in range(self.N)]
 
     def draw(self):
         # Test plotPoint
@@ -69,10 +74,12 @@ class testPlot(PlotGL):
 
         # Test plotAxis
         if True:
+            self.plotAxis()
             for i in range(self.N):
                 pt = self.pointAxis[i]
                 scale = self.scaleAxis[i]
-                self.plotAxis(pt, scale=scale)
+                R = self.rotationAxis[i]
+                self.plotAxis(pt, scale=scale, R=R)
 
 
 if __name__ == "__main__":
