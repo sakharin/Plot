@@ -27,6 +27,36 @@ class Geometry(object):
                        [0., sA, cA]])
         return rA.dot(rB).dot(rC)
 
+    def checkRMatrix(self, R):
+        assert(isinstance(R, np.ndarray))
+        assert(R.shape == (3, 3))
+
+        # https://www.fastgraph.com/makegames/3drotation/
+        # 1.R is normalized: the squares of the elements in any row or column
+        # sum to 1.
+        for i in range(3):
+            assert(np.linalg.norm(R[i, :]) == 1)
+            assert(np.linalg.norm(R[:, i]) == 1)
+        # R is orthogonal: the dot product of any pair of rows or any pair of
+        # columns is 0.
+        assert(R[0, :].dot(R[1, :]) == 0)
+        assert(R[0, :].dot(R[2, :]) == 0)
+        assert(R[1, :].dot(R[2, :]) == 0)
+        assert(R[:, 0].dot(R[:, 1]) == 0)
+        assert(R[:, 0].dot(R[:, 2]) == 0)
+        assert(R[:, 1].dot(R[:, 2]) == 0)
+        return R
+
+    def checkTMatrix(self, T):
+        self.checkRMatrix(T[:3, :3])
+        assert(T.shape[0] >= 3 and T.shape[0] <= 4)
+        if T.shape[1] == 4:
+            return T[:3, :4]
+        if T.shape[0] == 3:
+            S = np.zeros((3, 4))
+            S[:3, :3] = T[:, :]
+            return S
+
     def angleDiff(self, angle1, angle2):
         # http://stackoverflow.com/questions/12234574/calculating-if-an-angle-is-between-two-angles
         # Return diff in range [-pi, pi]

@@ -95,3 +95,25 @@ if __name__ == "__main__1":
             print "Error !"
             print minAng, ang1, maxAng, ang2
     print "Tested."
+
+if __name__ == "__main__":
+    A = geo.getRMatrixEulerAngles(0, 0, np.deg2rad(30))
+    geo.checkRMatrix(A)
+    B = np.eye(3)
+    geo.checkRMatrix(B)
+    C = np.array([[0, 0, 1],
+                  [1, 0, 0],
+                  [0, 1, 0]])
+    geo.checkRMatrix(C)
+    D = np.array([[0, 0, 1, 3],
+                  [1, 0, 0, 1],
+                  [0, 1, 0, 2]])
+    E = np.array([[0, 0, 1, 3],
+                  [1, 0, 0, 1],
+                  [0, 1, 0, 2],
+                  [0, 0, 0, 1]])
+    geo.checkTMatrix(A)
+    geo.checkTMatrix(B)
+    geo.checkTMatrix(C)
+    geo.checkTMatrix(D)
+    geo.checkTMatrix(E)
