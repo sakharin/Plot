@@ -12,9 +12,10 @@ from Plot import Plot
 
 
 class PlotGL(Plot):
-    def __init__(self, size=(600, 600), winName="Viewer"):
+    def __init__(self, size=(600, 800), winName="Viewer"):
         super(PlotGL, self).__init__()
-        self.h, self.w = size
+        self.size = size
+        self.h, self.w = self.size
 
         pygame.init()
         glut.glutInit()
@@ -69,7 +70,10 @@ class PlotGL(Plot):
         gl.glLoadIdentity()
         #glu.gluPerspective(self.FOV, self.aspectRatio,
         #                   self.zNear, self.zFar)
-        gl.glOrtho(-0.5 / self.zoom, 0.5 / self.zoom, -0.5 / self.zoom, 0.5 / self.zoom, self.zNear, self.zFar)
+        h, w = self.size
+        gl.glOrtho(-0.5 / self.zoom, 0.5 / self.zoom,
+                   -0.5 / self.zoom * h / w, 0.5 / self.zoom * h / w,
+                   self.zNear, self.zFar)
         gl.glMatrixMode(gl.GL_MODELVIEW)
 
     def setText(self, size=24, color=None, bgColor=None):
