@@ -16,25 +16,18 @@ class PlotSVG(Plot):
                              size=(self.size[1], self.size[0]),
                              profile='full')
 
-        self.setCamera()
-
-    def setCamera(self):
-        fx = self.size[0] / 2.
-        fy = fx
-        cx = self.size[1] / 2.
-        cy = self.size[0] / 2.
-        self.K = np.array([[fx, 0, cx],
-                           [0, fy, cy],
-                           [0, 0, 1]])
-        self.R = self.geo.getRMatrixEulerAngles(np.deg2rad(180), 0, 0)
-        self.R = self.geo.getRMatrixEulerAngles(0, 0, np.deg2rad(-90)).dot(self.R)
-        self.T = np.array([[0], [0], [1]])
+        self.scale = 0.25
 
     def project(self, p):
-        # Avoid division by zero
-        e = 1e-6
-        p_ = self.K.dot(self.R.dot(p) + self.T) + e
-        return (p_[0, 0] / p_[2, 0], p_[1, 0] / p_[2, 0])
+        A = np.array([[1, 0],
+                      [0, 1],
+                      [0, 0]])
+        AT = A.T
+        ATAI = np.linalg.inv(AT.dot(A))
+        proj = A.dot(ATAI).dot(AT)
+        #print proj
+        q = proj.dot(p) * self.size[1] * self.scale
+        return (q[0, 0] + self.size[1] / 2., q[1, 0] + self.size[0] / 2.)
 
     def add(self, obj):
         self.dwg.add(obj)

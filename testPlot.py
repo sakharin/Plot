@@ -12,36 +12,36 @@ class testPlot(PlotGL):
         super(testPlot, self).__init__()
         self.N = 10
         self.pointPoint = \
-            [np.array([np.random.uniform(1, 2, 1),
-                       np.random.uniform(0, 1, 1),
-                       np.random.uniform(-1, 1, 1)])
+            [np.array([np.random.uniform(-2.0, -1.0, 1),
+                       np.random.uniform(-1.5, -0.5, 1),
+                       np.random.uniform(-0.5, 0.5, 1)])
                 for i in range(self.N)]
         self.sizePoint = \
-            [np.random.uniform(0, 10, 1)[0] for i in range(self.N)]
+            [np.random.uniform(1, 5, 1)[0] for i in range(self.N)]
 
         self.pointLine = \
-            [np.array([np.random.uniform(0, 1, 1),
-                       np.random.uniform(0, 1, 1),
-                       np.random.uniform(-1, 1, 1)])
+            [np.array([np.random.uniform(-1.0, 0.0, 1),
+                       np.random.uniform(-1.5, -0.5, 1),
+                       np.random.uniform(-0.5, 0.5, 1)])
                 for i in range(2 * self.N)]
         self.sizeLine = \
-            [np.random.uniform(0, 5, 1)[0] for i in range(self.N)]
+            [np.random.uniform(1, 5, 1)[0] for i in range(self.N)]
 
         self.pointArrow = \
-            [np.array([np.random.uniform(-1, 0, 1),
-                       np.random.uniform(0, 1, 1),
-                       np.random.uniform(-1, 1, 1)])
+            [np.array([np.random.uniform(0.0, 1.0, 1),
+                       np.random.uniform(-1.5, -0.5, 1),
+                       np.random.uniform(-0.5, 0.5, 1)])
                 for i in range(2 * self.N)]
         self.sizeArrow = \
-            [np.random.uniform(0, 5, 1)[0] for i in range(self.N)]
+            [np.random.uniform(1, 5, 1)[0] for i in range(self.N)]
 
         self.pointAxis = \
-            [np.array([np.random.uniform(1, 2, 1),
-                       np.random.uniform(-1, 0, 1),
+            [np.array([np.random.uniform(1.0, 2.0, 1),
+                       np.random.uniform(-1.5, -0.5, 1),
                        np.random.uniform(-0.5, 0.5, 1)])
                 for i in range(self.N)]
         self.scaleAxis = \
-            [np.random.uniform(0, 0.3, 1)[0] for i in range(self.N)]
+            [np.random.uniform(0.01, 0.2, 1)[0] for i in range(self.N)]
         thetas = np.random.uniform(0, np.pi, self.N)
         phis = np.random.uniform(0, 2 * np.pi, 2 * self.N)
         self.rotationAxis = \
@@ -70,7 +70,7 @@ class testPlot(PlotGL):
                 pt1 = self.pointArrow[i * 2]
                 pt2 = self.pointArrow[i * 2 + 1]
                 size = self.sizeArrow[i]
-                self.plotArrow(pt1, pt2, color=self.Cgreen, line_width=size)
+                self.plotArrow(pt1, pt2, color=self.Cblue, line_width=size)
 
         # Test plotAxis
         if True:

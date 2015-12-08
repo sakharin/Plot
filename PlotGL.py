@@ -27,7 +27,7 @@ class PlotGL(Plot):
         self.zNear = 0.01
         self.zFar = 30.
 
-        self.zoomReset = 1. / 4.
+        self.zoomReset = 0.25
         self.zoomSpeedMax = 2.
         self.zoomSpeedMin = 1.01
         self.zoomSpeed = 1.05
@@ -42,11 +42,9 @@ class PlotGL(Plot):
         self.moveMin = 0.001
 
         self.viewAngleReset = [0., 0.]
-        self.viewAngleSpeedMax = 30.
-        self.viewAngleSpeedMin = 0.001
-        self.viewAngleSpeed = 10
-        self.viewAngleMax = 10.
-        self.viewAngleMin = 0.001
+        self.viewAngleSpeedMax = np.deg2rad(30.)
+        self.viewAngleSpeedMin = np.deg2rad(0.001)
+        self.viewAngleSpeed = np.deg2rad(10)
 
         self.setParams()
 
@@ -119,9 +117,9 @@ class PlotGL(Plot):
 
     def keyboardEventsNavigation(self, key):
         if key == pygame.K_LEFT:
-            self.move[0] = (self.move[0] + self.moveSpeed)
-        if key == pygame.K_RIGHT:
             self.move[0] = (self.move[0] - self.moveSpeed)
+        if key == pygame.K_RIGHT:
+            self.move[0] = (self.move[0] + self.moveSpeed)
 
         if key == pygame.K_UP:
             self.move[1] = (self.move[1] - self.moveSpeed)
@@ -137,8 +135,8 @@ class PlotGL(Plot):
             self.viewAngle[1] += self.viewAngleSpeed
         if key == pygame.K_KP2 or key == pygame.K_k:
             self.viewAngle[1] -= self.viewAngleSpeed
-        self.viewAngle[0] %= 360
-        self.viewAngle[1] %= 360
+        self.viewAngle[0] %= 2. * np.pi
+        self.viewAngle[1] %= 2. * np.pi
 
         if key == pygame.K_HOME or key == pygame.K_KP5:
             self.move = [self.moveReset[0], self.moveReset[1]]
@@ -270,11 +268,11 @@ class PlotGL(Plot):
             self.setView()
 
             move = np.array([[self.move[1]], [-self.move[0]], [0]])
-            eye = np.array([[0], [0], [1]])
+            eye = np.array([[0], [0], [-1]])
             center = np.array([[0], [0], [0]])
             up = np.array([[-1], [0], [0]])
-            R = self.geo.getRMatrixEulerAngles(0, 0, np.deg2rad(self.viewAngle[0] - 180))
-            R = R.dot(self.geo.getRMatrixEulerAngles(0, np.deg2rad(-self.viewAngle[1]), 0))
+            R = self.geo.getRMatrixEulerAngles(0, 0, self.viewAngle[0] + np.pi / 2.)
+            R = R.dot(self.geo.getRMatrixEulerAngles(0, self.viewAngle[1], 0))
             m = R.dot(move)
             e = R.dot(eye) + m
             c = R.dot(center) + m
