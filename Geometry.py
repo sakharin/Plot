@@ -35,16 +35,16 @@ class Geometry(object):
         # 1.R is normalized: the squares of the elements in any row or column
         # sum to 1.
         for i in range(3):
-            assert(np.linalg.norm(R[i, :]) == 1)
-            assert(np.linalg.norm(R[:, i]) == 1)
+            assert(np.allclose(np.linalg.norm(R[i, :], 2), 1.))
+            assert(np.allclose(np.linalg.norm(R[:, i], 2), 1.))
         # R is orthogonal: the dot product of any pair of rows or any pair of
         # columns is 0.
-        assert(R[0, :].dot(R[1, :]) == 0)
-        assert(R[0, :].dot(R[2, :]) == 0)
-        assert(R[1, :].dot(R[2, :]) == 0)
-        assert(R[:, 0].dot(R[:, 1]) == 0)
-        assert(R[:, 0].dot(R[:, 2]) == 0)
-        assert(R[:, 1].dot(R[:, 2]) == 0)
+        assert(np.allclose(R[0, :].dot(R[1, :]), 0))
+        assert(np.allclose(R[0, :].dot(R[2, :]), 0))
+        assert(np.allclose(R[1, :].dot(R[2, :]), 0))
+        assert(np.allclose(R[:, 0].dot(R[:, 1]), 0))
+        assert(np.allclose(R[:, 0].dot(R[:, 2]), 0))
+        assert(np.allclose(R[:, 1].dot(R[:, 2]), 0))
         return R
 
     def checkTMatrix(self, T):
