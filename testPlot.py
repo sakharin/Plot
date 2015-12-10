@@ -48,6 +48,19 @@ class testPlot(PlotGL):
             [self.geo.getRMatrixEulerAngles(0, 0, phis[i]).dot(self.geo.getRMatrixEulerAngles(0, thetas[i], 0))
                 for i in range(self.N)]
 
+        self.pointPlane = \
+            [np.array([np.random.uniform(-2.0, -1.0, 1),
+                       np.random.uniform(-0.5, 0.5, 1),
+                       np.random.uniform(-0.5, 0.5, 1)])
+                for i in range(self.N)]
+        self.wPlane = \
+            [np.random.uniform(0.05, 0.2, 1)[0] for i in range(self.N)]
+        self.hPlane = \
+            [np.random.uniform(0.05, 0.2, 1)[0] for i in range(self.N)]
+        self.rotationPlane = \
+            [self.geo.getRMatrixEulerAngles(0, 0, phis[i]).dot(self.geo.getRMatrixEulerAngles(0, thetas[i], 0))
+                for i in range(self.N)]
+
     def draw(self):
         # Test plotPoint
         if True:
@@ -80,6 +93,18 @@ class testPlot(PlotGL):
                 scale = self.scaleAxis[i]
                 R = self.rotationAxis[i]
                 self.plotAxis(pt, scale=scale, R=R)
+
+        # Test plotPlane
+        if True:
+            for i in range(self.N):
+                pt = self.pointPlane[i]
+                R = self.rotationPlane[i]
+                w = self.wPlane[i]
+                h = self.hPlane[i]
+                self.plotPlane(pt, R=R, w=w, h=h, color=self.Corange)
+
+                vN = R.dot(self.vZ)
+                self.plotPlane(pt, vN=vN, w=w, h=h, color=self.Cwhite)
 
 
 if __name__ == "__main__":

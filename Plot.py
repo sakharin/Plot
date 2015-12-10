@@ -89,6 +89,36 @@ class Plot(object):
         params.update({'color': self.Cblue})
         self.plotArrow(pt1, pt1 + scale * vZ_, **params)
 
+    def plotPlane(self, pt1=None,
+                  R=None, vN=None,
+                  w=1, h=1, **params):
+        if pt1 is None:
+            pt1 = self.pO
+
+        vA = self.vX
+        vB = self.vY
+        if R is not None:
+            R = self.geo.checkRMatrix(R)
+            vA = R.dot(self.vX)
+            vB = R.dot(self.vY)
+            vN = R.dot(self.vZ)
+        elif vN is not None:
+            # Find an orthogonal vector
+            vA, vB = self.geo.getOrthogonalVecs(vN)
+        else:
+            vN = self.vZ
+
+        w2 = w / 2.
+        h2 = h / 2.
+        p1 = pt1 - w2 * vA - h2 * vB
+        p2 = pt1 + w2 * vA - h2 * vB
+        p3 = pt1 + w2 * vA + h2 * vB
+        p4 = pt1 - w2 * vA + h2 * vB
+        self.plotLine(p1, p2, **params)
+        self.plotLine(p2, p3, **params)
+        self.plotLine(p3, p4, **params)
+        self.plotLine(p4, p1, **params)
+
     def draw(self):
         pass
 
