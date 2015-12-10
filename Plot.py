@@ -164,6 +164,62 @@ class Plot(object):
         params.update({'color': self.Cgreen})
         self.plotPoint(p2, **params)
 
+    def plotAirplane(self, pt1=None,
+                     R=None, vU=None, vE=None,
+                     scale=1., **params):
+        if pt1 is None:
+            pt1 = self.pO
+        vA = self.vX
+        vB = self.vY
+        vC = self.vZ
+        if R is not None:
+            R = self.geo.checkRMatrix(R)
+            vA = R.dot(self.vX)
+            vB = R.dot(self.vY)
+            vC = R.dot(self.vZ)
+        if vU is not None and vE is not None:
+            vC = vE
+            vA = np.cross(vC.reshape(-1), vU.reshape(-1)).reshape((3, 1))
+            vB = np.cross(vC.reshape(-1), vA.reshape(-1)).reshape((3, 1))
+
+        vA = vA * scale
+        vB = vB * scale
+        vC = vC * scale
+
+        p0 = pt1 + 0.0 * vA + 0.0 * vB + 1.0 * vC
+        p1 = pt1 - 1.0 * vA + 0.0 * vB + 0.0 * vC
+        p2 = pt1 + 0.0 * vA + 0.0 * vB + 0.0 * vC
+        p3 = pt1 + 1.0 * vA + 0.0 * vB + 0.0 * vC
+        p4 = pt1 + 0.0 * vA + 0.0 * vB - 0.5 * vC
+        p5 = pt1 - 0.5 * vA + 0.0 * vB - 1.0 * vC
+        p6 = pt1 + 0.0 * vA + 0.0 * vB - 1.0 * vC
+        p7 = pt1 + 0.5 * vA + 0.0 * vB - 1.0 * vC
+        p8 = pt1 + 0.0 * vA - 0.5 * vB - 1.0 * vC
+
+        self.plotLine(p0, p1, **params)
+        self.plotLine(p0, p2, **params)
+        self.plotLine(p0, p3, **params)
+        self.plotLine(p1, p2, **params)
+        self.plotLine(p2, p3, **params)
+
+        self.plotLine(p2, p4, **params)
+
+        self.plotLine(p4, p5, **params)
+        self.plotLine(p4, p6, **params)
+        self.plotLine(p4, p7, **params)
+        self.plotLine(p5, p6, **params)
+        self.plotLine(p6, p7, **params)
+
+        self.plotLine(p4, p8, **params)
+        self.plotLine(p6, p8, **params)
+
+        params.update({'color': self.Cred})
+        self.plotPoint(p1, **params)
+        params.update({'color': self.Cgreen})
+        self.plotPoint(p3, **params)
+        params.update({'color': self.Cwhite})
+        self.plotPoint(p8, **params)
+
     def draw(self):
         pass
 
