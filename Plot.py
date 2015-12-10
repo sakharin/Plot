@@ -11,6 +11,11 @@ class Plot(object):
         self.colors = ColorSet01().colors
         self.setColors()
 
+        self.pO = np.array([[0], [0], [0]])
+        self.vX = np.array([[1], [0], [0]])
+        self.vY = np.array([[0], [1], [0]])
+        self.vZ = np.array([[0], [0], [1]])
+
     def __enter__(self):
         return self
 
@@ -66,24 +71,23 @@ class Plot(object):
 
     def plotAxis(self, pt1=None, scale=1, R=None, **params):
         if pt1 is None:
-            pt1 = np.zeros((3, 1))
-        self.pt1_ = pt1
-        self.vX_ = np.array([[1], [0], [0]])
-        self.vY_ = np.array([[0], [1], [0]])
-        self.vZ_ = np.array([[0], [0], [1]])
+            pt1 = self.pO
 
+        vX_ = self.vX
+        vY_ = self.vY
+        vZ_ = self.vZ
         if R is not None:
             if R.shape[1] == 4:
                 self.pt1_ = R[:3, 3:4]
-            self.vX_ = R[:3, :3].dot(self.vX_)
-            self.vY_ = R[:3, :3].dot(self.vY_)
-            self.vZ_ = R[:3, :3].dot(self.vZ_)
+            vX_ = R[:3, :3].dot(self.vX)
+            vY_ = R[:3, :3].dot(self.vY)
+            vZ_ = R[:3, :3].dot(self.vZ)
         params.update({'color': self.Cred})
-        self.plotArrow(self.pt1_, self.pt1_ + scale * self.vX_, **params)
+        self.plotArrow(pt1, pt1 + scale * vX_, **params)
         params.update({'color': self.Cgreen})
-        self.plotArrow(self.pt1_, self.pt1_ + scale * self.vY_, **params)
+        self.plotArrow(pt1, pt1 + scale * vY_, **params)
         params.update({'color': self.Cblue})
-        self.plotArrow(self.pt1_, self.pt1_ + scale * self.vZ_, **params)
+        self.plotArrow(pt1, pt1 + scale * vZ_, **params)
 
     def draw(self):
         pass
