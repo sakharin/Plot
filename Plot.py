@@ -119,6 +119,51 @@ class Plot(object):
         self.plotLine(p3, p4, **params)
         self.plotLine(p4, p1, **params)
 
+    def plotCam(self, pt1=None,
+                R=None, vU=None, vE=None,
+                camSizeH=0.024,
+                camSizeW=0.036,
+                camF=0.035,
+                camScale=10,
+                **params):
+        if pt1 is None:
+            pt1 = self.pO
+        vA = self.vX
+        vB = self.vY
+        vC = self.vZ
+        if R is not None:
+            R = self.geo.checkRMatrix(R)
+            vA = R.dot(self.vX)
+            vB = R.dot(self.vY)
+            vC = R.dot(self.vZ)
+        if vU is not None and vE is not None:
+            vC = vE
+            vA = np.cross(vC.reshape(-1), vU.reshape(-1)).reshape((3, 1))
+            vB = np.cross(vC.reshape(-1), vA.reshape(-1)).reshape((3, 1))
+        camF = camF * camScale
+        w2 = camSizeW / 2. * camScale
+        h2 = camSizeH / 2. * camScale
+        p0 = pt1
+        p1 = pt1 - w2 * vA - h2 * vB + camF * vC
+        p2 = pt1 + w2 * vA - h2 * vB + camF * vC
+        p3 = pt1 + w2 * vA + h2 * vB + camF * vC
+        p4 = pt1 - w2 * vA + h2 * vB + camF * vC
+
+        self.plotLine(p0, p1, **params)
+        self.plotLine(p0, p2, **params)
+        self.plotLine(p0, p3, **params)
+        self.plotLine(p0, p4, **params)
+
+        self.plotLine(p1, p2, **params)
+        self.plotLine(p2, p3, **params)
+        self.plotLine(p3, p4, **params)
+        self.plotLine(p4, p1, **params)
+
+        params.update({'color': self.Cred})
+        self.plotPoint(p1, **params)
+        params.update({'color': self.Cgreen})
+        self.plotPoint(p2, **params)
+
     def draw(self):
         pass
 

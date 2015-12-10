@@ -61,6 +61,19 @@ class testPlot(PlotGL):
             [self.geo.getRMatrixEulerAngles(0, 0, phis[i]).dot(self.geo.getRMatrixEulerAngles(0, thetas[i], 0))
                 for i in range(self.N)]
 
+        self.pointCam= \
+            [np.array([np.random.uniform(-1.0, 0.0, 1),
+                       np.random.uniform(-0.5, 0.5, 1),
+                       np.random.uniform(-0.5, 0.5, 1)])
+                for i in range(self.N)]
+        self.wCam = \
+            [np.random.uniform(0.05, 0.2, 1)[0] for i in range(self.N)]
+        self.hCam = \
+            [np.random.uniform(0.05, 0.2, 1)[0] for i in range(self.N)]
+        self.rotationCam = \
+            [self.geo.getRMatrixEulerAngles(0, 0, phis[i]).dot(self.geo.getRMatrixEulerAngles(0, thetas[i], 0))
+                for i in range(self.N)]
+
     def draw(self):
         # Test plotPoint
         if True:
@@ -106,6 +119,19 @@ class testPlot(PlotGL):
                 vN = R.dot(self.vZ)
                 self.plotPlane(pt, vN=vN, w=w, h=h, color=self.Cwhite)
 
+        # Test plotCam
+        if True:
+            for i in range(self.N):
+                pt = self.pointCam[i]
+                R = self.rotationCam[i]
+                w = self.wCam[i]
+                h = self.hCam
+                self.plotCam(pt, R=R, w=w, h=h, camScale=2, color=self.Corange)
+
+                pt2 = pt + 0.1 * self.vX
+                vU = R.dot(-self.vY)
+                vE = R.dot(self.vZ)
+                self.plotCam(pt2, vU=vU, vE=vE, w=w, h=h, camScale=2, color=self.Cwhite)
 
 if __name__ == "__main__":
     with testPlot() as p:
