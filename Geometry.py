@@ -223,6 +223,17 @@ class Geometry(object):
         elif len(shape) == 3:
             return np.sqrt((vec ** 2).sum(axis=2))
 
+    def getOrthogonalVecs(self, vec):
+        vec /= self.normVec(vec)
+        a = 1
+        b = 0
+        c = (-a * vec[0, 0] - b * vec[1, 0]) / vec[2, 0]
+        vA = np.array([[a], [b], [c]])
+        vA /= self.normVec(vA)
+        vB = np.cross(vec.reshape(-1), vA.reshape(-1)).reshape((3, 1))
+        vB /= self.normVec(vB)
+        return vA, vB
+
     def twoPts2Vec(self, P1, P2):
         sP1 = P1.shape
         sP2 = P2.shape
