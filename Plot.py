@@ -69,7 +69,7 @@ class Plot(object):
     def plotArrow(self, pt1, pt2, **params):
         pass
 
-    def plotAxis(self, pt1=None, scale=1, R=None, **params):
+    def genAxis(self, pt1, scale, R, **params):
         if pt1 is None:
             pt1 = self.pO
 
@@ -82,6 +82,11 @@ class Plot(object):
             vX_ = R[:3, :3].dot(self.vX)
             vY_ = R[:3, :3].dot(self.vY)
             vZ_ = R[:3, :3].dot(self.vZ)
+        return (pt1, vX_, vY_, vZ_)
+
+    def plotAxis(self, pt1=None, scale=1, R=None, **params):
+        pt1, vX_, vY_, vZ_ = \
+            self.genAxis(pt1, scale, R, **params)
         params.update({'color': self.Cred})
         self.plotArrow(pt1, pt1 + scale * vX_, **params)
         params.update({'color': self.Cgreen})
@@ -89,9 +94,7 @@ class Plot(object):
         params.update({'color': self.Cblue})
         self.plotArrow(pt1, pt1 + scale * vZ_, **params)
 
-    def plotPlane(self, pt1=None,
-                  R=None, vN=None,
-                  w=1, h=1, **params):
+    def genPlane(self, pt1, R, vN, w, h, **params):
         if pt1 is None:
             pt1 = self.pO
 
@@ -114,18 +117,21 @@ class Plot(object):
         p2 = pt1 + w2 * vA - h2 * vB
         p3 = pt1 + w2 * vA + h2 * vB
         p4 = pt1 - w2 * vA + h2 * vB
+        return (p1, p2, p3, p4)
+
+    def plotPlane(self, pt1=None,
+                  R=None, vN=None,
+                  w=1, h=1, **params):
+        p1, p2, p3, p4 = \
+            self.genPlane(pt1, R, vN, w, h, **params)
         self.plotLine(p1, p2, **params)
         self.plotLine(p2, p3, **params)
         self.plotLine(p3, p4, **params)
         self.plotLine(p4, p1, **params)
 
-    def plotCam(self, pt1=None,
-                R=None, vU=None, vE=None,
-                camSizeH=0.024,
-                camSizeW=0.036,
-                camF=0.035,
-                camScale=10,
-                **params):
+    def genCam(self, pt1, R, vU, vE,
+               camSizeH, camSizeW, camF, camScale,
+               **params):
         if pt1 is None:
             pt1 = self.pO
         vA = self.vX
@@ -148,7 +154,17 @@ class Plot(object):
         p2 = pt1 + w2 * vA - h2 * vB + camF * vC
         p3 = pt1 + w2 * vA + h2 * vB + camF * vC
         p4 = pt1 - w2 * vA + h2 * vB + camF * vC
+        return (p0, p1, p2, p3, p4)
 
+    def plotCam(self, pt1=None,
+                R=None, vU=None, vE=None,
+                camSizeH=0.024,
+                camSizeW=0.036,
+                camF=0.035,
+                camScale=10,
+                **params):
+        p0, p1, p2, p3, p4 = \
+            self.genCam(pt1, R, vU, vE, camSizeH, camSizeW, camF, camScale, **params)
         self.plotLine(p0, p1, **params)
         self.plotLine(p0, p2, **params)
         self.plotLine(p0, p3, **params)
@@ -164,9 +180,7 @@ class Plot(object):
         params.update({'color': self.Cgreen})
         self.plotPoint(p2, **params)
 
-    def plotAirplane(self, pt1=None,
-                     R=None, vU=None, vE=None,
-                     scale=1., **params):
+    def getAirplane(self, pt1, R, vU, vE, scale, **params):
         if pt1 is None:
             pt1 = self.pO
         vA = self.vX
@@ -195,7 +209,13 @@ class Plot(object):
         p6 = pt1 + 0.0 * vA + 0.0 * vB - 1.0 * vC
         p7 = pt1 + 0.5 * vA + 0.0 * vB - 1.0 * vC
         p8 = pt1 + 0.0 * vA - 0.5 * vB - 1.0 * vC
+        return (p0, p1, p2, p3, p4, p5, p6, p7, p8)
 
+    def plotAirplane(self, pt1=None,
+                     R=None, vU=None, vE=None,
+                     scale=1., **params):
+        p0, p1, p2, p3, p4, p5, p6, p7, p8 = \
+            self.getAirplane(pt1, R, vU, vE, scale, **params)
         self.plotLine(p0, p1, **params)
         self.plotLine(p0, p2, **params)
         self.plotLine(p0, p3, **params)

@@ -128,7 +128,7 @@ class testPlot(PlotGL):
                 self.plotPlane(pt, R=R, w=w, h=h, color=self.Corange)
 
                 vN = R.dot(self.vZ)
-                self.plotPlane(pt, vN=vN, w=w, h=h, color=self.Cwhite)
+                self.plotPlane(pt, vN=vN, w=w, h=h, color=self.Clightgray)
 
         # Test plotCam
         if True:
@@ -136,13 +136,13 @@ class testPlot(PlotGL):
                 pt = self.pointCam[i]
                 R = self.rotationCam[i]
                 w = self.wCam[i]
-                h = self.hCam
-                self.plotCam(pt, R=R, w=w, h=h, camScale=2, color=self.Corange)
+                h = self.hCam[i]
+                self.plotCam(pt, R=R, camSizeW=w, camSizeH=h, camScale=2, color=self.Corange)
 
                 pt2 = pt + 0.1 * self.vX
                 vU = R.dot(-self.vY)
                 vE = R.dot(self.vZ)
-                self.plotCam(pt2, vU=vU, vE=vE, w=w, h=h, camScale=2, color=self.Cwhite)
+                self.plotCam(pt2, vU=vU, vE=vE, camSizeW=w, camSizeH=h, camScale=2, color=self.Clightgray)
 
         # Test plotAirplane
         if True:
@@ -155,7 +155,8 @@ class testPlot(PlotGL):
                 pt2 = pt + 0.1 * self.vX
                 vU = R.dot(-self.vY)
                 vE = R.dot(self.vZ)
-                self.plotAirplane(pt2, vU=vU, vE=vE, scale=scale, color=self.Cwhite)
+                self.plotAirplane(pt2, vU=vU, vE=vE, scale=scale, color=self.Clightgray)
+
 
 if __name__ == "__main__":
     with testPlot() as p:

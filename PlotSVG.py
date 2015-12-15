@@ -50,10 +50,8 @@ class PlotSVG(Plot):
         c2 = params.get('color') is None
         if c1 and c2:
             params.update({'stroke': self.Cblack})
-            params.update({'fill': self.Cblack})
         elif c1 and not c2:
             params.update({'stroke': params.get('color')})
-            params.update({'fill': params.get('color')})
 
         params = super(PlotSVG, self).setDefaultParamsPoint(**params)
         del params['color']
@@ -61,12 +59,13 @@ class PlotSVG(Plot):
         if params.get('stroke_width') is None:
             params.update({'stroke_width': params.get('point_size')})
             del params['point_size']
+        if params.get('point_size') is not None:
+            del params['point_size']
 
         if params.get('stroke_linecap') is None:
             params.update({'stroke_linecap': 'round'})
 
-        if params.get('fill') is None:
-            params.update({'fill': 'none'})
+        params.update({'fill': params.get('stroke')})
 
         return params
 
@@ -125,7 +124,7 @@ class PlotSVG(Plot):
     def plotPoint(self, pt1, **params):
         super(PlotSVG, self).plotPoint(pt1, **params)
         params = self.setDefaultParamsPoint(**params)
-        size = params.get('stroke_width')
+        size = params.get('stroke_width') / 2.
         p1 = self.project(pt1)
         self.add(self.dwg.circle(p1, size, **params))
 
@@ -136,17 +135,22 @@ class PlotSVG(Plot):
         self.add(self.dwg.line(pt1_, pt2_, **params))
 
     def plotArrow(self, pt1, pt2, **params):
-        params = self.setDefaultParamsArrow(**params)
         numSegments = 32
+
+        params = self.setDefaultParamsArrow(**params)
         headSize = params.get('head_size')
         del params['head_size']
 
+        pt1_ = self.project(pt1)
         pt2_ = self.project(pt2)
-        self.plotLine(pt1, pt2, **params)
+
+        g = self.dwg.g()
+        g.add(self.dwg.line(pt1_, pt2_, **params))
 
         # Draw arrow head
         params.update({'stroke_dasharray': 'none'})
         params.update({'fill': params.get('stroke')})
+        params.update({'style': 'stroke-linejoin:round'})
         lineVec = pt2 - pt1
         lenVec = np.linalg.norm(lineVec)
         r = headSize / 2. * lenVec
@@ -162,7 +166,111 @@ class PlotSVG(Plot):
             pB = r * np.array([[np.cos(angB)], [np.sin(angB)], [0]])
             pA_ = self.project(pt3 + m.dot(pA))
             pB_ = self.project(pt3 + m.dot(pB))
-            self.add(self.dwg.polygon([pt2_, pA_, pB_], **params))
+            g.add(self.dwg.polygon([pt2_, pA_, pB_], **params))
+        self.add(g)
+
+    def plotPlane(self, pt1=None,
+                  R=None, vN=None,
+                  w=1, h=1, **params):
+        p1, p2, p3, p4 = \
+            self.genPlane(pt1, R, vN, w, h, **params)
+
+        p1_ = self.project(p1)
+        p2_ = self.project(p2)
+        p3_ = self.project(p3)
+        p4_ = self.project(p4)
+
+        g = self.dwg.g()
+        params = self.setDefaultParamsLine(**params)
+        g.add(self.dwg.line(p1_, p2_, **params))
+        g.add(self.dwg.line(p2_, p3_, **params))
+        g.add(self.dwg.line(p3_, p4_, **params))
+        g.add(self.dwg.line(p4_, p1_, **params))
+        self.add(g)
+
+    def plotCam(self, pt1=None,
+                R=None, vU=None, vE=None,
+                camSizeH=0.024,
+                camSizeW=0.036,
+                camF=0.035,
+                camScale=10,
+                **params):
+        p0, p1, p2, p3, p4 = \
+            self.genCam(pt1, R, vU, vE, camSizeH, camSizeW, camF, camScale, **params)
+        p0_ = self.project(p0)
+        p1_ = self.project(p1)
+        p2_ = self.project(p2)
+        p3_ = self.project(p3)
+        p4_ = self.project(p4)
+
+        g = self.dwg.g()
+        params = self.setDefaultParamsLine(**params)
+        g.add(self.dwg.line(p0_, p1_, **params))
+        g.add(self.dwg.line(p0_, p2_, **params))
+        g.add(self.dwg.line(p0_, p3_, **params))
+        g.add(self.dwg.line(p0_, p4_, **params))
+
+        g.add(self.dwg.line(p1_, p2_, **params))
+        g.add(self.dwg.line(p2_, p3_, **params))
+        g.add(self.dwg.line(p3_, p4_, **params))
+        g.add(self.dwg.line(p4_, p1_, **params))
+
+        params = self.setDefaultParamsPoint(**params)
+        size = params.get('stroke_width')
+        params.update({'stroke': self.Cred})
+        params.update({'fill': self.Cred})
+        g.add(self.dwg.circle(p1_, size, **params))
+        params.update({'stroke': self.Cgreen})
+        params.update({'fill': self.Cgreen})
+        g.add(self.dwg.circle(p2_, size, **params))
+        self.add(g)
+
+    def plotAirplane(self, pt1=None,
+                     R=None, vU=None, vE=None,
+                     scale=1., **params):
+        p0, p1, p2, p3, p4, p5, p6, p7, p8 = \
+            self.getAirplane(pt1, R, vU, vE, scale, **params)
+        p0_ = self.project(p0)
+        p1_ = self.project(p1)
+        p2_ = self.project(p2)
+        p3_ = self.project(p3)
+        p4_ = self.project(p4)
+        p5_ = self.project(p5)
+        p6_ = self.project(p6)
+        p7_ = self.project(p7)
+        p8_ = self.project(p8)
+
+        g = self.dwg.g()
+        params = self.setDefaultParamsLine(**params)
+        g.add(self.dwg.line(p0_, p1_, **params))
+        g.add(self.dwg.line(p0_, p2_, **params))
+        g.add(self.dwg.line(p0_, p3_, **params))
+        g.add(self.dwg.line(p1_, p2_, **params))
+        g.add(self.dwg.line(p2_, p3_, **params))
+
+        g.add(self.dwg.line(p2_, p4_, **params))
+
+        g.add(self.dwg.line(p4_, p5_, **params))
+        g.add(self.dwg.line(p4_, p6_, **params))
+        g.add(self.dwg.line(p4_, p7_, **params))
+        g.add(self.dwg.line(p5_, p6_, **params))
+        g.add(self.dwg.line(p6_, p7_, **params))
+
+        g.add(self.dwg.line(p4_, p8_, **params))
+        g.add(self.dwg.line(p6_, p8_, **params))
+
+        params = self.setDefaultParamsPoint(**params)
+        size = params.get('stroke_width')
+        params.update({'stroke': self.Cred})
+        params.update({'fill': self.Cred})
+        g.add(self.dwg.circle(p1_, size, **params))
+        params.update({'stroke': self.Cgreen})
+        params.update({'fill': self.Cgreen})
+        g.add(self.dwg.circle(p3_, size, **params))
+        params.update({'stroke': self.Cwhite})
+        params.update({'fill': self.Cwhite})
+        g.add(self.dwg.circle(p8_, size, **params))
+        self.add(g)
 
     def show(self):
         self.draw()
