@@ -180,7 +180,7 @@ class Plot(object):
         params.update({'color': self.Cgreen})
         self.plotPoint(p2, **params)
 
-    def getAirplane(self, pt1, R, vU, vE, scale, **params):
+    def genAirplane(self, pt1, R, vU, vE, scale, **params):
         if pt1 is None:
             pt1 = self.pO
         vA = self.vX
@@ -215,7 +215,7 @@ class Plot(object):
                      R=None, vU=None, vE=None,
                      scale=1., **params):
         p0, p1, p2, p3, p4, p5, p6, p7, p8 = \
-            self.getAirplane(pt1, R, vU, vE, scale, **params)
+            self.genAirplane(pt1, R, vU, vE, scale, **params)
         self.plotLine(p0, p1, **params)
         self.plotLine(p0, p2, **params)
         self.plotLine(p0, p3, **params)
