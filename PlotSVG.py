@@ -229,7 +229,7 @@ class PlotSVG(Plot):
                      R=None, vU=None, vE=None,
                      scale=1., **params):
         p0, p1, p2, p3, p4, p5, p6, p7, p8 = \
-            self.getAirplane(pt1, R, vU, vE, scale, **params)
+            self.genAirplane(pt1, R, vU, vE, scale, **params)
         p0_ = self.project(p0)
         p1_ = self.project(p1)
         p2_ = self.project(p2)
@@ -270,6 +270,23 @@ class PlotSVG(Plot):
         params.update({'stroke': self.Cwhite})
         params.update({'fill': self.Cwhite})
         g.add(self.dwg.circle(p8_, size, **params))
+        self.add(g)
+
+    def plotCircle(self, pt1=None, r=1, R=None, vN=None, numSegments=64, isDash=False, **params):
+        if pt1 is None:
+            pt1 = np.copy(self.pO)
+        pts = self.genCircle(pt1=pt1, r=r, R=R, vN=vN, numSegments=numSegments)
+
+        params = self.setDefaultParamsLine(**params)
+
+        g = self.dwg.g()
+        for i in range(numSegments):
+            p1_ = self.project(pts[:, i:i + 1])
+            if i == numSegments - 1:
+                p2_ = self.project(pts[:, 0:1])
+            else:
+                p2_ = self.project(pts[:, i + 1:i + 2])
+            g.add(self.dwg.line(p1_, p2_, **params))
         self.add(g)
 
     def show(self):

@@ -85,6 +85,17 @@ class testPlot(PlotGL):
         self.scaleAirplane = \
             [np.random.uniform(0.05, 0.2, 1)[0] for i in range(self.N)]
 
+        self.pointCircle = \
+            [np.array([np.random.uniform(1.0, 2.0, 1),
+                       np.random.uniform(-0.5, 0.5, 1),
+                       np.random.uniform(-0.5, 0.5, 1)])
+                for i in range(self.N)]
+        self.rCircle = \
+            [np.random.uniform(0.01, 0.2, 1)[0] for i in range(self.N)]
+        self.rotationCircle = \
+            [self.geo.getRMatrixEulerAngles(0, 0, phis[i]).dot(self.geo.getRMatrixEulerAngles(0, thetas[i], 0))
+                for i in range(self.N)]
+
     def draw(self):
         # Test plotPoint
         if True:
@@ -156,6 +167,20 @@ class testPlot(PlotGL):
                 vU = R.dot(-self.vY)
                 vE = R.dot(self.vZ)
                 self.plotAirplane(pt2, vU=vU, vE=vE, scale=scale, color=self.Clightgray)
+
+        # Test plotCircle
+        if True:
+            for i in range(self.N):
+                pt = self.pointCircle[i]
+                r = self.rCircle[i]
+                R = self.rotationCircle[i]
+                vN = R.dot(self.vZ)
+
+                self.plotCircle(pt, r=r, R=R, color=self.Corange)
+
+                pt2 = pt + 0.1 * self.vX
+                vN = R.dot(self.vZ)
+                self.plotCircle(pt2, r=r, vN=vN, color=self.Clightgray)
 
 
 if __name__ == "__main__":
