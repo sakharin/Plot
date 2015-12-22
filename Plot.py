@@ -241,6 +241,8 @@ class Plot(object):
         self.plotPoint(p8, **params)
 
     def genCircle(self, pt1, r, R, vN, numSegments):
+        if pt1 is None:
+            pt1 = np.copy(self.pO)
         if vN is None:
             vN = np.copy(self.vZ)
         m = None
@@ -258,8 +260,6 @@ class Plot(object):
         return pts
 
     def plotCircle(self, pt1=None, r=1, R=None, vN=None, numSegments=64, isDash=False, **params):
-        if pt1 is None:
-            pt1 = np.copy(self.pO)
         pts = self.genCircle(pt1=pt1, r=r, R=R, vN=vN, numSegments=numSegments)
         for i in range(numSegments):
             p1 = pts[:, i:i + 1]
@@ -267,6 +267,41 @@ class Plot(object):
                 p2 = pts[:, 0:1]
             else:
                 p2 = pts[:, i + 1:i + 2]
+            self.plotLine(p1, p2, **params)
+
+    def genArc(self, pt1, r, vStart, vEnd, numSegments):
+        if pt1 is None:
+            pt1 = np.copy(self.pO)
+        if vStart is None:
+            vStart = np.copy(self.vZ)
+        if vEnd is None:
+            vEnd = np.copy(self.vX)
+
+        vN = np.cross(vStart[:, 0], vEnd[:, 0]).reshape((3, 1))
+        vN = vN / self.geo.normVec(vN)
+
+        theta, phi = self.geo.vec2Angs(vN)
+        m = self.geo.getRMatrixEulerAngles(0, 0, phi)
+        m = m.dot(self.geo.getRMatrixEulerAngles(0, theta, 0))
+
+        mInv = np.linalg.inv(m)
+        _, phi1 = self.geo.vec2Angs(mInv.dot(vStart))
+        _, phi2 = self.geo.vec2Angs(mInv.dot(vEnd))
+        angDiff = self.geo.angleDiff(phi2, phi1)
+
+        pts = np.zeros((3, numSegments + 1))
+        for i in range(numSegments + 1):
+            ang1 = i * angDiff / numSegments + phi1
+            p1 = pt1 + m.dot(r * np.array([[np.cos(ang1)], [np.sin(ang1)], [0]]))
+            pts[:, i:i + 1] = p1[:, :]
+        return pts
+
+    def plotArc(self, pt1=None, r=1, vStart=None, vEnd=None, numSegments=64, **params):
+        pts = self.genArc(pt1=pt1, r=r, vStart=vStart, vEnd=vEnd, numSegments=numSegments)
+
+        for i in range(numSegments):
+            p1 = pts[:, i:i + 1]
+            p2 = pts[:, i + 1:i + 2]
             self.plotLine(p1, p2, **params)
 
     def draw(self):

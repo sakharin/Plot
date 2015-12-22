@@ -42,7 +42,7 @@ class testPlot(PlotGL):
                 for i in range(self.N)]
         self.scaleAxis = \
             [np.random.uniform(0.01, 0.2, 1)[0] for i in range(self.N)]
-        thetas = np.random.uniform(0, np.pi, self.N)
+        thetas = np.random.uniform(0, np.pi, 2 * self.N)
         phis = np.random.uniform(0, 2 * np.pi, 2 * self.N)
         self.rotationAxis = \
             [self.geo.getRMatrixEulerAngles(0, 0, phis[i]).dot(self.geo.getRMatrixEulerAngles(0, thetas[i], 0))
@@ -95,6 +95,17 @@ class testPlot(PlotGL):
         self.rotationCircle = \
             [self.geo.getRMatrixEulerAngles(0, 0, phis[i]).dot(self.geo.getRMatrixEulerAngles(0, thetas[i], 0))
                 for i in range(self.N)]
+
+        self.pointArc = \
+            [np.array([np.random.uniform(-2.0, -1.0, 1),
+                       np.random.uniform(0.5, 1.5, 1),
+                       np.random.uniform(-0.5, 0.5, 1)])
+                for i in range(self.N)]
+        self.rArc = \
+            [np.random.uniform(0.05, 0.2, 1)[0] for i in range(self.N)]
+        self.rotationArc = \
+            [self.geo.getRMatrixEulerAngles(0, 0, phis[i]).dot(self.geo.getRMatrixEulerAngles(0, thetas[i], 0))
+                for i in range(self.N * 2)]
 
     def draw(self):
         # Test plotPoint
@@ -175,12 +186,25 @@ class testPlot(PlotGL):
                 r = self.rCircle[i]
                 R = self.rotationCircle[i]
                 vN = R.dot(self.vZ)
-
                 self.plotCircle(pt, r=r, R=R, color=self.Corange)
 
                 pt2 = pt + 0.1 * self.vX
                 vN = R.dot(self.vZ)
                 self.plotCircle(pt2, r=r, vN=vN, color=self.Clightgray)
+
+        # Test plotArc
+        if True:
+            for i in range(self.N):
+                pt = self.pointArc[i]
+                r = self.rArc[i]
+                R1 = self.rotationArc[i * 2]
+                R2 = self.rotationArc[i * 2 + 1]
+                vS = R1.dot(self.vZ)
+                vE = R2.dot(self.vZ)
+
+                self.plotArrow(pt, pt + 1.5 * r * vS, color=self.Cred)
+                self.plotArrow(pt, pt + 1.5 * r * vE, color=self.Cblue)
+                self.plotArc(pt, r=r, vStart=vS, vEnd=vE, color=self.Clightgray)
 
 
 if __name__ == "__main__":
