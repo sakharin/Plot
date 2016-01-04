@@ -193,6 +193,9 @@ class Geometry(object):
         elif len(shape) == 3:
             return np.sqrt((vec ** 2).sum(axis=2))
 
+    def normalizedVec(self, vec):
+        return vec / self.normVec(vec)
+
     def twoPts2Vec(self, P1, P2):
         sP1 = P1.shape
         sP2 = P2.shape
