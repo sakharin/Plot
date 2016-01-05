@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 import numpy as np
+import random
+import string
 
 from Color import ColorSet01
 from Geometry import Geometry
@@ -59,6 +61,19 @@ class Plot(object):
             params.update({'head_size': 0.05})
 
         return params
+
+    def setDefaultParamsText(self, **params):
+        if params.get('color') is None:
+            params.update({'color': self.Cwhite})
+
+        if params.get('bgColor') is None:
+            params.update({'bGColor': self.Cblack})
+
+        if params.get('id') is None:
+            size = 6
+            chars = string.ascii_uppercase + string.digits
+            id = ''.join(random.choice(chars) for _ in range(size))
+            params.update({'id': id})
 
     def plotPoint(self, pt1, **params):
         pass
