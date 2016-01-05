@@ -107,6 +107,14 @@ class testPlot(PlotGL):
             [self.geo.getRMatrixEulerAngles(0, 0, phis[i]).dot(self.geo.getRMatrixEulerAngles(0, thetas[i], 0))
                 for i in range(self.N * 2)]
 
+        self.pointSphere = \
+            [np.array([np.random.uniform(-1.0, 0.0, 1),
+                       np.random.uniform(0.5, 1.5, 1),
+                       np.random.uniform(-0.5, 0.5, 1)])
+                for i in range(self.N)]
+        self.rSphere = \
+            [np.random.uniform(0.01, 0.2, 1)[0] for i in range(self.N)]
+
     def draw(self):
         # Test plotPoint
         if True:
@@ -206,6 +214,12 @@ class testPlot(PlotGL):
                 self.plotArrow(pt, pt + 1.5 * r * vE, color=self.Cblue)
                 self.plotArc(pt, r=r, vStart=vS, vEnd=vE, color=self.Clightgray)
 
+        # Test plotSphere
+        if True:
+            for i in range(self.N):
+                pt = self.pointSphere[i]
+                r = self.rSphere[i]
+                self.plotSphere(pt, r=r, color=self.Corange)
 
 if __name__ == "__main__":
     with testPlot() as p:

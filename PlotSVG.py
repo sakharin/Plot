@@ -73,7 +73,7 @@ class PlotSVG(Plot):
         c1 = params.get('stroke') is None
         c2 = params.get('color') is None
         if c1 and c2:
-            params.update({'stroke': self.black})
+            params.update({'stroke': self.Cblack})
         elif c1 and not c2:
             params.update({'stroke': params.get('color')})
             del params['color']
@@ -180,8 +180,9 @@ class PlotSVG(Plot):
         p3_ = self.project(p3)
         p4_ = self.project(p4)
 
-        g = self.dwg.g()
         params = self.setDefaultParamsLine(**params)
+
+        g = self.dwg.g()
         g.add(self.dwg.line(p1_, p2_, **params))
         g.add(self.dwg.line(p2_, p3_, **params))
         g.add(self.dwg.line(p3_, p4_, **params))
@@ -203,8 +204,9 @@ class PlotSVG(Plot):
         p3_ = self.project(p3)
         p4_ = self.project(p4)
 
-        g = self.dwg.g()
         params = self.setDefaultParamsLine(**params)
+
+        g = self.dwg.g()
         g.add(self.dwg.line(p0_, p1_, **params))
         g.add(self.dwg.line(p0_, p2_, **params))
         g.add(self.dwg.line(p0_, p3_, **params))
@@ -240,8 +242,9 @@ class PlotSVG(Plot):
         p7_ = self.project(p7)
         p8_ = self.project(p8)
 
-        g = self.dwg.g()
         params = self.setDefaultParamsLine(**params)
+
+        g = self.dwg.g()
         g.add(self.dwg.line(p0_, p1_, **params))
         g.add(self.dwg.line(p0_, p2_, **params))
         g.add(self.dwg.line(p0_, p3_, **params))
@@ -272,12 +275,11 @@ class PlotSVG(Plot):
         g.add(self.dwg.circle(p8_, size, **params))
         self.add(g)
 
-    def plotCircle(self, pt1=None, r=1, R=None, vN=None, numSegments=64, isDash=False, **params):
+    def plotCircle_(self, g, pt1=None, r=1, R=None, vN=None, numSegments=64, isDash=False, **params):
         pts = self.genCircle(pt1=pt1, r=r, R=R, vN=vN, numSegments=numSegments)
 
         params = self.setDefaultParamsLine(**params)
 
-        g = self.dwg.g()
         for i in range(numSegments):
             p1_ = self.project(pts[:, i:i + 1])
             if i == numSegments - 1:
@@ -285,6 +287,10 @@ class PlotSVG(Plot):
             else:
                 p2_ = self.project(pts[:, i + 1:i + 2])
             g.add(self.dwg.line(p1_, p2_, **params))
+
+    def plotCircle(self, pt1=None, r=1, R=None, vN=None, numSegments=64, isDash=False, **params):
+        g = self.dwg.g()
+        self.plotCircle_(g, pt1=pt1, r=r, R=R, vN=vN, numSegments=numSegments, **params)
         self.add(g)
 
     def plotArc(self, pt1=None, r=1, vStart=None, vEnd=None, numSegments=64, **params):
@@ -297,6 +303,26 @@ class PlotSVG(Plot):
             p1_ = self.project(pts[:, i:i + 1])
             p2_ = self.project(pts[:, i + 1:i + 2])
             g.add(self.dwg.line(p1_, p2_, **params))
+        self.add(g)
+
+    def plotSphere(self, pt1=None, r=1, numSegments=(16, 16), **params):
+        if pt1 is None:
+            pt1 = np.copy(self.pO)
+        g = self.dwg.g()
+        vX = r * np.copy(self.vX)
+        for i in range(numSegments[0]):
+            y = 2. * r * (i + 1) / (numSegments[0] + 1) - r
+            pos = np.array([[0],
+                            [y],
+                            [0]])
+            rLocal = np.sqrt(r ** 2 - y ** 2)
+            self.plotCircle_(g, pt1 + pos, rLocal, vN=self.vY, **params)
+
+        for i in range(numSegments[1]):
+            ang = np.pi * i / numSegments[1]
+            m = self.geo.getRMatrixEulerAngles(0, ang, 0)
+            vN = m.dot(vX)
+            self.plotCircle_(g, pt1, r, vN=vN, **params)
         self.add(g)
 
     def show(self):

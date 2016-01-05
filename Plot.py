@@ -304,6 +304,24 @@ class Plot(object):
             p2 = pts[:, i + 1:i + 2]
             self.plotLine(p1, p2, **params)
 
+    def plotSphere(self, pt1=None, r=1, numSegments=(16, 16), **params):
+        if pt1 is None:
+            pt1 = np.copy(self.pO)
+        vX = r * np.copy(self.vX)
+        for i in range(numSegments[0]):
+            y = 2. * r * (i + 1) / (numSegments[0] + 1) - r
+            pos = np.array([[0],
+                            [y],
+                            [0]])
+            rLocal = np.sqrt(r ** 2 - y ** 2)
+            self.plotCircle(pt1 + pos, rLocal, vN=self.vY, **params)
+
+        for i in range(numSegments[1]):
+            ang = np.pi * i / numSegments[1]
+            m = self.geo.getRMatrixEulerAngles(0, ang, 0)
+            vN = m.dot(vX)
+            self.plotCircle(pt1, r, vN=vN, **params)
+
     def draw(self):
         pass
 
