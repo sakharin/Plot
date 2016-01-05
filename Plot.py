@@ -1,381 +1,344 @@
 #!/usr/bin/env python
-import cv2
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
-from matplotlib.patches import FancyArrowPatch
-from mpl_toolkits.mplot3d import proj3d
+import random
+import string
 
+from Color import ColorSet01
 from Geometry import Geometry
-
-
-class Arrow3D(FancyArrowPatch):
-    #http://stackoverflow.com/questions/11140163/python-matplotlib-plotting-a-3d-cube-a-sphere-and-a-vector
-    def __init__(self, pt1, pt2, *args, **kwargs):
-        FancyArrowPatch.__init__(self, (0, 0), (0, 0), *args, **kwargs)
-        x = [pt1[0, 0], pt2[0, 0]]
-        y = [pt1[1, 0], pt2[1, 0]]
-        z = [pt1[2, 0], pt2[2, 0]]
-        self._verts3d = x, y, z
-
-    def draw(self, renderer):
-        xs3d, ys3d, zs3d = self._verts3d
-        xs, ys, zs = proj3d.proj_transform(xs3d, ys3d, zs3d, renderer.M)
-        self.set_positions((xs[0], ys[0]), (xs[1], ys[1]))
-        FancyArrowPatch.draw(self, renderer)
 
 
 class Plot(object):
     def __init__(self):
-        self.fig = plt.figure()
-        plt.ioff()
-        self.ax = self.fig.add_subplot(111, projection='3d')
-
-        # For plotting scale
-        self.xmx, self.xmn = -1e6, 1e6
-        self.ymx, self.ymn = -1e6, 1e6
-        self.zmx, self.zmn = -1e6, 1e6
-
         self.geo = Geometry()
+        self.colors = ColorSet01().colors
+        self.setColors()
 
-    def show(self, elev=0., azim=0.):
-        self.ax.set_xlabel("x")
-        self.ax.set_ylabel("y")
-        self.ax.set_zlabel("z")
-        self.ax.view_init(elev=elev, azim=azim)
+        self.pO = np.array([[0], [0], [0]])
+        self.vX = np.array([[1], [0], [0]])
+        self.vY = np.array([[0], [1], [0]])
+        self.vZ = np.array([[0], [0], [1]])
 
-        # calculate scale
-        rangeX = self.xmx - self.xmn
-        rangeY = self.ymx - self.ymn
-        rangeZ = self.zmx - self.zmn
+    def __enter__(self):
+        return self
 
-        maxRange = max(rangeX, rangeY, rangeZ)
-        md = maxRange / 2.
-        cx = (self.xmx + self.xmn) / 2.
-        cy = (self.ymx + self.ymn) / 2.
-        cz = (self.zmx + self.zmn) / 2.
+    def __exit__(self, type, value, traceback):
+        pass
 
-        self.ax.auto_scale_xyz([cx - md, cx + md],
-                               [cy - md, cy + md],
-                               [cz - md, cz + md])
-        plt.show()
+    def setColors(self):
+        for c in self.colors:
+            setattr(self, 'C' + c['name'],
+                    self.cvtColor(c['R'], c['G'], c['B']))
 
-    def updateRegion(self, pt):
-        x, y, z = pt[:3, 0]
-        self.xmn = min(self.xmn, x)
-        self.xmx = max(self.xmx, x)
+    def cvtColor(self, r, g, b, base=255):
+        raise NotImplemented("You should implemented this.")
 
-        self.ymn = min(self.ymn, y)
-        self.ymx = max(self.ymx, y)
+    def setDefaultParamsPoint(self, **params):
+        if params.get('color') is None:
+            params.update({'color': self.Cblack})
 
-        self.zmn = min(self.zmn, z)
-        self.zmx = max(self.zmx, z)
+        if params.get('point_size') is None:
+            params.update({'point_size': 3})
 
-    def plotPoint(self, pt1, color='.r'):
-        self.updateRegion(pt1)
-        self.ax.plot([pt1[0, 0]],
-                     [pt1[1, 0]],
-                     [pt1[2, 0]], color)
+        return params
 
-    def plotLine(self, pt1, pt2, color='-r'):
-        self.updateRegion(pt1)
-        self.updateRegion(pt2)
-        self.ax.plot([pt1[0, 0], pt2[0, 0]],
-                     [pt1[1, 0], pt2[1, 0]],
-                     [pt1[2, 0], pt2[2, 0]], color)
+    def setDefaultParamsLine(self, **params):
+        if params.get('color') is None:
+            params.update({'color': self.Cblack})
 
-    def plotPlane(self, P, color='-r'):
-        f = lambda a, b: -(a * P[0, 0] + b * P[1, 0] + P[3, 0]) / P[2, 0]
-        pt1 = np.matrix(np.array([[-0.5, 0.5, f(-0.5, 0.5), 1.0]]).T)
-        pt2 = np.matrix(np.array([[0.5, 0.5, f(0.5, 0.5), 1.0]]).T)
-        pt3 = np.matrix(np.array([[0.5, -0.5, f(0.5, -0.5), 1.0]]).T)
-        pt4 = np.matrix(np.array([[-0.5, -0.5, f(-0.5, -0.5), 1.0]]).T)
-        self.plotLine(pt1, pt2, color)
-        self.plotLine(pt2, pt3, color)
-        self.plotLine(pt3, pt4, color)
-        self.plotLine(pt4, pt1, color)
+        if params.get('line_width') is None:
+            params.update({'line_width': 1})
 
-    def plotBox(self, pt1, pt2, pt3=None, pt4=None, pt5=None, pt6=None, pt7=None, pt8=None, color='-r'):
-        if pt3 is None:
-            x1, y1, z1 = pt1[:, 0]
-            x2, y2, z2 = pt2[:, 0]
+        return params
 
-            pt1 = np.array([[x1, y1, z1, 1]]).T
-            pt2 = np.array([[x1, y2, z1, 1]]).T
-            pt3 = np.array([[x2, y2, z1, 1]]).T
-            pt4 = np.array([[x2, y1, z1, 1]]).T
+    def setDefaultParamsArrow(self, **params):
+        if params.get('color') is None:
+            params.update({'color': self.Cblack})
 
-            pt5 = np.array([[x1, y1, z2, 1]]).T
-            pt6 = np.array([[x1, y2, z2, 1]]).T
-            pt7 = np.array([[x2, y2, z2, 1]]).T
-            pt8 = np.array([[x2, y1, z2, 1]]).T
-        self.plotLine(pt1, pt2, color)
-        self.plotLine(pt2, pt3, color)
-        self.plotLine(pt3, pt4, color)
-        self.plotLine(pt4, pt1, color)
+        if params.get('line_width') is None:
+            params.update({'line_width': 1})
 
-        self.plotLine(pt5, pt6, color)
-        self.plotLine(pt6, pt7, color)
-        self.plotLine(pt7, pt8, color)
-        self.plotLine(pt8, pt5, color)
+        if params.get('head_size') is None:
+            params.update({'head_size': 0.05})
 
-        self.plotLine(pt1, pt5, color)
-        self.plotLine(pt2, pt6, color)
-        self.plotLine(pt3, pt7, color)
-        self.plotLine(pt4, pt8, color)
+        return params
 
-    def plotCam(self, param0, param1=None, param2=None, param3=None,
-                param4=None, color='-k'):
-        msg = "usage:\n" \
-            "    :plotCam(T, [A[, (w, h)[, s]]][, color])\n" \
-            "     T         : 3x3, 3x4, 4x4 transformation matrix\n" \
-            "     A         : 3x3 intrinsic parameter\n" \
-            "     (w, h)    : width and height of an image in pixel\n" \
-            "     s         : camera scale\n" \
-            "     color     : matplotlib color\n" \
-            "\n" \
-            "    :plotCam(pt0, pt1, pt2, pt3, pt4[, color])\n" \
-            "     pt1 - pt5 : 3x1, 4x1 points\n" \
-            "     color     : matplotlib color\n"
-        if not isinstance(param0, np.ndarray):
-            raise TypeError(msg)
-        if len(param0.shape) != 2:
-            raise TypeError(msg)
+    def setDefaultParamsText(self, **params):
+        if params.get('color') is None:
+            params.update({'color': self.Cwhite})
 
-        M, N = param0.shape
-        if M != 3 and M != 4:
-            raise TypeError(msg)
+        if params.get('bgColor') is None:
+            params.update({'bGColor': self.Cblack})
 
-        if N == 1:
-            # Check other points
-            cond2 = not isinstance(param1, np.ndarray)
-            cond3 = not isinstance(param2, np.ndarray)
-            cond4 = not isinstance(param3, np.ndarray)
-            cond5 = not isinstance(param4, np.ndarray)
-            if cond2 or cond3 or cond4 or cond5:
-                raise TypeError(msg)
+        if params.get('id') is None:
+            size = 6
+            chars = string.ascii_uppercase + string.digits
+            id = ''.join(random.choice(chars) for _ in range(size))
+            params.update({'id': id})
 
-            cond2 = len(param1.shape) != 2
-            cond3 = len(param2.shape) != 2
-            cond4 = len(param3.shape) != 2
-            cond5 = len(param4.shape) != 2
-            if cond2 or cond3 or cond4 or cond5:
-                raise TypeError(msg)
+    def plotPoint(self, pt1, **params):
+        pass
 
-            M2, N2 = param1.shape
-            M3, N3 = param2.shape
-            M4, N4 = param3.shape
-            M5, N5 = param4.shape
-            cond2 = M != M2 or N != N2
-            cond3 = M != M3 or N != N3
-            cond4 = M != M4 or N != N4
-            cond5 = M != M5 or N != N5
-            if cond2 or cond3 or cond4 or cond5:
-                raise TypeError(msg)
+    def plotLine(self, pt1, pt2, **params):
+        pass
 
-            pt0 = param0
-            pt1 = param1
-            pt2 = param2
-            pt3 = param3
-            pt4 = param4
+    def plotArrow(self, pt1, pt2, **params):
+        pass
 
-        if N >= 3 and N <= 4:
-            # Plot using transformation matrix
-            fx, fy = 1., 1.
-            cx, cy = 0.5, 0.5
-            w, h = 1., 1.
-            d = 1
+    def genAxis(self, pt1, scale, R, **params):
+        if pt1 is None:
+            pt1 = self.pO
 
-            if param1 is not None:
-                if not isinstance(param1, np.ndarray):
-                    raise TypeError(msg)
-                if len(param1.shape) != 2:
-                    raise TypeError(msg)
-                if param1.shape[0] != 3 or param1.shape[1] != 3:
-                    raise TypeError(msg)
-                fx = param1[0, 0]
-                fy = param1[1, 1]
-                cx, cy = param1[:2, 2]
-
-            if param2 is not None:
-                if not isinstance(param2, tuple):
-                    raise TypeError(msg)
-                if len(param2) != 2:
-                    raise TypeError(msg)
-                w, h = param2
-
-            if param3 is not None:
-                if not isinstance(param3, (int, float, long)):
-                    raise TypeError(msg)
-                d = param3
-
-            T = np.zeros((4, 4))
-            T[:M, :N] = param0[:, :]
-            T[3, 3] = 1
-
-            h1 = -cy * d / fy
-            w1 = -cx * d / fx
-            h2 = (h - cy) * d / fy
-            w2 = (w - cx) * d / fx
-
-            pt0 = T.dot(np.array([[0, 0, 0, 1]]).T)
-            pt1 = T.dot(np.array([[w1, h1, d, 1]]).T)
-            pt2 = T.dot(np.array([[w2, h1, d, 1]]).T)
-            pt3 = T.dot(np.array([[w1, h2, d, 1]]).T)
-            pt4 = T.dot(np.array([[w2, h2, d, 1]]).T)
-
-        # Plot using 5 pts
-        self.plotLine(pt0, pt1, color)
-        self.plotLine(pt0, pt2, color)
-        self.plotLine(pt0, pt3, color)
-        self.plotLine(pt0, pt4, color)
-
-        self.plotLine(pt1, pt2, color)
-        self.plotLine(pt1, pt3, color)
-        self.plotLine(pt2, pt4, color)
-        self.plotLine(pt3, pt4, color)
-
-        self.plotPoint(pt1, '.r')
-        self.plotPoint(pt2, '.g')
-
-    def plotAxis(self, R=None, scale=1.):
-        pt0 = np.matrix(np.array([[0., 0., 0., 1.]]).T)
-        ptx = np.matrix(np.array([[scale, 0., 0., 1.]]).T)
-        pty = np.matrix(np.array([[0., scale, 0., 1.]]).T)
-        ptz = np.matrix(np.array([[0., 0., scale, 1.]]).T)
-
+        vX_ = self.vX
+        vY_ = self.vY
+        vZ_ = self.vZ
         if R is not None:
-            pt0 = R * pt0
-            ptx = R * ptx
-            pty = R * pty
-            ptz = R * ptz
+            if R.shape[1] == 4:
+                self.pt1_ = R[:3, 3:4]
+            vX_ = R[:3, :3].dot(self.vX)
+            vY_ = R[:3, :3].dot(self.vY)
+            vZ_ = R[:3, :3].dot(self.vZ)
+        return (pt1, vX_, vY_, vZ_)
 
-        self.plotLine(pt0, ptx, '-r')
-        self.plotLine(pt0, pty, '-g')
-        self.plotLine(pt0, ptz, '-b')
+    def plotAxis(self, pt1=None, scale=1, R=None, **params):
+        pt1, vX_, vY_, vZ_ = \
+            self.genAxis(pt1, scale, R, **params)
+        params.update({'color': self.Cred})
+        self.plotArrow(pt1, pt1 + scale * vX_, **params)
+        params.update({'color': self.Cgreen})
+        self.plotArrow(pt1, pt1 + scale * vY_, **params)
+        params.update({'color': self.Cblue})
+        self.plotArrow(pt1, pt1 + scale * vZ_, **params)
 
-    def plotArrow(self, pt1, pt2, color='r'):
-        a = Arrow3D(pt1, pt2, mutation_scale=20, lw=1, arrowstyle="-|>", color=color)
-        self.ax.add_artist(a)
-        self.updateRegion(pt1)
-        self.updateRegion(pt2)
+    def genPlane(self, pt1, R, vN, w, h, **params):
+        if pt1 is None:
+            pt1 = self.pO
 
-    def plotRay(self, R, color='r', scale=1.):
-        pt1 = R[:3, :]
-        T = self.geo.getRMatrixEulerAngles(0, 0, R[4, 0])
-        T = T.dot(self.geo.getRMatrixEulerAngles(0, R[3, 0], 0))
-        pt2 = T.dot(np.array([[0, 0, scale]]).T) + pt1
-        self.updateRegion(pt1)
-        self.updateRegion(pt2)
-        self.plotArrow(pt1, pt2, color)
+        vA = self.vX
+        vB = self.vY
+        if R is not None:
+            R = self.geo.checkRMatrix(R)
+            vA = R.dot(self.vX)
+            vB = R.dot(self.vY)
+            vN = R.dot(self.vZ)
+        elif vN is not None:
+            # Find an orthogonal vector
+            vA, vB = self.geo.getOrthogonalVecs(vN)
+        else:
+            vN = self.vZ
 
-    def plotVec(self, vec, origin=None, color='r', scale=1.):
-        if origin is None:
-            origin = np.zeros((3, 1))
-        ray = self.geo.vec2Ray(vec, origin)
-        self.plotRay(ray, color, scale)
+        w2 = w / 2.
+        h2 = h / 2.
+        p1 = pt1 - w2 * vA - h2 * vB
+        p2 = pt1 + w2 * vA - h2 * vB
+        p3 = pt1 + w2 * vA + h2 * vB
+        p4 = pt1 - w2 * vA + h2 * vB
+        return (p1, p2, p3, p4)
 
-    def plotAirplane(self, R=None, scale=1.):
-        # plot an airplane centered at (0, 0, 0) heading to x direction
+    def plotPlane(self, pt1=None,
+                  R=None, vN=None,
+                  w=1, h=1, **params):
+        p1, p2, p3, p4 = \
+            self.genPlane(pt1, R, vN, w, h, **params)
+        self.plotLine(p1, p2, **params)
+        self.plotLine(p2, p3, **params)
+        self.plotLine(p3, p4, **params)
+        self.plotLine(p4, p1, **params)
 
-        # Left elevator tip
-        pt1 = np.matrix(np.array([[-1.0, 0.5, 0.0, 1.0]]).T)
-        # Tail
-        pt2 = np.matrix(np.array([[-1.0, 0.0, 0.0, 1.0]]).T)
-        # Right elevator tip
-        pt3 = np.matrix(np.array([[-1.0, -0.5, 0.0, 1.0]]).T)
+    def genCam(self, pt1, R, vU, vE,
+               camSizeH, camSizeW, camF, camScale,
+               **params):
+        if pt1 is None:
+            pt1 = self.pO
+        vA = self.vX
+        vB = self.vY
+        vC = self.vZ
+        if R is not None:
+            R = self.geo.checkRMatrix(R)
+            vA = R.dot(self.vX)
+            vB = R.dot(self.vY)
+            vC = R.dot(self.vZ)
+        if vU is not None and vE is not None:
+            vC = vE
+            vA = np.cross(vC.reshape(-1), vU.reshape(-1)).reshape((3, 1))
+            vB = np.cross(vC.reshape(-1), vA.reshape(-1)).reshape((3, 1))
+        camF = camF * camScale
+        w2 = camSizeW / 2. * camScale
+        h2 = camSizeH / 2. * camScale
+        p0 = pt1
+        p1 = pt1 - w2 * vA - h2 * vB + camF * vC
+        p2 = pt1 + w2 * vA - h2 * vB + camF * vC
+        p3 = pt1 + w2 * vA + h2 * vB + camF * vC
+        p4 = pt1 - w2 * vA + h2 * vB + camF * vC
+        return (p0, p1, p2, p3, p4)
 
-        # Front of elevator
-        pt4 = np.matrix(np.array([[-.5, 0.0, 0.0, 1.0]]).T)
+    def plotCam(self, pt1=None,
+                R=None, vU=None, vE=None,
+                camSizeH=0.024,
+                camSizeW=0.036,
+                camF=0.035,
+                camScale=10,
+                **params):
+        p0, p1, p2, p3, p4 = \
+            self.genCam(pt1, R, vU, vE, camSizeH, camSizeW, camF, camScale, **params)
+        self.plotLine(p0, p1, **params)
+        self.plotLine(p0, p2, **params)
+        self.plotLine(p0, p3, **params)
+        self.plotLine(p0, p4, **params)
 
-        # Rear of wing
-        pt5 = np.matrix(np.array([[0.0, 0.0, 0.0, 1.0]]).T)
+        self.plotLine(p1, p2, **params)
+        self.plotLine(p2, p3, **params)
+        self.plotLine(p3, p4, **params)
+        self.plotLine(p4, p1, **params)
 
-        # Right wing
-        pt6 = np.matrix(np.array([[0.0, 1.0, 0.0, 1.0]]).T)
+        params.update({'color': self.Cred})
+        self.plotPoint(p1, **params)
+        params.update({'color': self.Cgreen})
+        self.plotPoint(p2, **params)
 
-        # Left wing
-        pt7 = np.matrix(np.array([[0.0, -1.0, 0.0, 1.0]]).T)
+    def genAirplane(self, pt1, R, vU, vE, scale, **params):
+        if pt1 is None:
+            pt1 = self.pO
+        vA = self.vX
+        vB = self.vY
+        vC = self.vZ
+        if R is not None:
+            R = self.geo.checkRMatrix(R)
+            vA = R.dot(self.vX)
+            vB = R.dot(self.vY)
+            vC = R.dot(self.vZ)
+        if vU is not None and vE is not None:
+            vC = vE
+            vA = np.cross(vC.reshape(-1), vU.reshape(-1)).reshape((3, 1))
+            vB = np.cross(vC.reshape(-1), vA.reshape(-1)).reshape((3, 1))
 
-        pt8 = np.matrix(np.array([[1.0, 0.0, 0.0, 1.0]]).T)
+        vA = vA * scale
+        vB = vB * scale
+        vC = vC * scale
 
-        pt9 = np.matrix(np.array([[-1.0, 0.0, 0.5, 1.0]]).T)
+        p0 = pt1 + 0.0 * vA + 0.0 * vB + 1.0 * vC
+        p1 = pt1 - 1.0 * vA + 0.0 * vB + 0.0 * vC
+        p2 = pt1 + 0.0 * vA + 0.0 * vB + 0.0 * vC
+        p3 = pt1 + 1.0 * vA + 0.0 * vB + 0.0 * vC
+        p4 = pt1 + 0.0 * vA + 0.0 * vB - 0.5 * vC
+        p5 = pt1 - 0.5 * vA + 0.0 * vB - 1.0 * vC
+        p6 = pt1 + 0.0 * vA + 0.0 * vB - 1.0 * vC
+        p7 = pt1 + 0.5 * vA + 0.0 * vB - 1.0 * vC
+        p8 = pt1 + 0.0 * vA - 0.5 * vB - 1.0 * vC
+        return (p0, p1, p2, p3, p4, p5, p6, p7, p8)
 
-        if R is None:
-            R = np.eye(4)
-        pt1 = R * pt1
-        pt2 = R * pt2
-        pt3 = R * pt3
-        pt4 = R * pt4
-        pt5 = R * pt5
-        pt6 = R * pt6
-        pt7 = R * pt7
-        pt8 = R * pt8
-        pt9 = R * pt9
+    def plotAirplane(self, pt1=None,
+                     R=None, vU=None, vE=None,
+                     scale=1., **params):
+        p0, p1, p2, p3, p4, p5, p6, p7, p8 = \
+            self.genAirplane(pt1, R, vU, vE, scale, **params)
+        self.plotLine(p0, p1, **params)
+        self.plotLine(p0, p2, **params)
+        self.plotLine(p0, p3, **params)
+        self.plotLine(p1, p2, **params)
+        self.plotLine(p2, p3, **params)
 
-        # Elevator
-        self.plotLine(pt1, pt2)
-        self.plotLine(pt2, pt3)
-        self.plotLine(pt1, pt4)
-        self.plotLine(pt2, pt4)
-        self.plotLine(pt3, pt4)
+        self.plotLine(p2, p4, **params)
 
-        # Body
-        self.plotLine(pt4, pt5)
-        self.plotLine(pt5, pt8)
+        self.plotLine(p4, p5, **params)
+        self.plotLine(p4, p6, **params)
+        self.plotLine(p4, p7, **params)
+        self.plotLine(p5, p6, **params)
+        self.plotLine(p6, p7, **params)
 
-        # Left wing
-        self.plotLine(pt5, pt6)
-        self.plotLine(pt6, pt8)
+        self.plotLine(p4, p8, **params)
+        self.plotLine(p6, p8, **params)
 
-        # Right wing
-        self.plotLine(pt5, pt7)
-        self.plotLine(pt7, pt8)
+        params.update({'color': self.Cred})
+        self.plotPoint(p1, **params)
+        params.update({'color': self.Cgreen})
+        self.plotPoint(p3, **params)
+        params.update({'color': self.Cwhite})
+        self.plotPoint(p8, **params)
 
-        # Rudder
-        self.plotLine(pt2, pt9)
-        self.plotLine(pt4, pt9)
+    def genCircle(self, pt1, r, R, vN, numSegments):
+        if pt1 is None:
+            pt1 = np.copy(self.pO)
+        if vN is None:
+            vN = np.copy(self.vZ)
+        m = None
+        if R is not None:
+            m = self.geo.checkRMatrix(R)
+        else:
+            theta, phi = self.geo.vec2Angs(vN)
+            m = self.geo.getRMatrixEulerAngles(0, 0, phi)
+            m = m.dot(self.geo.getRMatrixEulerAngles(0, theta, 0))
+        pts = np.zeros((3, numSegments))
+        for i in range(numSegments):
+            ang1 = i * 2 * np.pi / numSegments
+            p1 = pt1 + m.dot(r * np.array([[np.cos(ang1)], [np.sin(ang1)], [0]]))
+            pts[:, i:i + 1] = p1[:, :]
+        return pts
 
-        # Lights
-        self.plotPoint(pt6, 'or')
-        self.plotPoint(pt7, 'og')
-        self.plotPoint(pt9, 'ow')
+    def plotCircle(self, pt1=None, r=1, R=None, vN=None, numSegments=64, isDash=False, **params):
+        pts = self.genCircle(pt1=pt1, r=r, R=R, vN=vN, numSegments=numSegments)
+        for i in range(numSegments):
+            p1 = pts[:, i:i + 1]
+            if i == numSegments - 1:
+                p2 = pts[:, 0:1]
+            else:
+                p2 = pts[:, i + 1:i + 2]
+            self.plotLine(p1, p2, **params)
 
+    def genArc(self, pt1, r, vStart, vEnd, numSegments):
+        if pt1 is None:
+            pt1 = np.copy(self.pO)
+        if vStart is None:
+            vStart = np.copy(self.vZ)
+        if vEnd is None:
+            vEnd = np.copy(self.vX)
 
-if __name__ == "__main__":
-    p = Plot()
-    for i in range(10):
-        pt = np.random.uniform(0, 10, 3).reshape((3, 1))
-        p.plotPoint(pt)
+        vN = np.cross(vStart[:, 0], vEnd[:, 0]).reshape((3, 1))
+        vN = vN / self.geo.normVec(vN)
 
-        pt1 = np.random.uniform(-5, 0, 3).reshape((3, 1))
-        pt2 = np.random.uniform(-5, 0, 3).reshape((3, 1))
-        p.plotLine(pt1, pt2, 'g-')
+        theta, phi = self.geo.vec2Angs(vN)
+        m = self.geo.getRMatrixEulerAngles(0, 0, phi)
+        m = m.dot(self.geo.getRMatrixEulerAngles(0, theta, 0))
 
-        pt1 = np.random.uniform(-10, -5, 3).reshape((3, 1))
-        pt2 = np.random.uniform(-10, -5, 3).reshape((3, 1))
-        p.plotBox(pt1, pt2, color='b-')
-    p.plotAxis(scale=1)
+        mInv = np.linalg.inv(m)
+        _, phi1 = self.geo.vec2Angs(mInv.dot(vStart))
+        _, phi2 = self.geo.vec2Angs(mInv.dot(vEnd))
+        angDiff = self.geo.angleDiff(phi2, phi1)
 
-    R = np.eye(4) * 3
-    R[:3, 3] = np.array([5, -5, -2])
-    R[3, 3] = 1
-    p.plotAirplane(R, scale=5)
+        pts = np.zeros((3, numSegments + 1))
+        for i in range(numSegments + 1):
+            ang1 = i * angDiff / numSegments + phi1
+            p1 = pt1 + m.dot(r * np.array([[np.cos(ang1)], [np.sin(ang1)], [0]]))
+            pts[:, i:i + 1] = p1[:, :]
+        return pts
 
-    thetas = np.pi / 16 * np.arange(32)
-    phis = np.pi / 4 * np.arange(5)
-    for theta in thetas:
-        for phi in phis:
-            R = np.array([[-10, 5, 2, theta, phi]]).T
-            p.plotRay(R, 'c', 3)
+    def plotArc(self, pt1=None, r=1, vStart=None, vEnd=None, numSegments=64, **params):
+        pts = self.genArc(pt1=pt1, r=r, vStart=vStart, vEnd=vEnd, numSegments=numSegments)
 
-            vec = np.zeros((3, 1))
-            vec[0, 0] = np.sin(theta)
-            vec[2, 0] = np.cos(theta)
-            vec[1, 0] = vec[0, 0] * np.sin(phi)
-            vec[0, 0] = vec[0, 0] * np.cos(phi)
-            vec *= 2
-            pt = np.array([[0, -10, 0]]).T
-            p.plotVec(vec, pt, 'm')
+        for i in range(numSegments):
+            p1 = pts[:, i:i + 1]
+            p2 = pts[:, i + 1:i + 2]
+            self.plotLine(p1, p2, **params)
 
-    p.show(50, -75)
+    def plotSphere(self, pt1=None, r=1, numSegments=(16, 16), **params):
+        if pt1 is None:
+            pt1 = np.copy(self.pO)
+        vX = r * np.copy(self.vX)
+        for i in range(numSegments[0]):
+            y = 2. * r * (i + 1) / (numSegments[0] + 1) - r
+            pos = np.array([[0],
+                            [y],
+                            [0]])
+            rLocal = np.sqrt(r ** 2 - y ** 2)
+            self.plotCircle(pt1 + pos, rLocal, vN=self.vY, **params)
+
+        for i in range(numSegments[1]):
+            ang = np.pi * i / numSegments[1]
+            m = self.geo.getRMatrixEulerAngles(0, ang, 0)
+            vN = m.dot(vX)
+            self.plotCircle(pt1, r, vN=vN, **params)
+
+    def draw(self):
+        pass
+
+    def show(self):
+        self.draw()
