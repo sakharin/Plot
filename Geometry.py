@@ -234,7 +234,7 @@ class Geometry(object):
         vA = np.array([[a], [b], [c]])
         vA = self.normalizedVec(vA)
         vB = np.cross(vec.reshape(-1), vA.reshape(-1)).reshape((3, 1))
-        vB = self.normlizedVec(vB)
+        vB = self.normalizedVec(vB)
         return vA, vB
 
     def twoPts2Vec(self, P1, P2):
