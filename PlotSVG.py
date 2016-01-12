@@ -305,7 +305,7 @@ class PlotSVG(Plot):
             g.add(self.dwg.line(p1_, p2_, **params))
         self.add(g)
 
-    def plotSphere(self, pt1=None, r=1, numSegments=(16, 16), **params):
+    def plotSphere1(self, pt1=None, r=1, numSegments=(16, 16), **params):
         if pt1 is None:
             pt1 = np.copy(self.pO)
         g = self.dwg.g()
@@ -323,6 +323,18 @@ class PlotSVG(Plot):
             m = self.geo.getRMatrixEulerAngles(0, ang, 0)
             vN = m.dot(vX)
             self.plotCircle_(g, pt1, r, vN=vN, **params)
+        self.add(g)
+
+    def plotSphere(self, pt1=None, r=1, subDivition=3, **params):
+        params = self.setDefaultParamsLine(**params)
+
+        ps, es = self.genSphere(pt1, r, subDivition)
+
+        g = self.dwg.g()
+        for e in es:
+            p1_ = self.project(ps[e[0]])
+            p2_ = self.project(ps[e[1]])
+            g.add(self.dwg.line(p1_, p2_, **params))
         self.add(g)
 
     def show(self):

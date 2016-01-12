@@ -319,7 +319,7 @@ class Plot(object):
             p2 = pts[:, i + 1:i + 2]
             self.plotLine(p1, p2, **params)
 
-    def plotSphere(self, pt1=None, r=1, numSegments=(16, 16), **params):
+    def plotSphere1(self, pt1=None, r=1, numSegments=(16, 16), **params):
         if pt1 is None:
             pt1 = np.copy(self.pO)
         vX = r * np.copy(self.vX)
@@ -336,6 +336,99 @@ class Plot(object):
             m = self.geo.getRMatrixEulerAngles(0, ang, 0)
             vN = m.dot(vX)
             self.plotCircle(pt1, r, vN=vN, **params)
+
+    def genSphere(self, pt1, r, subDivition):
+        if pt1 is None:
+            pt1 = np.copy(self.pO)
+
+        pTop = -self.vY
+        pBottom = self.vY
+        pFront = self.vZ
+        m = self.geo.getRMatrixEulerAngles(0, np.deg2rad(120), 0)
+        pRight = m.dot(self.vZ)
+        m = self.geo.getRMatrixEulerAngles(0, np.deg2rad(-120), 0)
+        pLeft = m.dot(self.vZ)
+
+        ps = list()
+        ps.append(pTop)
+        ps.append(pFront)
+        ps.append(pRight)
+        ps.append(pLeft)
+        ps.append(pBottom)
+
+        es = list()
+        es.append((0, 1))
+        es.append((1, 2))
+        es.append((2, 0))
+
+        es.append((0, 2))
+        es.append((2, 3))
+        es.append((3, 0))
+
+        es.append((0, 3))
+        es.append((3, 1))
+        es.append((1, 0))
+
+        es.append((1, 4))
+        es.append((4, 2))
+        es.append((2, 1))
+
+        es.append((2, 4))
+        es.append((4, 3))
+        es.append((3, 2))
+
+        es.append((3, 4))
+        es.append((4, 1))
+        es.append((1, 3))
+
+        # Sub triangle
+        for j in range(subDivition):
+            N = len(es)
+            for i in range(N / 3):
+                M = len(ps)
+
+                # Delete 3 edges
+                e1 = es.pop(0)
+                e2 = es.pop(0)
+                e3 = es.pop(0)
+
+                # Get 3 points
+                p1 = ps[e1[0]]
+                p2 = ps[e2[0]]
+                p3 = ps[e3[0]]
+
+                # Get 3 new points
+                p12 = self.geo.normalizedVec(p1 + p2)
+                p23 = self.geo.normalizedVec(p2 + p3)
+                p31 = self.geo.normalizedVec(p3 + p1)
+                ps.append(p12)
+                ps.append(p23)
+                ps.append(p31)
+
+                # Add 12 edges
+                es.append((e1[0], M + 0))
+                es.append((M + 0, M + 2))
+                es.append((M + 2, e1[0]))
+
+                es.append((M + 0, M + 1))
+                es.append((M + 1, M + 2))
+                es.append((M + 2, M + 0))
+
+                es.append((M + 0, e2[0]))
+                es.append((e2[0], M + 1))
+                es.append((M + 1, M + 0))
+
+                es.append((M + 2, M + 1))
+                es.append((M + 1, e3[0]))
+                es.append((e3[0], M + 2))
+
+        return [pt1 + r * p for p in ps], es
+
+    def plotSphere(self, pt1=None, r=1, subDivition=3, **params):
+        ps, es = self.genSphere(pt1, r, subDivition)
+
+        for e in es:
+            self.plotLine(ps[e[0]], ps[e[1]], **params)
 
     def draw(self):
         pass
