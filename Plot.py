@@ -84,7 +84,7 @@ class Plot(object):
     def plotArrow(self, pt1, pt2, **params):
         pass
 
-    def genAxis(self, pt1, scale, R, **params):
+    def genAxis(self, pt1, R, scale, **params):
         if pt1 is None:
             pt1 = self.pO
 
@@ -99,9 +99,9 @@ class Plot(object):
             vZ_ = R[:3, :3].dot(self.vZ)
         return (pt1, vX_, vY_, vZ_)
 
-    def plotAxis(self, pt1=None, scale=1, R=None, **params):
+    def plotAxis(self, pt1=None, R=None, scale=1, **params):
         pt1, vX_, vY_, vZ_ = \
-            self.genAxis(pt1, scale, R, **params)
+            self.genAxis(pt1, R, scale, **params)
         params.update({'color': self.Cred})
         self.plotArrow(pt1, pt1 + scale * vX_, **params)
         params.update({'color': self.Cgreen})

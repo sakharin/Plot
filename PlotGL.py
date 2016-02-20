@@ -247,12 +247,20 @@ class PlotGL(Plot):
             self.plotPoint(p2, **params)
             self.plotText(p2, params.get('text'))
 
-    def plotAxis(self, pt1=None, scale=1, isText=False, **params):
-        super(PlotGL, self).plotAxis(pt1, scale=scale, **params)
+    def plotAxis(self, pt1=None, R=None, scale=1, isText=False, **params):
+        pt1, vX_, vY_, vZ_ = \
+            self.genAxis(pt1, R, scale, **params)
+        params.update({'color': self.Cred})
+        self.plotArrow(pt1, pt1 + scale * vX_, **params)
+        params.update({'color': self.Cgreen})
+        self.plotArrow(pt1, pt1 + scale * vY_, **params)
+        params.update({'color': self.Cblue})
+        self.plotArrow(pt1, pt1 + scale * vZ_, **params)
+
         if isText:
-            self.plotText(self.pt1_ + scale * self.vX_, "x")
-            self.plotText(self.pt1_ + scale * self.vY_, "y")
-            self.plotText(self.pt1_ + scale * self.vZ_, "z")
+            self.plotText(pt1 + scale * vX_, "x")
+            self.plotText(pt1 + scale * vY_, "y")
+            self.plotText(pt1 + scale * vZ_, "z")
 
     def show(self):
         self.Clock = pygame.time.Clock()
