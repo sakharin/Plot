@@ -84,6 +84,21 @@ class Plot(object):
     def plotArrow(self, pt1, pt2, **params):
         pass
 
+    def genQuaternion(self, quat, **params):
+        quatNorm = quat / np.linalg.norm(quat)
+        ang, vec = self.geo.quat2AngleVector(quat)
+        othoVec = self.geo.getOrthogonalVecs(vec)[0]
+        othoVecQ = np.array([0, othoVec[0, 0], othoVec[1, 0], othoVec[2, 0]])
+        quatConj = self.geo.quatConj(quat)
+        res = self.geo.quatMul(self.geo.quatMul(quatNorm, othoVecQ), quatConj)
+        return vec, othoVec, res[1:].reshape((3, 1))
+
+    def plotQuaternion(self, pt1, quat, **params):
+        vec, othoVec, othoVec2 = self.genQuaternion(quat, **params)
+        self.plotArrow(pt1, pt1 + vec, **params)
+        params.update({'color': self.Cgreen})
+        self.plotArc(pt1, 0.25, othoVec, othoVec2, **params)
+
     def genAxis(self, pt1, R, scale, **params):
         if pt1 is None:
             pt1 = self.pO
