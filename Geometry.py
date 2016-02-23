@@ -228,10 +228,24 @@ class Geometry(object):
 
     def getOrthogonalVecs(self, vec):
         vec /= self.normVec(vec)
-        a = 1
-        b = 0
-        c = (-a * vec[0, 0] - b * vec[1, 0]) / vec[2, 0]
-        vA = np.array([[a], [b], [c]])
+        vA = None
+        u1, v1, w1 = vec[:, 0]
+        if u1 != 0:
+            v2 = 1
+            w2 = 0
+            u2 = (-v1 * v2 - w1 * w2) / u1
+            vA = np.array([[u2], [v2], [w2]])
+        elif v1 != 0:
+            u2 = 1
+            w2 = 0
+            v2 = (-u1 * u2 - w1 * w2) / v1
+            vA = np.array([[u2], [v2], [w2]])
+        elif w1 != 0:
+            u1 = 1
+            v1 = 0
+            w2 = (-u1 * u2 - v1 * v2) / w1
+            vA = np.array([[u2], [v2], [w2]])
+
         vA = self.normalizedVec(vA)
         vB = np.cross(vec.reshape(-1), vA.reshape(-1)).reshape((3, 1))
         vB = self.normalizedVec(vB)
