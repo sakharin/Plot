@@ -425,6 +425,63 @@ class Geometry(object):
         XYZ1[:3, :1] = TInv.dot(KInv.dot(uvDot) - C)
         return XYZ1
 
+    def normalizedQuat(self, quat):
+        return quat / np.linalg.norm(quat)
+
+    def quat2AngleVector(self, quat):
+        quatNorm = self.normalizedQuat(quat)
+
+        qw = quatNorm[0]
+        qx = quatNorm[1]
+        qy = quatNorm[2]
+        qz = quatNorm[3]
+
+        ang = 2 * np.arccos(qw)
+        s = np.sqrt(1 - qw * qw)
+        # avoid division by zero
+        if (s < 0.001):
+            x = 1
+            y = 0
+            z = 0
+        else:
+            x = qx / s
+            y = qy / s
+            z = qz / s
+        vec = np.array([[x], [y], [z]])
+        return ang, vec
+
+    def quatConj(self, quat):
+        quatNorm = self.normalizedQuat(quat)
+        return np.array([quatNorm[0],
+                         -quatNorm[1],
+                         -quatNorm[2],
+                         -quatNorm[3]])
+
+    def quatMul(self, quat1, quat2):
+        w1, x1, y1, z1 = quat1
+        w2, x2, y2, z2 = quat2
+        w3, x3, y3, z3 = 0, 0, 0, 0
+
+        w3 = w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2
+        x3 = w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2
+        y3 = w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2
+        z3 = w1 * w2 + x1 * y2 - y1 * x2 + z1 * w2
+
+        return np.array([w3, x3, y3, z3])
+
+    def quat2RMatrix(self, quat):
+        w, x, y, z = quat
+
+        return np.array([[w ** 2 + x ** 2 - y ** 2 - z ** 2,
+                          2 * x * y - 2 * w * z,
+                          2 * x * z + 2 * w * y],
+                         [2 * x * y + 2 * w * z,
+                          w ** 2 - x ** 2 + y ** 2 - z ** 2,
+                          2 * y * z + 2 * w * x],
+                         [2 * x * z - 2 * w * y,
+                          2 * y * z - 2 * w * x,
+                          w ** 2 - x ** 2 - y ** 2 + z ** 2]])
+
 
 if __name__ == "__main__":
     geo = Geometry()
