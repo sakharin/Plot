@@ -107,26 +107,12 @@ class Geometry(object):
             diffMinusdiffTDotuTimesu = diff - diffTDotuTimesu
             return np.sqrt((diffMinusdiffTDotuTimesu ** 2).sum(axis=2))
 
-    def projectPt2Plane(self, pts, P):
-        # http://docs.scipy.org/doc/numpy/reference/generated/numpy.tensordot.html
-        # Find a point on the plane
-        z = -1. * (P[3, 0]) / P[2, 0]
-        orgPt = np.array([[0], [0], [z], [1]])
-
-        # 1
-        v = pts - orgPt
-        v[:, 3, 0] = 1
-
-        # 2
-        dist = np.tensordot(v[:, :3, :], P[:3, :], axes=([1, 0])).reshape(-1)
-
-        # 3
-        N = pts.shape[0]
-        ppts = np.zeros((N, 4, 1))
-        for i in range(N):
-            ppts[i, :, :] = pts[i, :, :]
-            ppts[i, :3, 0] -= dist[i] * P[:3, 0]
-        return ppts
+    def projectPt2Plane(self, p0, V0, n):
+        # http://stackoverflow.com/questions/8942950/how-do-i-find-the-orthogonal-projection-of-a-point-onto-a-plane
+        # point p0 = (x, y, z)T
+        # plane point V0 = (a, b, c)T
+        # plane normal n = (d, e, f)T
+        return p0 - (p0 - V0).reshape(-1).dot(n.reshape(-1)) * n
 
     def calLnLnIntersection(self, p1, v1, p2, v2):
         a = np.linalg.norm(np.cross((p2 - p1).T, v2.T)) / \
