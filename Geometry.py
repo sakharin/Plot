@@ -227,9 +227,9 @@ class Geometry(object):
         return vec / self.normVec(vec)
 
     def getOrthogonalVecs(self, vec):
-        vec /= self.normVec(vec)
+        vec_ = vec / self.normVec(vec)
         vA = None
-        u1, v1, w1 = vec[:, 0]
+        u1, v1, w1 = vec_[:, 0]
         if u1 != 0:
             v2 = 1
             w2 = 0
