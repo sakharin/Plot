@@ -456,17 +456,21 @@ class Geometry(object):
         return np.array([w3, x3, y3, z3])
 
     def quat2RMatrix(self, quat):
-        w, x, y, z = quat
+        # world -> object
+        qX = np.array([0, 1, 0, 0])
+        qY = np.array([0, 0, 1, 0])
+        qZ = np.array([0, 0, 0, 1])
 
-        return np.array([[w ** 2 + x ** 2 - y ** 2 - z ** 2,
-                          2 * x * y - 2 * w * z,
-                          2 * x * z + 2 * w * y],
-                         [2 * x * y + 2 * w * z,
-                          w ** 2 - x ** 2 + y ** 2 - z ** 2,
-                          2 * y * z + 2 * w * x],
-                         [2 * x * z - 2 * w * y,
-                          2 * y * z - 2 * w * x,
-                          w ** 2 - x ** 2 - y ** 2 + z ** 2]])
+        qx = self.quatMul(self.quatMul(quat, qX), self.quatConj(quat))
+        qy = self.quatMul(self.quatMul(quat, qY), self.quatConj(quat))
+        qz = self.quatMul(self.quatMul(quat, qZ), self.quatConj(quat))
+
+        R = np.eye(3)
+        R[:, 0] = qx[1:]
+        R[:, 1] = qy[1:]
+        R[:, 2] = qz[1:]
+
+        return R
 
 
 if __name__ == "__main__":
