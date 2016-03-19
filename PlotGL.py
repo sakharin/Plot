@@ -47,6 +47,7 @@ class PlotGL(Plot):
         self.viewAngleSpeed = np.deg2rad(10)
 
         self.setParams()
+        self.isShowBg = False
 
     def setParams(self):
         self.zoom = self.zoomReset
@@ -277,6 +278,18 @@ class PlotGL(Plot):
             gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
             self.setView()
 
+            if self.isShowBg:
+                gl.glBegin(gl.GL_QUADS)
+                gl.glColor3f(1, 1, 1)
+                z = -self.zFar + 0.1
+                gl.glVertex3f(self.xLeft, self.yUp, z)
+                gl.glVertex3f(self.xRight, self.yUp, z)
+                gl.glVertex3f(self.xRight, self.yDown, z)
+                gl.glVertex3f(self.xLeft, self.yDown, z)
+                gl.glEnd()
+
+            gl.glPushMatrix()
+
             move = np.array([[self.move[1]], [-self.move[0]], [0]])
             eye = np.array([[0], [0], [-1]])
             center = np.array([[0], [0], [0]])
@@ -292,6 +305,7 @@ class PlotGL(Plot):
                           u[0, 0], u[1, 0], u[2, 0])
 
             self.draw()
+            gl.glPopMatrix()
             gl.glPopMatrix()
 
             pygame.display.flip()
