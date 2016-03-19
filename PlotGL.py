@@ -156,12 +156,11 @@ class PlotGL(Plot):
 
     def keyboardEventSave(self, key):
         if key == pygame.K_F2:
-            gl.glReadBuffer(gl.GL_FRONT)
             data = gl.glReadPixels(0, 0,
                                    self.w, self.h,
-                                   gl.GL_RGB, gl.GL_UNSIGNED_BYTE)
-            surface = pygame.image.fromstring(str(buffer(data)),
-                                              (self.w, self.h), 'RGB', True)
+                                   gl.GL_RGBA, gl.GL_UNSIGNED_BYTE)
+            surface = pygame.image.fromstring(str(data),
+                                              (self.w, self.h), 'RGBA', True)
             fileName = "test.png"
             pygame.image.save(surface, fileName)
 
