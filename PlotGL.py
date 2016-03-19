@@ -69,8 +69,12 @@ class PlotGL(Plot):
         #glu.gluPerspective(self.FOV, self.aspectRatio,
         #                   self.zNear, self.zFar)
         h, w = self.size
-        gl.glOrtho(-0.5 / self.zoom, 0.5 / self.zoom,
-                   -0.5 / self.zoom * h / w, 0.5 / self.zoom * h / w,
+        self.xLeft = -0.5 / self.zoom
+        self.xRight = 0.5 / self.zoom
+        self.yUp = -0.5 / self.zoom * h / w
+        self.yDown = 0.5 / self.zoom * h / w
+        gl.glOrtho(self.xLeft, self.xRight,
+                   self.yUp, self.yDown,
                    self.zNear, self.zFar)
         gl.glMatrixMode(gl.GL_MODELVIEW)
 
@@ -271,7 +275,6 @@ class PlotGL(Plot):
 
             gl.glPushMatrix()
             gl.glClear(gl.GL_COLOR_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT)
-
             self.setView()
 
             move = np.array([[self.move[1]], [-self.move[0]], [0]])
