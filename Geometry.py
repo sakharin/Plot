@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import cv2
+import inspect
 import numpy as np
 
 PI = np.pi
@@ -410,6 +411,31 @@ class Geometry(object):
 
         XYZ1[:3, :1] = TInv.dot(KInv.dot(uvDot) - C)
         return XYZ1
+
+    def _getCallerClass(self):
+        stack = inspect.stack()
+        return stack[2][0].f_locals["self"]
+
+    def u2Phi(self, u, W=None):
+        if W is None:
+            # get W of the caller class
+            W = self._getCallerClass().W
+        return u * -2 * np.pi / W + 2 * np.pi
+
+    def v2Theta(self, v, H=None):
+        if H is None:
+            H = self._getCallerClass().H
+        return v * np.pi / H
+
+    def phi2u(self, phi, W=None):
+        if W is None:
+            W = self._getCallerClass().W
+        return (phi - 2 * np.pi) * W / (-2 * np.pi)
+
+    def theta2v(self, theta, H=None):
+        if H is None:
+            H = self._getCallerClass().H
+        return theta * H / np.pi
 
     def normalizedQuat(self, quat):
         return quat / np.linalg.norm(quat)
