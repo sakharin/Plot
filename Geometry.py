@@ -272,6 +272,7 @@ class Geometry(object):
             else:
                 theta = np.arccos(diff[2, 0] / norm)
                 phi = np.arctan2(diff[1, 0], diff[0, 0])
+            phi %= TWOPI
             return phi, theta
         else:
             diff = vec
@@ -431,7 +432,7 @@ class Geometry(object):
     def phi2u(self, phi, W=None):
         if W is None:
             W = self._getCallerClass().W
-        return (phi - 2 * np.pi) * W / (-2 * np.pi)
+        return ((phi - 2 * np.pi) * W / (-2 * np.pi)) % W
 
     def theta2v(self, theta, H=None):
         if H is None:
