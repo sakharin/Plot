@@ -279,7 +279,7 @@ class Plot(object):
         if R is not None:
             m = self.geo.checkRMatrix(R)
         else:
-            theta, phi = self.geo.vec2Angs(vN)
+            phi, theta = self.geo.vec2Angs(vN)
             m = self.geo.getRMatrixEulerAngles(0, 0, phi)
             m = m.dot(self.geo.getRMatrixEulerAngles(0, theta, 0))
         pts = np.zeros((3, numSegments))
@@ -310,13 +310,13 @@ class Plot(object):
         vN = np.cross(vStart[:, 0], vEnd[:, 0]).reshape((3, 1))
         vN = vN / self.geo.normVec(vN)
 
-        theta, phi = self.geo.vec2Angs(vN)
+        phi, theta = self.geo.vec2Angs(vN)
         m = self.geo.getRMatrixEulerAngles(0, 0, phi)
         m = m.dot(self.geo.getRMatrixEulerAngles(0, theta, 0))
 
         mInv = np.linalg.inv(m)
-        _, phi1 = self.geo.vec2Angs(mInv.dot(vStart))
-        _, phi2 = self.geo.vec2Angs(mInv.dot(vEnd))
+        phi1, _ = self.geo.vec2Angs(mInv.dot(vStart))
+        phi2, _ = self.geo.vec2Angs(mInv.dot(vEnd))
         angDiff = self.geo.angleDiff(phi2, phi1)
 
         pts = np.zeros((3, numSegments + 1))

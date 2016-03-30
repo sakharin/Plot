@@ -156,7 +156,7 @@ class PlotSVG(Plot):
         r = headSize / 2. * lenVec
         pt3 = pt2 - headSize * lineVec
 
-        theta, phi = self.geo.vec2Angs(lineVec / lenVec)
+        phi, theta = self.geo.vec2Angs(lineVec / lenVec)
         m = self.geo.getRMatrixEulerAngles(0, 0, phi)
         m = m.dot(self.geo.getRMatrixEulerAngles(0, theta, 0))
         for i in range(numSegments):

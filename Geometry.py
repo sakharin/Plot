@@ -272,7 +272,7 @@ class Geometry(object):
             else:
                 theta = np.arccos(diff[2, 0] / norm)
                 phi = np.arctan2(diff[1, 0], diff[0, 0])
-            return theta, phi
+            return phi, theta
         else:
             diff = vec
             norm = np.sqrt((diff ** 2).sum(axis=2))
@@ -293,10 +293,11 @@ class Geometry(object):
 
             theta += (1 - m1) * (1 - m2) * acos
             phi += (1 - m1) * (1 - m2) * atan
+            phi %= TWOPI
 
-            return theta, phi
+            return phi, theta
 
-    def angs2Vec(self, theta, phi):
+    def angs2Vec(self, phi, theta):
         if isinstance(theta, (int, long, float)):
             res = np.zeros((3, 1))
             res[0] = np.sin(theta)
@@ -318,7 +319,7 @@ class Geometry(object):
         if len(shape) == 2:
             ray = np.zeros((5, 1))
             ray[:3, 0:1] = P1
-            theta, phi = self.vec2Angs(vec)
+            phi, theta = self.vec2Angs(vec)
             ray[3, 0] = theta
             ray[4, 0] = phi
             return ray
@@ -328,7 +329,7 @@ class Geometry(object):
                 rays[:, :, :3] = P1[:, 0]
             else:
                 rays[:, :, :3] = P1[:, :, :]
-            theta, phi = self.vec2Angs(vec)
+            phi, theta = self.vec2Angs(vec)
             rays[:, :, 3] = theta
             rays[:, :, 4] = phi
             return rays
@@ -338,11 +339,11 @@ class Geometry(object):
         if len(shape) == 2:
             thetas = Rs[3, 0]
             phis = Rs[4, 0]
-            return self.angs2Vec(thetas, phis)
+            return self.angs2Vec(phis, thetas)
         elif len(shape) == 3:
             thetas = Rs[:, :, 3]
             phis = Rs[:, :, 4]
-            return self.angs2Vec(thetas, phis)
+            return self.angs2Vec(phis, thetas)
 
     def twoPts2Ang(self, P1, P2):
         shape = P2.shape

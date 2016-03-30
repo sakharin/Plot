@@ -238,7 +238,7 @@ class PlotGL(Plot):
         gl.glPushMatrix()
         try:
             self.plotLine(pt1, pt2, **params)
-            theta, phi = self.geo.vec2Angs(pt2 - pt1)
+            phi, theta = self.geo.vec2Angs(pt2 - pt1)
             gl.glTranslatef(pt2[0, 0], pt2[1, 0], pt2[2, 0])
             gl.glRotatef(np.rad2deg(phi) + 90, 0, 0, 1)
             gl.glRotatef(np.rad2deg(theta), 1, 0, 0)
