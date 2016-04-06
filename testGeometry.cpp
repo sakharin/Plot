@@ -3,10 +3,6 @@
 
 #include "Geometry.hpp"
 
-#define PI 3.14159265359
-#define TWOPI 6.28318530718
-#define PIOTWO 1.57079632679
-
 #define H 100
 #define W 120
 

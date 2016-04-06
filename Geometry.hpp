@@ -1,11 +1,8 @@
 #ifndef __GEOMETRY_H__
 #define __GEOMETRY_H__
 
-#include <cv.h>
-#include <highgui.h>
-#include <math.h>
-
 #include <iostream>
+#include <opencv2/opencv.hpp>
 
 #ifndef PI
 #define PI 3.14159265359
