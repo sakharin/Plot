@@ -3,7 +3,7 @@
 Geometry::Geometry() {
 }
 
-void Geometry::getRMatrixEulerAngles(float A, float B, float C, cv::Mat *R) {
+void Geometry::getRMatrixEulerAngles(cv::Mat *R, float A, float B, float C) {
     CV_Assert(R->data != NULL);
     CV_Assert(R->rows == 3 && R->cols == 3);
     CV_Assert(R->type() == CV_32F);
@@ -35,7 +35,7 @@ void Geometry::getRMatrixEulerAngles(float A, float B, float C, cv::Mat *R) {
     tmp.copyTo(*R);
 }
 
-void Geometry::vecElem2Angs(float x, float y, float z, float* theta, float* phi) {
+void Geometry::vecElem2Angs(float* phi, float* theta, float x, float y, float z) {
     float r;
     r = std::sqrt(x * x + y * y + z * z);
     if(r == 0) {
@@ -47,7 +47,7 @@ void Geometry::vecElem2Angs(float x, float y, float z, float* theta, float* phi)
     }
 }
 
-void Geometry::vec2Angs(cv::Mat vec, float *theta, float *phi) {
+void Geometry::vec2Angs(float *phi, float *theta, cv::Mat vec) {
     CV_Assert(vec.data != NULL);
     CV_Assert(vec.rows == 3 && vec.cols == 1);
     CV_Assert(vec.type() == CV_32F);
@@ -57,10 +57,10 @@ void Geometry::vec2Angs(cv::Mat vec, float *theta, float *phi) {
     x = vec.at<float>(0, 0);
     y = vec.at<float>(1, 0);
     z = vec.at<float>(2, 0);
-    vecElem2Angs(x, y, z, theta, phi);
+    vecElem2Angs(phi, theta, x, y, z);
 }
 
-void Geometry::vec2Angs(cv::Mat vecs, cv::Mat *thetas, cv::Mat *phis) {
+void Geometry::vec2Angs(cv::Mat *phis, cv::Mat *thetas, cv::Mat vecs) {
     CV_Assert(vecs.data != NULL);
     CV_Assert(thetas->data != NULL);
     CV_Assert(phis->data != NULL);
@@ -91,7 +91,7 @@ void Geometry::vec2Angs(cv::Mat vecs, cv::Mat *thetas, cv::Mat *phis) {
         t = thetas->ptr<float>(i);
         p = phis->ptr<float>(i);
         for(j = 0; j < w; j++) {
-            vecElem2Angs(*x, *y, *z, t, p);
+            vecElem2Angs(p, t, *x, *y, *z);
             x += 3;
             y += 3;
             z += 3;
@@ -101,7 +101,7 @@ void Geometry::vec2Angs(cv::Mat vecs, cv::Mat *thetas, cv::Mat *phis) {
     }
 }
 
-void Geometry::twoPts2Vec(cv::Mat P1, cv::Mat P2, cv::Mat *P) {
+void Geometry::twoPts2Vec(cv::Mat *P, cv::Mat P1, cv::Mat P2) {
     CV_Assert(P1.data != NULL);
     CV_Assert(P2.data != NULL);
     CV_Assert(P->data != NULL);
@@ -112,13 +112,13 @@ void Geometry::twoPts2Vec(cv::Mat P1, cv::Mat P2, cv::Mat *P) {
         CV_Assert(P1.type() == CV_32F);
         CV_Assert(P2.type() == CV_32F);
         CV_Assert(P->type() == CV_32F);
-        twoPts2VecPtPt(P1, P2, P);
+        twoPts2VecPtPt(P, P1, P2);
     } else if(P1.rows == 3 && P1.cols == 1 &&
        P2.rows == P->rows && P2.cols == P->cols) {
         CV_Assert(P1.type() == CV_32F);
         CV_Assert(P2.type() == CV_32FC3);
         CV_Assert(P->type() == CV_32FC3);
-        twoPts2VecPtMat(P1, P2, P);
+        twoPts2VecPtMat(P, P1, P2);
     } else {
         CV_Assert((P1.rows == 3 && P1.cols == 1 &&
        P2.rows == 3 && P2.cols == 1 &&
@@ -128,7 +128,7 @@ void Geometry::twoPts2Vec(cv::Mat P1, cv::Mat P2, cv::Mat *P) {
     }
 }
 
-void Geometry::twoPts2VecPtPt(cv::Mat P1, cv::Mat P2, cv::Mat *P) {
+void Geometry::twoPts2VecPtPt(cv::Mat *P, cv::Mat P1, cv::Mat P2) {
     *P = P2 - P1;
     float x = P->at<float>(0, 0);
     float y = P->at<float>(1, 0);
@@ -137,7 +137,7 @@ void Geometry::twoPts2VecPtPt(cv::Mat P1, cv::Mat P2, cv::Mat *P) {
     *P /= norm;
 }
 
-void Geometry::twoPts2VecPtMat(cv::Mat P1, cv::Mat P2, cv::Mat *P) {
+void Geometry::twoPts2VecPtMat(cv::Mat *P, cv::Mat P1, cv::Mat P2) {
     int h = P2.rows;
     int w = P2.cols;
 
@@ -182,7 +182,7 @@ void Geometry::twoPts2VecPtMat(cv::Mat P1, cv::Mat P2, cv::Mat *P) {
     }
 }
 
-void Geometry::twoPts2Angs(cv::Mat P1, cv::Mat P2, float *theta, float *phi) {
+void Geometry::twoPts2Angs(float *phi, float *theta, cv::Mat P1, cv::Mat P2) {
     CV_Assert(P1.data != NULL);
     CV_Assert(P1.rows == 3 && P1.cols == 1);
     CV_Assert(P1.type() == CV_32F);
@@ -194,10 +194,10 @@ void Geometry::twoPts2Angs(cv::Mat P1, cv::Mat P2, float *theta, float *phi) {
     float x = P1.at<float>(0, 0) - P2.at<float>(0, 0);
     float y = P1.at<float>(1, 0) - P2.at<float>(1, 0);
     float z = P1.at<float>(2, 0) - P2.at<float>(2, 0);
-    vecElem2Angs(x, y, z, theta, phi);
+    vecElem2Angs(phi, theta, x, y, z);
 }
 
-void Geometry::twoPts2Angs(cv::Mat P1, cv::Mat P2, cv::Mat *thetas, cv::Mat *phis) {
+void Geometry::twoPts2Angs(cv::Mat *phis, cv::Mat *thetas, cv::Mat P1, cv::Mat P2) {
     CV_Assert(P1.data != NULL);
     CV_Assert(P1.rows == 3 && P1.cols == 1);
     CV_Assert(P1.type() == CV_32F);
@@ -242,7 +242,7 @@ void Geometry::twoPts2Angs(cv::Mat P1, cv::Mat P2, cv::Mat *thetas, cv::Mat *phi
             y = y1 - *y2;
             z = z1 - *z2;
 
-            vecElem2Angs(x, y, z, t++, p++);
+            vecElem2Angs(p++, t++, x, y, z);
             x2 += 3;
             y2 += 3;
             z2 += 3;

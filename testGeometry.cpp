@@ -33,7 +33,7 @@ void test_vec2Angs_Vec() {
     vec.at<float>(0, 0) = 0;
     vec.at<float>(1, 0) = 0;
     vec.at<float>(2, 0) = 0;
-    geo.vec2Angs(vec, &theta, &phi);
+    geo.vec2Angs(&phi, &theta, vec);
     assert(theta == 0 && phi == 0);
 
     for(int i = 0; i < 360; i++) {
@@ -44,7 +44,7 @@ void test_vec2Angs_Vec() {
         vec.at<float>(1, 0) = y * (i + 1);
         vec.at<float>(2, 0) = z * (i + 1);
 
-        geo.vec2Angs(vec, &theta, &phi);
+        geo.vec2Angs(&phi, &theta, vec);
         assert(std::abs(phi - std::atan2(y, x)) < 0.000001);
         assert(std::abs(theta - PIOTWO) < 0.000001);
     }
@@ -57,7 +57,7 @@ void test_vec2Angs_Mat() {
     cv::Mat phis = cv::Mat::zeros(H, W, CV_32F);
     cv::randu(vecs, cv::Scalar(-1000), cv::Scalar(1000));
 
-    geo.vec2Angs(vecs, &thetas, &phis);
+    geo.vec2Angs(&phis, &thetas, vecs);
 
     float *p;
     float x, y, z, r;
@@ -93,7 +93,7 @@ void test_twoPts2Vec_PtPt() {
     cv::randu(P1, cv::Scalar(-1000), cv::Scalar(1000));
     cv::randu(P2, cv::Scalar(-1000), cv::Scalar(1000));
 
-    geo.twoPts2Vec(P1, P2, &vec);
+    geo.twoPts2Vec(&vec, P1, P2);
 
     float x, y, z, norm;
     P1 = P2 - P1;
@@ -118,7 +118,7 @@ void test_twoPts2Vec_PtMat() {
     cv::randu(P1, cv::Scalar(-1000), cv::Scalar(1000));
     cv::randu(P2, cv::Scalar(-1000), cv::Scalar(1000));
 
-    geo.twoPts2Vec(P1, P2, &vec);
+    geo.twoPts2Vec(&vec, P1, P2);
 
     float x1 = P1.at<float>(0, 0);
     float y1 = P1.at<float>(1, 0);
@@ -173,7 +173,7 @@ void test_twoPts2Angs_PtPt() {
             cv::randu(P1, cv::Scalar(-1000), cv::Scalar(1000));
             cv::randu(P2, cv::Scalar(-1000), cv::Scalar(1000));
 
-            geo.twoPts2Angs(P1, P2, &theta, &phi);
+            geo.twoPts2Angs(&phi, &theta, P1, P2);
 
             float x, y, z, r;
             P1 = P1 - P2;
@@ -206,7 +206,7 @@ void test_twoPts2Angs_PtMat() {
     float y1 = P1.at<float>(1, 0);
     float z1 = P1.at<float>(2, 0);
 
-    geo.twoPts2Angs(P1, P2, &thetas, &phis);
+    geo.twoPts2Angs(&phis, &thetas, P1, P2);
 
     float x, y, z, r;
     float *p2;
