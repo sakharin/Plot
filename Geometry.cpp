@@ -39,11 +39,11 @@ void Geometry::vecElem2Angs(float* phi, float* theta, float x, float y, float z)
 	float r;
 	r = std::sqrt(x * x + y * y + z * z);
 	if(r == 0) {
-		*theta = 0;
 		*phi = 0;
+		*theta = 0;
 	} else {
-		*theta = std::acos(z / r);
 		*phi = std::atan2(y, x);
+		*theta = std::acos(z / r);
 	}
 }
 
@@ -62,34 +62,34 @@ void Geometry::vec2Angs(float *phi, float *theta, cv::Mat vec) {
 
 void Geometry::vec2Angs(cv::Mat *phis, cv::Mat *thetas, cv::Mat vecs) {
 	CV_Assert(vecs.data != NULL);
-	CV_Assert(thetas->data != NULL);
 	CV_Assert(phis->data != NULL);
+	CV_Assert(thetas->data != NULL);
 
-	CV_Assert(vecs.rows == thetas->rows && vecs.cols == thetas->cols);
 	CV_Assert(vecs.rows == phis->rows && vecs.cols == phis->cols);
+	CV_Assert(vecs.rows == thetas->rows && vecs.cols == thetas->cols);
 
 	CV_Assert(vecs.type() == CV_32FC3);
-	CV_Assert(thetas->type() == CV_32F);
 	CV_Assert(phis->type() == CV_32F);
+	CV_Assert(thetas->type() == CV_32F);
 
 	int h = vecs.rows;
 	int w = vecs.cols;
 
-	if(vecs.isContinuous() && thetas->isContinuous() && phis->isContinuous()) {
+	if(vecs.isContinuous() && phis->isContinuous() && thetas->isContinuous()) {
 		w *= h;
 		h = 1;
 	}
 
 	int i, j;
-	float *x, *y, *z, *t, *p;
+	float *x, *y, *z, *p, *t;
 	float r;
 	for(i = 0; i < h; i++) {
 		x = vecs.ptr<float>(i);
 		y = x + 1;
 		z = x + 2;
 
-		t = thetas->ptr<float>(i);
 		p = phis->ptr<float>(i);
+		t = thetas->ptr<float>(i);
 		for(j = 0; j < w; j++) {
 			vecElem2Angs(p, t, *x, *y, *z);
 			x += 3;
@@ -214,22 +214,22 @@ void Geometry::twoPts2Angs(cv::Mat *phis, cv::Mat *thetas, cv::Mat P1, cv::Mat P
 	CV_Assert(P1.type() == CV_32F);
 
 	CV_Assert(P2.data != NULL);
-	CV_Assert(thetas->data != NULL);
 	CV_Assert(phis->data != NULL);
+	CV_Assert(thetas->data != NULL);
 
-	CV_Assert(P2.rows == thetas->rows && P2.cols == thetas->cols);
 	CV_Assert(P2.rows == phis->rows && P2.cols == phis->cols);
+	CV_Assert(P2.rows == thetas->rows && P2.cols == thetas->cols);
 
 	CV_Assert(P2.type() == CV_32FC3);
-	CV_Assert(thetas->type() == CV_32F);
 	CV_Assert(phis->type() == CV_32F);
+	CV_Assert(thetas->type() == CV_32F);
 
 	int h = P2.rows;
 	int w = P2.cols;
 
 	if(P2.isContinuous() &&
-			thetas->isContinuous() &&
-			phis->isContinuous()) {
+			phis->isContinuous() &&
+			thetas->isContinuous()) {
 		w *= h;
 		h = 1;
 	}
@@ -240,14 +240,14 @@ void Geometry::twoPts2Angs(cv::Mat *phis, cv::Mat *thetas, cv::Mat P1, cv::Mat P
 	float z1 = P1.at<float>(2, 0);
 	float x, y, z;
 	float *x2, *y2, *z2;
-	float *t, *p;
+	float *p, *t;
 	for(i = 0; i < h; i++) {
 		x2 = P2.ptr<float>(i);
 		y2 = x2 + 1;
 		z2 = x2 + 2;
 
-		t = thetas->ptr<float>(i);
 		p = phis->ptr<float>(i);
+		t = thetas->ptr<float>(i);
 		for(j = 0; j < w; j++) {
 			x = x1 - *x2;
 			y = y1 - *y2;

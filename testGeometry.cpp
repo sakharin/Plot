@@ -67,8 +67,8 @@ void test_vec2Angs_Vec() {
 				geo.vec2Angs(&phi, &theta, vec);
 
 				r = std::sqrt(x * x + y * y + z * z);
-				assert(compareFloat0(theta - std::acos(z / r)));
 				assert(compareFloat0(phi - std::atan2(y, x)));
+				assert(compareFloat0(theta - std::acos(z / r)));
 			}
 		}
 	}
@@ -77,8 +77,8 @@ void test_vec2Angs_Vec() {
 void test_vec2Angs_Mat() {
 	Geometry geo = Geometry();
 	cv::Mat vecs = cv::Mat::zeros(H, W, CV_32FC3);
-	cv::Mat thetas = cv::Mat::zeros(H, W, CV_32F);
 	cv::Mat phis = cv::Mat::zeros(H, W, CV_32F);
+	cv::Mat thetas = cv::Mat::zeros(H, W, CV_32F);
 	cv::randu(vecs, cv::Scalar(-1000), cv::Scalar(1000));
 
 	geo.vec2Angs(&phis, &thetas, vecs);
