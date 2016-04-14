@@ -101,6 +101,17 @@ void Geometry::vec2Angs(cv::Mat *phis, cv::Mat *thetas, cv::Mat vecs) {
     }
 }
 
+void Geometry::angs2Vec(cv::Mat* vec, float phi, float theta) {
+    CV_Assert(vec->data != NULL);
+    CV_Assert(vec->rows == 3 && vec->cols == 1);
+    CV_Assert(vec->type() == CV_32F);
+    CV_Assert(vec->data != NULL);
+    vec->at<float>(0, 0) = std::sin(theta);
+    vec->at<float>(2, 0) = std::cos(theta);
+    vec->at<float>(1, 0) = vec->at<float>(0, 0) * std::sin(phi);
+    vec->at<float>(0, 0) = vec->at<float>(0, 0) * std::cos(phi);
+}
+
 void Geometry::twoPts2Vec(cv::Mat *P, cv::Mat P1, cv::Mat P2) {
     CV_Assert(P1.data != NULL);
     CV_Assert(P2.data != NULL);

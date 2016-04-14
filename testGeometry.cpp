@@ -10,6 +10,8 @@ void test_vec2Angs();
 void test_vec2Angs_Vec();
 void test_vec2Angs_Mat();
 
+void test_angs2Vec();
+
 void test_twoPts2Vec();
 void test_twoPts2Vec_PtPt();
 void test_twoPts2Vec_PtMat();
@@ -76,6 +78,27 @@ void test_vec2Angs_Mat() {
                 assert(std::abs(thetas.at<float>(i, j) - std::acos(z / r)) < 0.000001);
                 assert(std::abs(phis.at<float>(i, j) - std::atan2(y, x)) < 0.000001);
             }
+        }
+    }
+}
+
+void test_angs2Vec() {
+    Geometry geo = Geometry();
+    cv::Mat vec = cv::Mat::zeros(3, 1, CV_32F);
+    float x, y, z;
+
+    for(int phi = 0; phi < 360; phi++) {
+        for(int theta = 0; theta < 360; theta++) {
+            geo.angs2Vec(&vec, phi / 360. * TWOPI, theta / 360. * TWOPI);
+
+            x = std::sin(theta / 360. * TWOPI);
+            z = std::cos(theta / 360. * TWOPI);
+            y = x * std::sin(phi / 360. * TWOPI);
+            x = x * std::cos(phi / 360. * TWOPI);
+
+            assert(std::abs(vec.at<float>(0, 0) == x) < 0.000001);
+            assert(std::abs(vec.at<float>(1, 0) == y) < 0.000001);
+            assert(std::abs(vec.at<float>(2, 0) == z) < 0.000001);
         }
     }
 }
@@ -232,6 +255,7 @@ void test_twoPts2Angs_PtMat() {
 
 int main (int argc, char *argv[]) {
     test_vec2Angs();
+    test_angs2Vec();
     test_twoPts2Vec();
     test_twoPts2Angs();
     return 0;
