@@ -32,5 +32,9 @@ class Geometry {
 		void twoPts2Vec(cv::Mat*, cv::Mat, cv::Mat);
 		void twoPts2Angs(float*, float*, cv::Mat, cv::Mat);
 		void twoPts2Angs(cv::Mat*, cv::Mat*, cv::Mat, cv::Mat);
+		void u2Phi(float* phi, float u, int W);
+		void v2Theta(float* theta, float v, int H);
+		void phi2u(float* u, float phi, int W);
+		void theta2v(float* v, float theta, int H);
 };
 #endif

@@ -260,3 +260,19 @@ void Geometry::twoPts2Angs(cv::Mat *phis, cv::Mat *thetas, cv::Mat P1, cv::Mat P
 		}
 	}
 }
+
+void Geometry::u2Phi(float* phi, float u, int W) {
+	*phi = u * -TWOPI / W + TWOPI;
+}
+
+void Geometry::v2Theta(float* theta, float v, int H) {
+	*theta = v * PI / H;
+}
+
+void Geometry::phi2u(float* u, float phi, int W) {
+	*u = std::fmod((phi - TWOPI) * W / -TWOPI, W);
+}
+
+void Geometry::theta2v(float* v, float theta, int H) {
+	*v = theta * H / PI;
+}

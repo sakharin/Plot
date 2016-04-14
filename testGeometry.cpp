@@ -21,6 +21,12 @@ void test_twoPts2Angs_PtPt();
 void test_twoPts2Angs_PtMat();
 
 
+void test_u2Phi();
+void test_v2Theta();
+void test_phi2u();
+void test_theta2v();
+
+
 void test_vec2Angs() {
 	test_vec2Angs_Vec();
 	test_vec2Angs_Mat();
@@ -253,10 +259,61 @@ void test_twoPts2Angs_PtMat() {
 	}
 }
 
+void test_u2Phi() {
+	Geometry geo = Geometry();
+	float u;
+	float phi, p;
+	for(int i = 0; i < W; i++) {
+		u = i;
+		geo.u2Phi(&phi, u, W);
+		p = u * -TWOPI / W + TWOPI;
+	assert(std::abs(phi - p) < 0.000001);
+	}
+}
+
+void test_v2Theta() {
+	Geometry geo = Geometry();
+	float v;
+	float theta, t;
+	for(int i = 0; i < H; i++) {
+		v = i;
+		geo.v2Theta(&theta, v, H);
+		t = v * PI / H;
+		assert(std::abs(theta - t) < 0.000001);
+	}
+}
+
+void test_phi2u() {
+	Geometry geo = Geometry();
+	float phi;
+	float u, u2;
+	for(int i = 0; i < 360; i++) {
+		phi = i / 360. * TWOPI;
+		geo.u2Phi(&u, phi, W);
+		u2 = std::fmod((phi - TWOPI) * W / -TWOPI, W);
+		assert(std::abs(u - u2) < 0.000001);
+	}
+}
+void test_theta2v() {
+	Geometry geo = Geometry();
+	float theta;
+	float v, v2;
+	for(int i = 0; i < 180; i++) {
+		theta = i / 180. * PI;
+		geo.theta2v(&v, theta, H);
+		v = theta * H / PI;
+		assert(std::abs(v - v2) < 0.000001);
+	}
+}
+
 int main (int argc, char *argv[]) {
 	test_vec2Angs();
 	test_angs2Vec();
 	test_twoPts2Vec();
 	test_twoPts2Angs();
+	test_u2Phi();
+	test_v2Theta();
+	test_phi2u();
+	test_theta2v();
 	return 0;
 }
