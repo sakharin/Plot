@@ -35,6 +35,29 @@ void Geometry::getRMatrixEulerAngles(cv::Mat *R, float A, float B, float C) {
 	tmp.copyTo(*R);
 }
 
+float Geometry::normVec(cv::Mat vec) {
+	CV_Assert(vec.data != NULL);
+	CV_Assert(vec.rows == 3 && vec.cols == 1);
+	CV_Assert(vec.type() == CV_32F);
+
+	float x = vec.at<float>(0, 0);
+	float y = vec.at<float>(1, 0);
+	float z = vec.at<float>(2, 0);
+	return std::sqrt(x * x + y * y + z * z);
+}
+
+void Geometry::normalizedVec(cv::Mat* outVec, cv::Mat vec) {
+	CV_Assert(vec.data != NULL);
+	CV_Assert(vec.rows == 3 && vec.cols == 1);
+	CV_Assert(vec.type() == CV_32F);
+
+	CV_Assert(outVec->data != NULL);
+	CV_Assert(outVec->rows == 3 && outVec->cols == 1);
+	CV_Assert(outVec->type() == CV_32F);
+
+	*outVec = vec / normVec(vec);
+}
+
 void Geometry::vecElem2Angs(float* phi, float* theta, float x, float y, float z) {
 	float r;
 	r = std::sqrt(x * x + y * y + z * z);
