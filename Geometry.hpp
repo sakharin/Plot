@@ -19,18 +19,18 @@
 
 
 class Geometry {
-    protected:
-        void vecElem2Angs(float*, float*, float, float, float);
-        void twoPts2VecPtPt(cv::Mat*, cv::Mat, cv::Mat);
-        void twoPts2VecPtMat(cv::Mat*, cv::Mat, cv::Mat);
-    public:
-        Geometry();
-        void getRMatrixEulerAngles(cv::Mat*, float, float, float);
-        void vec2Angs(float *, float *, cv::Mat);
-        void vec2Angs(cv::Mat*, cv::Mat*, cv::Mat);
+	protected:
+		void vecElem2Angs(float*, float*, float, float, float);
+		void twoPts2VecPtPt(cv::Mat*, cv::Mat, cv::Mat);
+		void twoPts2VecPtMat(cv::Mat*, cv::Mat, cv::Mat);
+	public:
+		Geometry();
+		void getRMatrixEulerAngles(cv::Mat*, float, float, float);
+		void vec2Angs(float *, float *, cv::Mat);
+		void vec2Angs(cv::Mat*, cv::Mat*, cv::Mat);
 		void angs2Vec(cv::Mat*, float, float);
-        void twoPts2Vec(cv::Mat*, cv::Mat, cv::Mat);
-        void twoPts2Angs(float*, float*, cv::Mat, cv::Mat);
-        void twoPts2Angs(cv::Mat*, cv::Mat*, cv::Mat, cv::Mat);
+		void twoPts2Vec(cv::Mat*, cv::Mat, cv::Mat);
+		void twoPts2Angs(float*, float*, cv::Mat, cv::Mat);
+		void twoPts2Angs(cv::Mat*, cv::Mat*, cv::Mat, cv::Mat);
 };
 #endif
