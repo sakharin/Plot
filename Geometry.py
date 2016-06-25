@@ -357,26 +357,26 @@ class Geometry(object):
 
     def twoPts2Ray(self, P1, P2):
         shape = P2.shape
-        theta, phi = self.twoPts2Ang(P1, P2)
+        phi, theta = self.twoPts2Ang(P1, P2)
         if len(shape) == 2:
             ray = np.zeros((5, 1))
             ray[0:3, 0:1] = P1
-            ray[3, 0] = theta
-            ray[4, 0] = phi
+            ray[3, 0] = phi
+            ray[4, 0] = theta
             return ray
         else:
             rays = np.zeros((shape[0], shape[1], 5))
             rays[:, :, :3] = P1.reshape((1, 3))
-            rays[:, :, 3] = theta
-            rays[:, :, 4] = phi
+            rays[:, :, 3] = phi
+            rays[:, :, 4] = theta
             return rays
 
     def ptAngles2Ray(self, pt, theta, phi):
         if isinstance(theta, (int, long, float)):
             ray = np.zeros((5, 1))
             ray[:3, 0] = pt[:, 0]
-            ray[3, 0] = theta
-            ray[4, 0] = phi
+            ray[3, 0] = phi
+            ray[4, 0] = theta
             return ray
         else:
             shape = theta.shape
@@ -385,8 +385,8 @@ class Geometry(object):
                 ray[:, :, :3] = pt.reshape((1, 1, 3))
             elif len(pt.shape) == 3:
                 ray[:, :, :3] = pt[:, :, :3]
-            ray[:, :, 3] = theta
-            ray[:, :, 4] = phi
+            ray[:, :, 3] = phi
+            ray[:, :, 4] = theta
             return ray
 
     def minMaxAng(self, ang):
