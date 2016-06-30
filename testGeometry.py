@@ -1,12 +1,32 @@
 #!/usr/bin/env python
 import cv2
+import math
 import numpy as np
+import random
 
 import Plot
-import Geometry
+from Geometry import Geometry
+
+PI = np.pi
+TWOPI = 2 * PI
+PIOTWO = 0.5 * PI
+
+NUMTEST = 1000
 
 
-if __name__ == "__main__":
+def isClose(a, b, rel_tol=1e-06, abs_tol=1e-06):
+    # http://stackoverflow.com/questions/5595425/what-is-the-best-way-to-compare-floats-for-almost-equality-in-python
+    res = abs(a - b) <= max(rel_tol * max(abs(a), abs(b)), abs_tol)
+    if not res:
+        print a, b
+    return res
+
+
+def isCloseToZero(a, rel_tol=1e-06, abs_tol=1e-06):
+    return isClose(a, 0., rel_tol, abs_tol)
+
+
+if __name__ == "__main__1":
     geo = Geometry.Geometry()
     p = Plot.Plot()
 
@@ -82,21 +102,38 @@ if __name__ == "__main__":
     p.plotAxis()
     p.show(90, 180)
 
-if __name__ == "__main__1":
-    # Test minMaxAng function
-    errorMax = 1e-6
-    for i in range(1000):
-        geo = Geometry.Geometry()
-        ang1 = np.random.randint(360)
-        ang2 = ang1 + np.random.randint(180)
-        angs = np.deg2rad(np.arange(ang1, ang2 + 1)) % (2 * np.pi)
-        minAng, maxAng = np.rad2deg(geo.minMaxAng(angs))
-        if abs((minAng % 360) - (ang1 % 360)) > errorMax or abs((maxAng % 360) - (ang2 % 360)) > errorMax:
-            print "Error !"
-            print minAng, ang1, maxAng, ang2
-    print "Tested."
 
-if __name__ == "__main__":
+def test_RMatrix2EulerAngles():
+    print "test RMatrix2EulerAngles",
+    geo = Geometry()
+    for i in range(NUMTEST):
+        # test the first time
+        alpha1 = random.uniform(-PI, PI)
+        beta1 = random.uniform(-PI, PI)
+        gamma1 = random.uniform(-PI, PI)
+
+        M = geo.getRMatrixEulerAngles(alpha1, beta1, gamma1)
+        alpha2, beta2, gamma2 = geo.RMatrix2EulerAngles(M)
+
+        # test it again since more than 1 angle sets give the same
+        # Eulor rotation matrix
+        alpha1 = alpha2
+        beta1 = beta2
+        gamma1 = gamma2
+
+        M = geo.getRMatrixEulerAngles(alpha1, beta1, gamma1)
+        alpha2, beta2, gamma2 = geo.RMatrix2EulerAngles(M)
+
+        cond = isClose(alpha1, alpha2) and \
+            isClose(beta1, beta2) and \
+            isClose(gamma1, gamma2)
+        assert(cond)
+    print "done"
+
+
+def test_checkRMatrix():
+    print "test getRMatrixEulerAngles",
+    geo = Geometry()
     A = geo.getRMatrixEulerAngles(0, 0, np.deg2rad(30))
     geo.checkRMatrix(A)
     B = np.eye(3)
@@ -117,3 +154,47 @@ if __name__ == "__main__":
     geo.checkTMatrix(C)
     geo.checkTMatrix(D)
     geo.checkTMatrix(E)
+    print "done"
+
+
+def angDiff(a, b):
+    a %= TWOPI
+    b %= TWOPI
+    res = a - b
+    if res > PI:
+        res -= TWOPI
+    if res < -PI:
+        res += TWOPI
+    return res
+
+
+def test_minMaxAng():
+    print "test minMaxAng",
+    geo = Geometry()
+    for i in range(NUMTEST):
+        ang1 = np.random.randint(-720, 720)
+        ang2 = ang1 + np.random.randint(180)
+        angs = np.deg2rad(np.arange(ang1, ang2 + 1))
+        minAng, maxAng = geo.minMaxAng(angs)
+        assert(isCloseToZero(angDiff(minAng, np.deg2rad(ang1))))
+        assert(isCloseToZero(angDiff(maxAng, np.deg2rad(ang2))))
+    print "done"
+
+
+def test_angleDiff():
+    print "test angleDiff",
+    geo = Geometry()
+    for i in range(NUMTEST):
+        alpha = random.uniform(-2 * TWOPI, 2 * TWOPI)
+        beta = random.uniform(-2 * TWOPI, 2 * TWOPI)
+        res1 = geo.angleDiff(alpha, beta)
+        res2 = angDiff(alpha, beta)
+        assert(isClose(res1, res2))
+    print "done"
+
+
+if __name__ == "__main__":
+    test_RMatrix2EulerAngles()
+    test_checkRMatrix()
+    test_minMaxAng()
+    test_angleDiff()

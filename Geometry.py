@@ -5,6 +5,7 @@ import numpy as np
 
 PI = np.pi
 TWOPI = 2 * PI
+PIOTWO = 0.5 * PI
 
 
 class Geometry(object):
@@ -27,6 +28,19 @@ class Geometry(object):
                        [0., cA, -sA],
                        [0., sA, cA]])
         return rA.dot(rB).dot(rC)
+
+    def RMatrix2EulerAngles(self, M):
+        #http://www.geometrictools.com/Documentation/EulerAngles.pdf
+        if M[0, 2] < 1:
+            if M[0, 2] > -1:
+                thetaY = np.arcsin(M[0, 2])
+                thetaX = np.arctan2(-M[1, 2], M[2, 2])
+                thetaZ = np.arctan2(-M[0, 1], M[0, 0])
+            else:
+                thetaY = -PIOTWO
+                thetaX = -np.arctan2(M[1, 0], M[1, 1])
+                thetaZ = 0
+        return thetaX, thetaY, thetaZ
 
     def checkRMatrix(self, R):
         assert(isinstance(R, np.ndarray))
