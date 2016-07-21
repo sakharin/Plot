@@ -5,8 +5,6 @@
 
 #include "Geometry.hpp"
 
-#define NDEBUG
-
 #define H 100
 #define W 120
 
