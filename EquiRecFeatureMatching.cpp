@@ -28,17 +28,17 @@ EquiRecFeatureMatching::EquiRecFeatureMatching(cv::Mat inImg1, cv::Mat inImg2) {
 	// Get unit sphere vectors and mask
 	cv::Mat vecs = cv::Mat::zeros(H, W, CV_32FC3);
 	cv::Mat vec = cv::Mat::zeros(3, 1, CV_32F);
-	cv::Mat mark = cv::Mat::zeros(H, W, CV_8U);
+	cv::Mat mask = cv::Mat::zeros(H, W, CV_8U);
 	for (int i = 0; i < H; i++) {
 		theta = i * PI / H;
 		for (int j = 0; j < W; j++) {
-			phi = j * TWOPI / W;
+			phi = -j * TWOPI / W;
 
 			geo.angs2Vec(&vec, phi, theta);
 			vecs.at<cv::Vec3f>(i, j) = vec;
 
 			float ang = std::atan(std::tan(theta - PIOTWO) / std::cos(phi + PI));
-			mark.at<unsigned char>(i, j) = 255 * ((-beta < ang) and (ang <= beta));
+			mask.at<unsigned char>(i, j) = 255 * ((-beta < ang) and (ang <= beta));
 		}
 	}
 
@@ -83,19 +83,15 @@ EquiRecFeatureMatching::EquiRecFeatureMatching(cv::Mat inImg1, cv::Mat inImg2) {
 				  CV_INTER_LINEAR, cv::BORDER_REFLECT_101);
 		cv::remap(inImg2, rotatedImg2, gridx, gridy,
 				  CV_INTER_LINEAR, cv::BORDER_REFLECT_101);
-		sift->detect(rotatedImg1, kps1, mark);
-		sift->detect(rotatedImg2, kps2, mark);
+		sift->detect(rotatedImg1, kps1, mask);
+		sift->detect(rotatedImg2, kps2, mask);
 		sift->compute(rotatedImg1, kps1, deses1);
 		sift->compute(rotatedImg2, kps2, deses2);
-
-		cv::FlannBasedMatcher matcher;
-		std::vector< std::vector< cv::DMatch > > matches;
-		matcher.knnMatch(deses1, deses2, matches, 2);
 
 		// Copy keypoints
 		int previousKeyPointsIndex1 = keyPoints1.size();
 		int previousKeyPointsIndex2 = keyPoints2.size();
-		geo.getRMatrixEulerAngles(&m, 0, -k * 2 * beta, 0);
+		geo.getRMatrixEulerAngles(&m, 0, k * 2 * beta, 0);
 		for (int i = 0; i < kps1.size(); i++) {
 			// Rotate keyPoint1
 			cv::KeyPoint kp;
@@ -115,14 +111,21 @@ EquiRecFeatureMatching::EquiRecFeatureMatching(cv::Mat inImg1, cv::Mat inImg2) {
 			keyPoints2.push_back(kp);
 		}
 
-        // Ratio test as per Lowe's paper
-		for (int i = 0; i < matches.size(); i++) {
-			if (matches[i][0].distance < 0.75 * matches[i][1].distance) {
-				cv::DMatch m = matches[i][0];
-				m.queryIdx += previousKeyPointsIndex1;
-				m.trainIdx += previousKeyPointsIndex2;
-				goodMatches.push_back(m);
-			}
+		// Copy descriptors
+		descriptors1.push_back(deses1);
+		descriptors2.push_back(deses2);
+	}
+
+	// Match features
+	cv::FlannBasedMatcher matcher;
+	std::vector< std::vector< cv::DMatch > > matches;
+	matcher.knnMatch(descriptors1, descriptors2, matches, 2);
+
+	// Ratio test as per Lowe's paper
+	for (int i = 0; i < matches.size(); i++) {
+		if (matches[i][0].distance < 0.7 * matches[i][1].distance) {
+			cv::DMatch m = matches[i][0];
+			goodMatches.push_back(m);
 		}
 	}
 }

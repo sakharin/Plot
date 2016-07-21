@@ -20,3 +20,8 @@ target_link_libraries(testGeometry ${OpenCV_LIBS})
 add_library(EquiRecFeatureMatching STATIC EquiRecFeatureMatching.cpp)
 target_link_libraries(EquiRecFeatureMatching Geometry)
 target_link_libraries(EquiRecFeatureMatching  ${OpenCV_LIBS})
+
+add_executable(testEquiRecFeatureMatching testEquiRecFeatureMatching.cpp)
+target_link_libraries(testEquiRecFeatureMatching Geometry)
+target_link_libraries(testEquiRecFeatureMatching EquiRecFeatureMatching)
+target_link_libraries(testEquiRecFeatureMatching ${OpenCV_LIBS})
