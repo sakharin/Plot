@@ -157,15 +157,24 @@ def test_checkRMatrix():
     print "done"
 
 
-def angDiff(a, b):
-    a %= TWOPI
-    b %= TWOPI
-    res = a - b
-    if res > PI:
-        res -= TWOPI
-    if res < -PI:
-        res += TWOPI
-    return res
+def test_angsDiff():
+    print "test angsDiff",
+    geo = Geometry()
+    for i in range(NUMTEST):
+        ang1 = random.uniform(-2 * TWOPI, 2 * TWOPI)
+        ang2 = random.uniform(-2 * TWOPI, 2 * TWOPI)
+
+        diff1 = geo.angsDiff(ang1, ang2)
+
+        ang1 %= TWOPI
+        ang2 %= TWOPI
+        diff2 = ang1 - ang2
+        if diff2 > PI:
+            diff2 -= TWOPI
+        if diff2 < -PI:
+            diff2 += TWOPI
+        assert(isClose(diff1, diff2))
+    print "done"
 
 
 def test_minMaxAng():
@@ -176,25 +185,13 @@ def test_minMaxAng():
         ang2 = ang1 + np.random.randint(180)
         angs = np.deg2rad(np.arange(ang1, ang2 + 1))
         minAng, maxAng = geo.minMaxAng(angs)
-        assert(isCloseToZero(angDiff(minAng, np.deg2rad(ang1))))
-        assert(isCloseToZero(angDiff(maxAng, np.deg2rad(ang2))))
-    print "done"
-
-
-def test_angleDiff():
-    print "test angleDiff",
-    geo = Geometry()
-    for i in range(NUMTEST):
-        alpha = random.uniform(-2 * TWOPI, 2 * TWOPI)
-        beta = random.uniform(-2 * TWOPI, 2 * TWOPI)
-        res1 = geo.angleDiff(alpha, beta)
-        res2 = angDiff(alpha, beta)
-        assert(isClose(res1, res2))
+        assert(isCloseToZero(geo.angsDiff(minAng, np.deg2rad(ang1))))
+        assert(isCloseToZero(geo.angsDiff(maxAng, np.deg2rad(ang2))))
     print "done"
 
 
 if __name__ == "__main__":
     test_RMatrix2EulerAngles()
     test_checkRMatrix()
+    test_angsDiff()
     test_minMaxAng()
-    test_angleDiff()

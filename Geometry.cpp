@@ -35,6 +35,12 @@ void Geometry::getRMatrixEulerAngles(cv::Mat *R, float A, float B, float C) {
 	tmp.copyTo(*R);
 }
 
+float Geometry::angsDiff(float ang1, float ang2) {
+	//http://stackoverflow.com/questions/12234574/calculating-if-an-angle-is-between-two-angles
+	// Return diff in range [-pi, pi]
+	return std::fmod((ang1 - ang2 + PI), TWOPI) - PI;
+}
+
 float Geometry::normVec(cv::Mat vec) {
 	CV_Assert(vec.data != NULL);
 	CV_Assert(vec.rows == 3 && vec.cols == 1);

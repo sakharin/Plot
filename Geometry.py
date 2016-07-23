@@ -72,10 +72,10 @@ class Geometry(object):
             S[:3, :3] = T[:, :]
             return S
 
-    def angleDiff(self, angle1, angle2):
+    def angsDiff(self, ang1, ang2):
         # http://stackoverflow.com/questions/12234574/calculating-if-an-angle-is-between-two-angles
         # Return diff in range [-pi, pi]
-        return (angle1 - angle2 + PI) % TWOPI - PI
+        return (ang1 - ang2 + PI) % TWOPI - PI
 
     def lineCrossingPlane(self, P0, u, V0, n):
         # http://geomalgorithms.com/a05-_intersect-1.html

@@ -10,6 +10,10 @@
 
 #define compareFloat0(a) (((a) < FLT_EPSILON) && (-(a) > -FLT_EPSILON))
 
+#define NUMTEST 1000
+
+void test_angsDiff();
+
 void test_vec2Angs();
 void test_vec2Angs_Vec();
 void test_vec2Angs_Mat();
@@ -28,6 +32,33 @@ void test_u2Phi();
 void test_v2Theta();
 void test_phi2u();
 void test_theta2v();
+
+void test_angsDiff() {
+	std::cout << "testing angsDiff() ..." << std::flush;
+	Geometry geo = Geometry();
+	cv::Mat ang1 = cv::Mat(NUMTEST, 1, CV_32F);
+	cv::Mat ang2 = cv::Mat(NUMTEST, 1, CV_32F);
+	cv::randu(ang1, cv::Scalar(-1000), cv::Scalar(1000));
+	cv::randu(ang2, cv::Scalar(-1000), cv::Scalar(1000));
+	for (int i = 0; i < NUMTEST; i++) {
+		float a = ang1.at<float>(i, 0);
+		float b = ang2.at<float>(i, 0);
+
+		float diff1 = geo.angsDiff(a, b);
+
+		a = std::fmod(a, TWOPI);
+		b = std::fmod(b, TWOPI);
+		float diff2 = a - b;
+		if (diff2 > PI) {
+			diff2-= TWOPI;
+		}
+		if (diff2 < -PI) {
+			diff2 += TWOPI;
+		}
+		assert(compareFloat0(diff1 - diff2));
+	}
+	std::cout << "\b\b\bdone." << std::endl << std::flush;
+}
 
 void test_vec2Angs() {
 	std::cout << "testing vec2Angs() ..." << std::flush;
@@ -339,6 +370,7 @@ void test_theta2v() {
 }
 
 int main (int argc, char *argv[]) {
+	test_angsDiff();
 	test_vec2Angs();
 	test_angs2Vec();
 	test_twoPts2Vec();

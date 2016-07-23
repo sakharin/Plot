@@ -26,6 +26,7 @@ class Geometry {
 	public:
 		Geometry();
 		void getRMatrixEulerAngles(cv::Mat*, float, float, float);
+		float angsDiff(float, float);
 		float normVec(cv::Mat);
 		void normalizedVec(cv::Mat*, cv::Mat);
 		void vec2Angs(float *, float *, cv::Mat);
