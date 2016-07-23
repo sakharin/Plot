@@ -21,7 +21,7 @@ void test_EquiRecFeatureMatching() {
 	std::cout <<  "Images are loaded." << std::endl;
 	std::cout <<  "Actual size " << inImg1.size() << std::endl;
 
-	// Scale image
+	// Resized image for speed
 	if (inImg1.size().width > 1600) {
 		int H = inImg1.size().height;
 		int W = inImg1.size().width;
@@ -32,15 +32,39 @@ void test_EquiRecFeatureMatching() {
 		cv::resize(inImg2, inImg2, cv::Size(W, H), 0, 0, cv::INTER_LINEAR);
 	}
 
-	// Scalled siize
+	// Resized size
 	int H = inImg1.size().height;
 	int W = inImg1.size().width;
-	std::cout <<  "Scalled size " << inImg1.size() << std::endl;
+	std::cout << "Scalled size " << inImg1.size() << std::endl;
 
-	EquiRecFeatureMatching efm(inImg1, inImg2);
+	std::vector< cv::KeyPoint > keyPoints1;
+	std::vector< cv::KeyPoint > keyPoints2;
+	cv::Mat descriptors1;
+	cv::Mat descriptors2;
+	std::vector< cv::DMatch > goodMatches;
+
+	// Call EquiRecFeatureMatching
+	std::cout << std::endl << "Call EquiRecFeatureMatching ..." << std::flush;
+	EquiRecFeatureMatching efm = EquiRecFeatureMatching();
+	efm.detectAndCompute(inImg1, &keyPoints1, &descriptors1);
+	efm.detectAndCompute(inImg2, &keyPoints2, &descriptors2);
+	std::cout << "\b\b\bdone." << std::endl << std::flush;
+
+	// Match features
+	cv::FlannBasedMatcher matcher;
+	std::vector< std::vector< cv::DMatch > > matches;
+	matcher.knnMatch(descriptors1, descriptors2, matches, 2);
+
+	// Ratio test as per Lowe's paper
+	for (int i = 0; i < matches.size(); i++) {
+		if (matches[i][0].distance < 0.7 * matches[i][1].distance) {
+			cv::DMatch m = matches[i][0];
+			goodMatches.push_back(m);
+		}
+	}
 
 	cv::Mat img;
-	cv::drawMatches(inImg1, efm.keyPoints1, inImg2, efm.keyPoints2, efm.goodMatches, img);
+	cv::drawMatches(inImg1, keyPoints1, inImg2, keyPoints2, goodMatches, img);
 	cv::imshow("Viewer", img);
 
 	std::cout << "done" << std::endl;

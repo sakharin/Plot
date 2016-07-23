@@ -1,5 +1,11 @@
 #include "EquiRecFeatureMatching.hpp"
 
+EquiRecFeatureMatching::EquiRecFeatureMatching() {
+	previousH = 0;
+	previousW = 0;
+	geo = Geometry();
+}
+
 void EquiRecFeatureMatching::point2Vec(cv::Mat *vec, cv::Point2f pt) {
 	float phi, theta;
 	geo.u2Phi(&phi, pt.x, W);
@@ -17,28 +23,31 @@ void EquiRecFeatureMatching::vec2Point(cv::Point2f *pt, cv::Mat vec) {
 	pt->y = std::fmod(y, float(H));
 }
 
-EquiRecFeatureMatching::EquiRecFeatureMatching(cv::Mat inImg1, cv::Mat inImg2) {
-	geo = Geometry();
-	H = inImg1.size().height;
-	W = inImg1.size().width;
-	float phi, theta;
+void EquiRecFeatureMatching::detectAndCompute(cv::Mat inImg, std::vector< cv::KeyPoint > *keyPoints, cv::Mat *descriptors) {
 	int N = 6;
 	float beta = PI / (2 * N);
 
-	// Get unit sphere vectors and mask
-	cv::Mat vecs = cv::Mat::zeros(H, W, CV_32FC3);
 	cv::Mat vec = cv::Mat::zeros(3, 1, CV_32F);
-	cv::Mat mask = cv::Mat::zeros(H, W, CV_8U);
-	for (int i = 0; i < H; i++) {
-		theta = i * PI / H;
-		for (int j = 0; j < W; j++) {
-			phi = -j * TWOPI / W;
+	float phi, theta;
 
-			geo.angs2Vec(&vec, phi, theta);
-			vecs.at<cv::Vec3f>(i, j) = vec;
+	// Get unit sphere vectors and mask
+	H = inImg.size().height;
+	W = inImg.size().width;
+	assert(H != 0 && W != 0);
+	if (H != previousH || W != previousW) {
+		vecs = cv::Mat::zeros(H, W, CV_32FC3);
+		mask = cv::Mat::zeros(H, W, CV_8U);
+		for (int i = 0; i < H; i++) {
+			theta = i * PI / H;
+			for (int j = 0; j < W; j++) {
+				phi = -j * TWOPI / W;
 
-			float ang = std::atan(std::tan(theta - PIOTWO) / std::cos(phi + PI));
-			mask.at<unsigned char>(i, j) = 255 * ((-beta < ang) and (ang <= beta));
+				geo.angs2Vec(&vec, phi, theta);
+				vecs.at<cv::Vec3f>(i, j) = vec;
+
+				float ang = std::atan(std::tan(theta - PIOTWO) / std::cos(phi + PI));
+				mask.at<unsigned char>(i, j) = 255 * ((-beta < ang) and (ang <= beta));
+			}
 		}
 	}
 
@@ -49,8 +58,7 @@ EquiRecFeatureMatching::EquiRecFeatureMatching(cv::Mat inImg1, cv::Mat inImg2) {
 	cv::Mat thetas = cv::Mat::zeros(H, W, CV_32F);
     cv::Mat gridx = cv::Mat::zeros(H, W, CV_32F);
     cv::Mat gridy = cv::Mat::zeros(H, W, CV_32F);
-	cv::Mat rotatedImg1 = cv::Mat::zeros(H, W, CV_8U);
-	cv::Mat rotatedImg2 = cv::Mat::zeros(H, W, CV_8U);
+	cv::Mat rotatedImg = cv::Mat::zeros(H, W, CV_8U);
 	float u, v;
 
 
@@ -73,59 +81,29 @@ EquiRecFeatureMatching::EquiRecFeatureMatching(cv::Mat inImg1, cv::Mat inImg2) {
 		}
 
 		// Get features
-		std::vector< cv::KeyPoint > kps1;
-		std::vector< cv::KeyPoint > kps2;
-		cv::Mat deses1;
-		cv::Mat deses2;
+		std::vector< cv::KeyPoint > kps;
+		cv::Mat deses;
 
 		cv::Ptr<cv::xfeatures2d::SIFT> sift = cv::xfeatures2d::SIFT::create();
-		cv::remap(inImg1, rotatedImg1, gridx, gridy,
+		cv::remap(inImg, rotatedImg, gridx, gridy,
 				  CV_INTER_LINEAR, cv::BORDER_REFLECT_101);
-		cv::remap(inImg2, rotatedImg2, gridx, gridy,
-				  CV_INTER_LINEAR, cv::BORDER_REFLECT_101);
-		sift->detect(rotatedImg1, kps1, mask);
-		sift->detect(rotatedImg2, kps2, mask);
-		sift->compute(rotatedImg1, kps1, deses1);
-		sift->compute(rotatedImg2, kps2, deses2);
+		sift->detect(rotatedImg, kps, mask);
+		sift->compute(rotatedImg, kps, deses);
 
 		// Copy keypoints
-		int previousKeyPointsIndex1 = keyPoints1.size();
-		int previousKeyPointsIndex2 = keyPoints2.size();
+		int previousKeyPointsIndex = keyPoints->size();
 		geo.getRMatrixEulerAngles(&m, 0, k * 2 * beta, 0);
-		for (int i = 0; i < kps1.size(); i++) {
-			// Rotate keyPoint1
+		for (int i = 0; i < kps.size(); i++) {
+			// Rotate keyPoint
 			cv::KeyPoint kp;
-			kp = kps1[i];
+			kp = kps[i];
 			point2Vec(&vec, kp.pt);
 			vec = m * vec;
 			vec2Point(&kp.pt, vec);
-			keyPoints1.push_back(kp);
-		}
-		for (int i = 0; i < kps2.size(); i++) {
-			// Rotate keyPoint2
-			cv::KeyPoint kp;
-			kp = kps2[i];
-			point2Vec(&vec, kp.pt);
-			vec = m * vec;
-			vec2Point(&kp.pt, vec);
-			keyPoints2.push_back(kp);
+			keyPoints->push_back(kp);
 		}
 
 		// Copy descriptors
-		descriptors1.push_back(deses1);
-		descriptors2.push_back(deses2);
-	}
-
-	// Match features
-	cv::FlannBasedMatcher matcher;
-	std::vector< std::vector< cv::DMatch > > matches;
-	matcher.knnMatch(descriptors1, descriptors2, matches, 2);
-
-	// Ratio test as per Lowe's paper
-	for (int i = 0; i < matches.size(); i++) {
-		if (matches[i][0].distance < 0.7 * matches[i][1].distance) {
-			cv::DMatch m = matches[i][0];
-			goodMatches.push_back(m);
-		}
+		descriptors->push_back(deses);
 	}
 }

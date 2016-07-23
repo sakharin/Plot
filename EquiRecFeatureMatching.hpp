@@ -19,19 +19,18 @@
 
 class EquiRecFeatureMatching {
 	private:
-		int H;
-		int W;
-		void point2Vec(cv::Mat*, cv::Point2f);
-		void vec2Point(cv::Point2f*, cv::Mat);
+		int H, W;
+		int previousH;
+		int previousW;
+		cv::Mat vecs;
+		cv::Mat mask;
 		Geometry geo;
 
-	public:
-		std::vector< cv::KeyPoint > keyPoints1;
-		std::vector< cv::KeyPoint > keyPoints2;
-		cv::Mat descriptors1;
-		cv::Mat descriptors2;
-		std::vector< cv::DMatch > goodMatches;
+		void point2Vec(cv::Mat*, cv::Point2f);
+		void vec2Point(cv::Point2f*, cv::Mat);
 
-		EquiRecFeatureMatching(cv::Mat inImg1, cv::Mat inImg2);
+	public:
+		EquiRecFeatureMatching();
+		void detectAndCompute(cv::Mat, std::vector< cv::KeyPoint >*, cv::Mat*);
 };
 #endif
