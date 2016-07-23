@@ -17,7 +17,7 @@
 #endif
 
 
-class EquiRecFeatureMatching {
+class EquiRecFeatureDetector {
 	private:
 		int H, W;
 		int previousH;
@@ -30,7 +30,7 @@ class EquiRecFeatureMatching {
 		void vec2Point(cv::Point2f*, cv::Mat);
 
 	public:
-		EquiRecFeatureMatching();
+		EquiRecFeatureDetector();
 		void detectAndCompute(cv::Mat, std::vector< cv::KeyPoint >*, cv::Mat*);
 };
 #endif

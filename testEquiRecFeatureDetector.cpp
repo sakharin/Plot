@@ -1,10 +1,10 @@
 #include <iostream>
 #include "Geometry.hpp"
-#include "EquiRecFeatureMatching.hpp"
+#include "EquiRecFeatureDetector.hpp"
 
-void test_EquiRecFeatureMatching();
+void test_EquiRecFeatureDetector();
 
-void test_EquiRecFeatureMatching() {
+void test_EquiRecFeatureDetector() {
 	std::string path = "/home/orion/works/Resources/ThetaData/Set9CamS";
 	std::string imgName1 = path + "/R0013629.JPG";
 	std::string imgName2 = path + "/R0013646.JPG";
@@ -43,9 +43,9 @@ void test_EquiRecFeatureMatching() {
 	cv::Mat descriptors2;
 	std::vector< cv::DMatch > goodMatches;
 
-	// Call EquiRecFeatureMatching
-	std::cout << std::endl << "Call EquiRecFeatureMatching ..." << std::flush;
-	EquiRecFeatureMatching efm = EquiRecFeatureMatching();
+	// Call EquiRecFeatureDetector
+	std::cout << std::endl << "Call EquiRecFeatureDetector ..." << std::flush;
+	EquiRecFeatureDetector efm = EquiRecFeatureDetector();
 	efm.detectAndCompute(inImg1, &keyPoints1, &descriptors1);
 	efm.detectAndCompute(inImg2, &keyPoints2, &descriptors2);
 	std::cout << "\b\b\bdone." << std::endl << std::flush;
@@ -77,6 +77,6 @@ void test_EquiRecFeatureMatching() {
 }
 
 int main (int argc, char *argv[]) {
-	test_EquiRecFeatureMatching();
+	test_EquiRecFeatureDetector();
 	return 0;
 }

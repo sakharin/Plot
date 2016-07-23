@@ -1,19 +1,19 @@
-#include "EquiRecFeatureMatching.hpp"
+#include "EquiRecFeatureDetector.hpp"
 
-EquiRecFeatureMatching::EquiRecFeatureMatching() {
+EquiRecFeatureDetector::EquiRecFeatureDetector() {
 	previousH = 0;
 	previousW = 0;
 	geo = Geometry();
 }
 
-void EquiRecFeatureMatching::point2Vec(cv::Mat *vec, cv::Point2f pt) {
+void EquiRecFeatureDetector::point2Vec(cv::Mat *vec, cv::Point2f pt) {
 	float phi, theta;
 	geo.u2Phi(&phi, pt.x, W);
 	geo.v2Theta(&theta, pt.y, H);
 	geo.angs2Vec(vec, phi, theta);
 }
 
-void EquiRecFeatureMatching::vec2Point(cv::Point2f *pt, cv::Mat vec) {
+void EquiRecFeatureDetector::vec2Point(cv::Point2f *pt, cv::Mat vec) {
 	float phi, theta;
 	float x, y;
 	geo.vec2Angs(&phi, &theta, vec);
@@ -23,7 +23,7 @@ void EquiRecFeatureMatching::vec2Point(cv::Point2f *pt, cv::Mat vec) {
 	pt->y = std::fmod(y, float(H));
 }
 
-void EquiRecFeatureMatching::detectAndCompute(cv::Mat inImg, std::vector< cv::KeyPoint > *keyPoints, cv::Mat *descriptors) {
+void EquiRecFeatureDetector::detectAndCompute(cv::Mat inImg, std::vector< cv::KeyPoint > *keyPoints, cv::Mat *descriptors) {
 	int N = 6;
 	float beta = PI / (2 * N);
 
