@@ -40,6 +40,10 @@ class Geometry(object):
                 thetaY = -PIOTWO
                 thetaX = -np.arctan2(M[1, 0], M[1, 1])
                 thetaZ = 0
+        else:
+            thetaY = PIOTWO
+            thetaX = np.arctan2(M[1, 0], M[1, 1])
+            thetaZ = 0
         return thetaX, thetaY, thetaZ
 
     def checkRMatrix(self, R):
