@@ -77,7 +77,7 @@ void test_vec2Angs_Vec() {
 	vec.at<float>(1, 0) = 0;
 	vec.at<float>(2, 0) = 0;
 
-	geo.vec2Angs(&phi, &theta, vec);
+	geo.vec2Angs(vec, &phi, &theta);
 
 	assert(compareFloat0(phi));
 	assert(compareFloat0(theta));
@@ -93,7 +93,7 @@ void test_vec2Angs_Vec() {
 				vec.at<float>(1, 0) = y;
 				vec.at<float>(2, 0) = z;
 
-				geo.vec2Angs(&phi, &theta, vec);
+				geo.vec2Angs(vec, &phi, &theta);
 
 				r = std::sqrt(x * x + y * y + z * z);
 				assert(compareFloat0(phi - std::atan2(y, x)));
@@ -110,7 +110,7 @@ void test_vec2Angs_Mat() {
 	cv::Mat thetas = cv::Mat::zeros(H, W, CV_32F);
 	cv::randu(vecs, cv::Scalar(-1000), cv::Scalar(1000));
 
-	geo.vec2Angs(&phis, &thetas, vecs);
+	geo.vec2Angs(vecs, &phis, &thetas);
 
 	float *p;
 	float x, y, z, r;
@@ -144,7 +144,7 @@ void test_angs2Vec() {
 		for(int j = 0; j < 180; j++) {
 			phi = i / 360. * TWOPI;
 			theta = j / 180. * PI;
-			geo.angs2Vec(&vec, phi, theta);
+			geo.angs2Vec(phi, theta, &vec);
 
 			x = std::sin(theta);
 			z = std::cos(theta);
@@ -174,7 +174,7 @@ void test_twoPts2Vec_PtPt() {
 	cv::randu(P1, cv::Scalar(-1000), cv::Scalar(1000));
 	cv::randu(P2, cv::Scalar(-1000), cv::Scalar(1000));
 
-	geo.twoPts2Vec(&vec, P1, P2);
+	geo.twoPts2Vec(P1, P2, &vec);
 
 	float x, y, z, r;
 	P1 = P2 - P1;
@@ -199,7 +199,7 @@ void test_twoPts2Vec_PtMat() {
 	cv::randu(P1, cv::Scalar(-1000), cv::Scalar(1000));
 	cv::randu(P2, cv::Scalar(-1000), cv::Scalar(1000));
 
-	geo.twoPts2Vec(&vec, P1, P2);
+	geo.twoPts2Vec(P1, P2, &vec);
 
 	float x1 = P1.at<float>(0, 0);
 	float y1 = P1.at<float>(1, 0);
@@ -257,7 +257,7 @@ void test_twoPts2Angs_PtPt() {
 			cv::randu(P1, cv::Scalar(-1000), cv::Scalar(1000));
 			cv::randu(P2, cv::Scalar(-1000), cv::Scalar(1000));
 
-			geo.twoPts2Angs(&phi, &theta, P1, P2);
+			geo.twoPts2Angs(P1, P2, &phi, &theta);
 
 			float x, y, z, r;
 			P1 = P1 - P2;
@@ -290,7 +290,7 @@ void test_twoPts2Angs_PtMat() {
 	float y1 = P1.at<float>(1, 0);
 	float z1 = P1.at<float>(2, 0);
 
-	geo.twoPts2Angs(&phis, &thetas, P1, P2);
+	geo.twoPts2Angs(P1, P2, &phis, &thetas);
 
 	float x, y, z, r;
 	float *p2;
@@ -321,7 +321,7 @@ void test_u2Phi() {
 	float phi, p;
 	for(int i = 0; i < W; i++) {
 		u = i;
-		geo.u2Phi(&phi, u, W);
+		geo.u2Phi(u, W, &phi);
 		p = u * -TWOPI / W + TWOPI;
 		assert(compareFloat0(phi -p));
 	}
@@ -335,7 +335,7 @@ void test_v2Theta() {
 	float theta, t;
 	for(int i = 0; i < H; i++) {
 		v = i;
-		geo.v2Theta(&theta, v, H);
+		geo.v2Theta(v, H, &theta);
 		t = v * PI / H;
 		assert(compareFloat0(theta - t));
 	}
@@ -349,7 +349,7 @@ void test_phi2u() {
 	float u, u2;
 	for(int i = 0; i < 360; i++) {
 		phi = i / 360. * TWOPI;
-		geo.phi2u(&u, phi, W);
+		geo.phi2u(phi, W, &u);
 		u2 = std::fmod((phi - TWOPI) * W / -TWOPI, W);
 		assert(compareFloat0(u - u2));
 	}
@@ -362,7 +362,7 @@ void test_theta2v() {
 	float v, v2;
 	for(int i = 0; i < 180; i++) {
 		theta = i / 180. * PI;
-		geo.theta2v(&v, theta, H);
+		geo.theta2v(theta, H, &v);
 		v2 = theta * H / PI;
 		assert(compareFloat0(v - v2));
 	}

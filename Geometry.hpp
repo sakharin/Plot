@@ -20,24 +20,24 @@
 
 class Geometry {
 	protected:
-		void vecElem2Angs(float*, float*, float, float, float);
-		void twoPts2VecPtPt(cv::Mat*, cv::Mat, cv::Mat);
-		void twoPts2VecPtMat(cv::Mat*, cv::Mat, cv::Mat);
+		void vecElem2Angs(float x, float y, float z, float* phi, float* theta);
+		void twoPts2VecPtPt(cv::Mat P1, cv::Mat P2, cv::Mat* P);
+		void twoPts2VecPtMat(cv::Mat P1, cv::Mat P2, cv::Mat* P);
 	public:
 		Geometry();
-		void getRMatrixEulerAngles(cv::Mat*, float, float, float);
-		float angsDiff(float, float);
-		float normVec(cv::Mat);
-		void normalizedVec(cv::Mat*, cv::Mat);
-		void vec2Angs(float *, float *, cv::Mat);
-		void vec2Angs(cv::Mat*, cv::Mat*, cv::Mat);
-		void angs2Vec(cv::Mat*, float, float);
-		void twoPts2Vec(cv::Mat*, cv::Mat, cv::Mat);
-		void twoPts2Angs(float*, float*, cv::Mat, cv::Mat);
-		void twoPts2Angs(cv::Mat*, cv::Mat*, cv::Mat, cv::Mat);
-		void u2Phi(float* phi, float u, int W);
-		void v2Theta(float* theta, float v, int H);
-		void phi2u(float* u, float phi, int W);
-		void theta2v(float* v, float theta, int H);
+		void getRMatrixEulerAngles(float X, float Y, float Z, cv::Mat* M);
+		float angsDiff(float ang1, float ang2);
+		float normVec(cv::Mat vec);
+		void normalizedVec(cv::Mat vec, cv::Mat* outVec);
+		void vec2Angs(cv::Mat vec, float* phi, float* theta);
+		void vec2Angs(cv::Mat vecs, cv::Mat* phis, cv::Mat* thetas);
+		void angs2Vec(float phi, float theta, cv::Mat* vec);
+		void twoPts2Vec(cv::Mat P1, cv::Mat P2, cv::Mat *P);
+		void twoPts2Angs(cv::Mat P1, cv::Mat P2, float* phi, float* theta);
+		void twoPts2Angs(cv::Mat P1, cv::Mat P2, cv::Mat* phis, cv::Mat* thetas);
+		void u2Phi(float u, int W, float* phi);
+		void v2Theta(float v, int H, float* theta);
+		void phi2u(float phi, int W, float* u);
+		void theta2v(float theta, int H, float* v);
 };
 #endif

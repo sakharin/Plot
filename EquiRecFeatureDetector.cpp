@@ -8,17 +8,17 @@ EquiRecFeatureDetector::EquiRecFeatureDetector() {
 
 void EquiRecFeatureDetector::point2Vec(cv::Mat *vec, cv::Point2f pt) {
 	float phi, theta;
-	geo.u2Phi(&phi, pt.x, W);
-	geo.v2Theta(&theta, pt.y, H);
-	geo.angs2Vec(vec, phi, theta);
+	geo.u2Phi(pt.x, W, &phi);
+	geo.v2Theta(pt.y, H, &theta);
+	geo.angs2Vec(phi, theta, vec);
 }
 
 void EquiRecFeatureDetector::vec2Point(cv::Point2f *pt, cv::Mat vec) {
 	float phi, theta;
 	float x, y;
-	geo.vec2Angs(&phi, &theta, vec);
-	geo.phi2u(&x, phi, W);
-	geo.theta2v(&y, theta, H);
+	geo.vec2Angs(vec, &phi, &theta);
+	geo.phi2u(phi, W, &x);
+	geo.theta2v(theta, H, &y);
 	pt->x = std::fmod(x, float(W));
 	pt->y = std::fmod(y, float(H));
 }
@@ -42,7 +42,7 @@ void EquiRecFeatureDetector::detectAndCompute(cv::Mat inImg, std::vector< cv::Ke
 			for (int j = 0; j < W; j++) {
 				phi = -j * TWOPI / W;
 
-				geo.angs2Vec(&vec, phi, theta);
+				geo.angs2Vec(phi, theta, &vec);
 				vecs.at<cv::Vec3f>(i, j) = vec;
 
 				float ang = std::atan(std::tan(theta - PIOTWO) / std::cos(phi + PI));
@@ -65,16 +65,16 @@ void EquiRecFeatureDetector::detectAndCompute(cv::Mat inImg, std::vector< cv::Ke
 	// For all rotation angle
 	for (int k = 0; k < N; k++) {
 		// Rotate the unit sphere
-		geo.getRMatrixEulerAngles(&m, 0, k * 2 * beta, 0);
+		geo.getRMatrixEulerAngles(0, k * 2 * beta, 0, &m);
 		for(int i = 0; i < H; i++) {
 			for(int j = 0; j < W; j++) {
 				vec.at<float>(0, 0) = vecs.at<cv::Vec3f>(i, j)[0];
 				vec.at<float>(1, 0) = vecs.at<cv::Vec3f>(i, j)[1];
 				vec.at<float>(2, 0) = vecs.at<cv::Vec3f>(i, j)[2];
 				vec = m * vec;
-				geo.vec2Angs(&phi, &theta, vec);
-				geo.phi2u(&u, phi, W);
-				geo.theta2v(&v, theta, H);
+				geo.vec2Angs(vec, &phi, &theta);
+				geo.phi2u(phi, W, &u);
+				geo.theta2v(theta, H, &v);
 				gridx.at<float>(i, j) = u;
 				gridy.at<float>(i, j) = v;
 			}
@@ -92,7 +92,7 @@ void EquiRecFeatureDetector::detectAndCompute(cv::Mat inImg, std::vector< cv::Ke
 
 		// Copy keypoints
 		int previousKeyPointsIndex = keyPoints->size();
-		geo.getRMatrixEulerAngles(&m, 0, k * 2 * beta, 0);
+		geo.getRMatrixEulerAngles(0, k * 2 * beta, 0, &m);
 		for (int i = 0; i < kps.size(); i++) {
 			// Rotate keyPoint
 			cv::KeyPoint kp;
