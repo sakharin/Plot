@@ -111,7 +111,6 @@ void Geometry::vec2Angs(cv::Mat vecs, cv::Mat* phis, cv::Mat* thetas) {
 
 	int i, j;
 	float *x, *y, *z, *p, *t;
-	float r;
 	for(i = 0; i < h; i++) {
 		x = vecs.ptr<float>(i);
 		y = x + 1;

@@ -33,8 +33,6 @@ void test_EquiRecFeatureDetector() {
 	}
 
 	// Resized size
-	int H = inImg1.size().height;
-	int W = inImg1.size().width;
 	std::cout << "Scalled size " << inImg1.size() << std::endl;
 
 	std::vector< cv::KeyPoint > keyPoints1;
@@ -56,7 +54,7 @@ void test_EquiRecFeatureDetector() {
 	matcher.knnMatch(descriptors1, descriptors2, matches, 2);
 
 	// Ratio test as per Lowe's paper
-	for (int i = 0; i < matches.size(); i++) {
+	for (unsigned int i = 0; i < matches.size(); i++) {
 		if (matches[i][0].distance < 0.7 * matches[i][1].distance) {
 			cv::DMatch m = matches[i][0];
 			goodMatches.push_back(m);

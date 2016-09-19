@@ -71,7 +71,6 @@ void test_vec2Angs_Vec() {
 	Geometry geo = Geometry();
 	cv::Mat vec = cv::Mat::zeros(3, 1, CV_32F);
 	float phi, theta;
-	float x, y, z, r;
 
 	vec.at<float>(0, 0) = 0;
 	vec.at<float>(1, 0) = 0;
@@ -85,9 +84,9 @@ void test_vec2Angs_Vec() {
 	for(int i = 1; i < 360; i++) {
 		for(int j = 1; j < 360; j++) {
 			for(int k = 1; k < 360; k++) {
-				x = i / 360.;
-				y = j / 360.;
-				z = k / 360.;
+				float x = i / 360.;
+				float y = j / 360.;
+				float z = k / 360.;
 
 				vec.at<float>(0, 0) = x;
 				vec.at<float>(1, 0) = y;
@@ -95,7 +94,7 @@ void test_vec2Angs_Vec() {
 
 				geo.vec2Angs(vec, &phi, &theta);
 
-				r = std::sqrt(x * x + y * y + z * z);
+				float r = std::sqrt(x * x + y * y + z * z);
 				assert(compareFloat0(phi - std::atan2(y, x)));
 				assert(compareFloat0(theta - std::acos(z / r)));
 			}
@@ -137,7 +136,6 @@ void test_angs2Vec() {
 	std::cout << "testing angs2Vec() ..." << std::flush;
 	Geometry geo = Geometry();
 	cv::Mat vec = cv::Mat::zeros(3, 1, CV_32F);
-	float x, y, z;
 	float phi, theta;
 
 	for(int i = 0; i < 360; i++) {
@@ -146,9 +144,9 @@ void test_angs2Vec() {
 			theta = j / 180. * PI;
 			geo.angs2Vec(phi, theta, &vec);
 
-			x = std::sin(theta);
-			z = std::cos(theta);
-			y = x * std::sin(phi);
+			float x = std::sin(theta);
+			float z = std::cos(theta);
+			float y = x * std::sin(phi);
 			x = x * std::cos(phi);
 
 			assert(compareFloat0(vec.at<float>(0, 0) - x));
@@ -317,12 +315,11 @@ void test_twoPts2Angs_PtMat() {
 void test_u2Phi() {
 	std::cout << "testing u2Phi() ..." << std::flush;
 	Geometry geo = Geometry();
-	float u;
-	float phi, p;
 	for(int i = 0; i < W; i++) {
-		u = i;
+		float u = i;
+		float phi;
 		geo.u2Phi(u, W, &phi);
-		p = u * -TWOPI / W + TWOPI;
+		float p = u * -TWOPI / W + TWOPI;
 		assert(compareFloat0(phi -p));
 	}
 	std::cout << "\b\b\bdone." << std::endl << std::flush;
@@ -331,12 +328,11 @@ void test_u2Phi() {
 void test_v2Theta() {
 	std::cout << "testing v2Theta() ..." << std::flush;
 	Geometry geo = Geometry();
-	float v;
-	float theta, t;
 	for(int i = 0; i < H; i++) {
-		v = i;
+		float v = i;
+		float theta;
 		geo.v2Theta(v, H, &theta);
-		t = v * PI / H;
+		float t = v * PI / H;
 		assert(compareFloat0(theta - t));
 	}
 	std::cout << "\b\b\bdone." << std::endl << std::flush;
@@ -345,12 +341,11 @@ void test_v2Theta() {
 void test_phi2u() {
 	std::cout << "testing phi2u() ..." << std::flush;
 	Geometry geo = Geometry();
-	float phi;
-	float u, u2;
 	for(int i = 0; i < 360; i++) {
-		phi = i / 360. * TWOPI;
+		float phi = i / 360. * TWOPI;
+		float u;
 		geo.phi2u(phi, W, &u);
-		u2 = std::fmod((phi - TWOPI) * W / -TWOPI, W);
+		float u2 = std::fmod((phi - TWOPI) * W / -TWOPI, W);
 		assert(compareFloat0(u - u2));
 	}
 	std::cout << "\b\b\bdone." << std::endl << std::flush;
@@ -358,12 +353,11 @@ void test_phi2u() {
 void test_theta2v() {
 	std::cout << "testing theta2v() ..." << std::flush;
 	Geometry geo = Geometry();
-	float theta;
-	float v, v2;
 	for(int i = 0; i < 180; i++) {
-		theta = i / 180. * PI;
+		float theta = i / 180. * PI;
+		float v;
 		geo.theta2v(theta, H, &v);
-		v2 = theta * H / PI;
+		float v2 = theta * H / PI;
 		assert(compareFloat0(v - v2));
 	}
 	std::cout << "\b\b\bdone." << std::endl << std::flush;

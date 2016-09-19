@@ -91,9 +91,8 @@ void EquiRecFeatureDetector::detectAndCompute(cv::Mat inImg, std::vector< cv::Ke
 		sift->compute(rotatedImg, kps, deses);
 
 		// Copy keypoints
-		int previousKeyPointsIndex = keyPoints->size();
 		geo.getRMatrixEulerAngles(0, k * 2 * beta, 0, &m);
-		for (int i = 0; i < kps.size(); i++) {
+		for (unsigned int i = 0; i < kps.size(); i++) {
 			// Rotate keyPoint
 			cv::KeyPoint kp;
 			kp = kps[i];
