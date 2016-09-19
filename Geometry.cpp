@@ -330,15 +330,24 @@ void Geometry::readPts3(std::string fileName, std::vector< cv::Point3d >& pts) {
 
 void Geometry::genPts3Random(std::vector< cv::Point3d >& pts, int numPts, double minDist, double maxDist) {
 	// Initialize random seed
-	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
-	std::uniform_real_distribution<double> distribution(minDist, maxDist);
-	std::mt19937_64 rng(seed);
+	unsigned angSeed = std::chrono::system_clock::now().time_since_epoch().count();
+	unsigned distSeed = std::chrono::system_clock::now().time_since_epoch().count();
+	std::uniform_real_distribution<double> angDist(-PI, PI);
+	std::mt19937_64 angRng(angSeed);
+	std::uniform_real_distribution<double> distDist(minDist, maxDist);
+	std::mt19937_64 distRng(distSeed);
 
 	for(int i = 0; i < numPts; i++) {
-		cv::Point3d pt;
-		pt.x = distribution(rng);
-		pt.y = distribution(rng);
-		pt.z = distribution(rng);
+		float phi = angDist(angRng);
+		float theta = angDist(angRng);
+		float dist = distDist(distRng);
+
+		cv::Mat vec = cv::Mat::zeros(3, 1, CV_32F);
+		angs2Vec(phi, theta, &vec);
+		vec *= dist;
+		cv::Point3d pt(vec.at< float >(0, 0),
+				       vec.at< float >(1, 0),
+				       vec.at< float >(2, 0));
 		pts.push_back(pt);
 	}
 }
