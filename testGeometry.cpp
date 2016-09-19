@@ -396,6 +396,14 @@ void test_writePts3_readPts3() {
 	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
 
+void test_genPts3Random() {
+	std::cout << "testing getPt3Random() ..." << std::flush;
+	Geometry geo = Geometry();
+	std::vector< cv::Point3d > ptsSrc;
+	geo.genPts3Random(ptsSrc);
+	std::cout << "\b\b\bdone." << std::endl << std::flush;
+}
+
 int main (int argc, char *argv[]) {
 	test_angsDiff();
 	test_vec2Angs();
@@ -407,5 +415,6 @@ int main (int argc, char *argv[]) {
 	test_phi2u();
 	test_theta2v();
 	test_writePts3_readPts3();
+	test_genPts3Random();
 	return 0;
 }

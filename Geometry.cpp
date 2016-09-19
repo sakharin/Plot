@@ -327,3 +327,18 @@ void Geometry::readPts3(std::string fileName, std::vector< cv::Point3d >& pts) {
 	}
 	fs.close();
 }
+
+void Geometry::genPts3Random(std::vector< cv::Point3d >& pts, int numPts, double minDist, double maxDist) {
+	// Initialize random seed
+	unsigned seed = std::chrono::system_clock::now().time_since_epoch().count();
+	std::uniform_real_distribution<double> distribution(minDist, maxDist);
+	std::mt19937_64 rng(seed);
+
+	for(int i = 0; i < numPts; i++) {
+		cv::Point3d pt;
+		pt.x = distribution(rng);
+		pt.y = distribution(rng);
+		pt.z = distribution(rng);
+		pts.push_back(pt);
+	}
+}
