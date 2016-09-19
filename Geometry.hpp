@@ -49,6 +49,6 @@ class Geometry {
 		void writePts3(std::string fileName, std::vector< cv::Point3d >& pts);
 		void readPts3(std::string fileName, std::vector< cv::Point3d >& pts);
 
-		void genPts3Random(std::vector< cv::Point3d >& pts, int numPts=100, double minDist=10, double maxDist=100);
+		void genPts3Random(std::vector< cv::Point3d >& pts, int numPts=100, double minDist=0.1, double maxDist=1);
 };
 #endif
