@@ -81,24 +81,22 @@ void test_vec2Angs_Vec() {
 	assert(compareFloat0(phi));
 	assert(compareFloat0(theta));
 
-	for(int i = 1; i < 360; i++) {
-		for(int j = 1; j < 360; j++) {
-			for(int k = 1; k < 360; k++) {
-				float x = i / 360.;
-				float y = j / 360.;
-				float z = k / 360.;
+	cv::Mat pts = cv::Mat(NUMTEST, 3, CV_32F);
+	cv::randu(pts, cv::Scalar(-1000), cv::Scalar(1000));
+	for(int i = 0; i < NUMTEST; i++) {
+		float x = pts.at< float>(i, 0);
+		float y = pts.at< float>(i, 1);
+		float z = pts.at< float>(i, 2);
 
-				vec.at<float>(0, 0) = x;
-				vec.at<float>(1, 0) = y;
-				vec.at<float>(2, 0) = z;
+		vec.at<float>(0, 0) = x;
+		vec.at<float>(1, 0) = y;
+		vec.at<float>(2, 0) = z;
 
-				geo.vec2Angs(vec, &phi, &theta);
+		geo.vec2Angs(vec, &phi, &theta);
 
-				float r = std::sqrt(x * x + y * y + z * z);
-				assert(compareFloat0(phi - std::atan2(y, x)));
-				assert(compareFloat0(theta - std::acos(z / r)));
-			}
-		}
+		float r = std::sqrt(x * x + y * y + z * z);
+		assert(compareFloat0(phi - std::atan2(y, x)));
+		assert(compareFloat0(theta - std::acos(z / r)));
 	}
 }
 
