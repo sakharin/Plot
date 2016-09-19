@@ -352,7 +352,7 @@ void Geometry::genPts3Random(std::vector< cv::Point3d >& pts, int numPts, double
 	}
 }
 
-void Geometry::genPts3UnitSphere(std::vector< cv::Point3d >& pts, int numPts, double dist) {
+void Geometry::genPts3UnitSphere(std::vector< cv::Point3d >& pts, int numPts, double r) {
 	unsigned angSeed = std::chrono::system_clock::now().time_since_epoch().count();
 	std::uniform_real_distribution<double> angDist(-TWOPI, TWOPI);
 	std::mt19937_64 angRnd(angSeed);
@@ -365,7 +365,7 @@ void Geometry::genPts3UnitSphere(std::vector< cv::Point3d >& pts, int numPts, do
 		// Get vector
 		cv::Mat vec = cv::Mat::zeros(3, 1, CV_32F);
 		angs2Vec(phi, theta, &vec);
-		vec *= dist;
+		vec *= r;
 
 		// Convert to point
 		cv::Point3d pt;
@@ -375,5 +375,23 @@ void Geometry::genPts3UnitSphere(std::vector< cv::Point3d >& pts, int numPts, do
 
 		// Keep point
 		pts.push_back(pt);
+	}
+}
+
+void Geometry::genPts3UnitCylinder(std::vector< cv::Point3d >& pts, int numPts, int h, double r) {
+	for(float z = 0.5; z >= -0.5; z -= 1. / (h - 1)) {
+		for(double i = 0.0; i < TWOPI; i += TWOPI / numPts) {
+			// Point on circle
+			float x = r * cos(i);
+			float y = r * sin(i);
+
+			cv::Point3d pt;
+			pt.x = x * r;
+			pt.y = y * r;
+			pt.z = z * r;
+
+			// Keep point
+			pts.push_back(pt);
+		}
 	}
 }

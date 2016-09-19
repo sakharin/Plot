@@ -410,6 +410,14 @@ void test_genPts3UnitSphere() {
 	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
 
+void test_genPts3UnitCylinder() {
+	std::cout << "testing genPt3UnitCylinder() ..." << std::flush;
+	Geometry geo = Geometry();
+	std::vector< cv::Point3d > ptsSrc;
+	geo.genPts3UnitCylinder(ptsSrc);
+	std::cout << "\b\b\bdone." << std::endl << std::flush;
+}
+
 int main (int argc, char *argv[]) {
 	test_angsDiff();
 	test_vec2Angs();
@@ -423,5 +431,6 @@ int main (int argc, char *argv[]) {
 	test_writePts3_readPts3();
 	test_genPts3Random();
 	test_genPts3UnitSphere();
+	test_genPts3UnitCylinder();
 	return 0;
 }
