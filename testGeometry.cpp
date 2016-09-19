@@ -395,10 +395,18 @@ void test_writePts3_readPts3() {
 }
 
 void test_genPts3Random() {
-	std::cout << "testing getPt3Random() ..." << std::flush;
+	std::cout << "testing genPt3Random() ..." << std::flush;
 	Geometry geo = Geometry();
 	std::vector< cv::Point3d > ptsSrc;
 	geo.genPts3Random(ptsSrc);
+	std::cout << "\b\b\bdone." << std::endl << std::flush;
+}
+
+void test_genPts3UnitSphere() {
+	std::cout << "testing genPt3UnitSphere() ..." << std::flush;
+	Geometry geo = Geometry();
+	std::vector< cv::Point3d > ptsSrc;
+	geo.genPts3UnitSphere(ptsSrc);
 	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
 
@@ -414,5 +422,6 @@ int main (int argc, char *argv[]) {
 	test_theta2v();
 	test_writePts3_readPts3();
 	test_genPts3Random();
+	test_genPts3UnitSphere();
 	return 0;
 }

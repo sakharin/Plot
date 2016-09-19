@@ -50,5 +50,6 @@ class Geometry {
 		void readPts3(std::string fileName, std::vector< cv::Point3d >& pts);
 
 		void genPts3Random(std::vector< cv::Point3d >& pts, int numPts=100, double minDist=0.1, double maxDist=1);
+		void genPts3UnitSphere(std::vector< cv::Point3d >& pts, int numPts=100, double dist=1.0);
 };
 #endif

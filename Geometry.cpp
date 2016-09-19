@@ -351,3 +351,29 @@ void Geometry::genPts3Random(std::vector< cv::Point3d >& pts, int numPts, double
 		}
 	}
 }
+
+void Geometry::genPts3UnitSphere(std::vector< cv::Point3d >& pts, int numPts, double dist) {
+	unsigned angSeed = std::chrono::system_clock::now().time_since_epoch().count();
+	std::uniform_real_distribution<double> angDist(-TWOPI, TWOPI);
+	std::mt19937_64 angRnd(angSeed);
+
+	for(int i = 0; i < numPts; i++) {
+		// Random angles
+		double phi = angDist(angRnd);
+		double theta = std::fmod(angDist(angRnd), PI);
+
+		// Get vector
+		cv::Mat vec = cv::Mat::zeros(3, 1, CV_32F);
+		angs2Vec(phi, theta, &vec);
+		vec *= dist;
+
+		// Convert to point
+		cv::Point3d pt;
+		pt.x = vec.at< float >(0, 0);
+		pt.y = vec.at< float >(1, 0);
+		pt.z = vec.at< float >(2, 0);
+
+		// Keep point
+		pts.push_back(pt);
+	}
+}
