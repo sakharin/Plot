@@ -5,6 +5,10 @@
 #include <chrono>
 #include <random>
 #include <iostream>
+#include <fstream>
+#include <ios>
+#include <iostream>
+#include <limits>
 #include <opencv2/opencv.hpp>
 
 #ifndef PI
@@ -41,5 +45,8 @@ class Geometry {
 		void v2Theta(float v, int H, float* theta);
 		void phi2u(float phi, int W, float* u);
 		void theta2v(float theta, int H, float* v);
+
+		void writePts3(std::string fileName, std::vector< cv::Point3d >& pts);
+		void readPts3(std::string fileName, std::vector< cv::Point3d >& pts);
 };
 #endif

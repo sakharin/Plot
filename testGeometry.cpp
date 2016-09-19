@@ -50,12 +50,12 @@ void test_angsDiff() {
 		b = std::fmod(b, TWOPI);
 		float diff2 = a - b;
 		if (diff2 > PI) {
-			diff2-= TWOPI;
+			diff2 -= TWOPI;
 		}
 		if (diff2 < -PI) {
 			diff2 += TWOPI;
 		}
-		assert(compareFloat0(diff1 - diff2));
+		assert(compareFloat0(0.001 * (diff1 - diff2)));
 	}
 	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
@@ -363,6 +363,39 @@ void test_theta2v() {
 	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
 
+void test_writePts3_readPts3() {
+	std::cout << "testing writePts3(), readPts3() ..." << std::flush;
+	Geometry geo = Geometry();
+
+	// Generate points
+	std::vector< cv::Point3d > ptsSrc;
+	cv::Mat dat = cv::Mat(3, NUMTEST, CV_64F);
+	for (int i = 0; i < NUMTEST; i++) {
+		cv::randu(dat, cv::Scalar(-1000), cv::Scalar(1000));
+		double x = dat.at<double>(0, i);
+		double y = dat.at<double>(1, i);
+		double z = dat.at<double>(2, i);
+		cv::Point3d p(x, y, z);
+		ptsSrc.push_back(p);
+	}
+
+	// Write file
+	std::string fileName = "tmp.csv";
+	geo.writePts3(fileName, ptsSrc);
+
+	// Read file
+	std::vector< cv::Point3d > ptsDst;
+	geo.readPts3(fileName, ptsDst);
+
+	// Compare data
+	for (int i = 0; i < NUMTEST; i++) {
+		assert(compareFloat0(ptsSrc[i].x - ptsDst[i].x));
+		assert(compareFloat0(ptsSrc[i].y - ptsDst[i].y));
+		assert(compareFloat0(ptsSrc[i].z - ptsDst[i].z));
+	}
+	std::cout << "\b\b\bdone." << std::endl << std::flush;
+}
+
 int main (int argc, char *argv[]) {
 	test_angsDiff();
 	test_vec2Angs();
@@ -373,5 +406,6 @@ int main (int argc, char *argv[]) {
 	test_v2Theta();
 	test_phi2u();
 	test_theta2v();
+	test_writePts3_readPts3();
 	return 0;
 }

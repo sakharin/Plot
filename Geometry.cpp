@@ -304,3 +304,26 @@ void Geometry::phi2u(float phi, int W, float* u) {
 void Geometry::theta2v(float theta, int H, float* v) {
 	*v = theta * H / PI;
 }
+
+void Geometry::writePts3(std::string fileName, std::vector< cv::Point3d >& pts) {
+	std::ofstream fs(fileName, std::ios_base::out | std::ios_base::trunc);
+	fs.precision(std::numeric_limits< double >::max_digits10);
+	for(unsigned int i = 0; i < pts.size(); i++) {
+		fs << pts[i].x << ", " << pts[i].y << ", " << pts[i].z << "\n";
+	}
+	fs.close();
+}
+
+void Geometry::readPts3(std::string fileName, std::vector< cv::Point3d >& pts) {
+	std::ifstream fs(fileName, std::ios_base::in);
+	fs.precision(std::numeric_limits< double >::max_digits10);
+	std::string line;
+	while(std::getline(fs, line, '\n')) {
+		const char* c = line.c_str();
+		double x, y, z;
+		std::sscanf(c, "%lf, %lf, %lf", &x, &y, &z);
+		cv::Point3d p(x, y, z);
+		pts.push_back(p);
+	}
+	fs.close();
+}
