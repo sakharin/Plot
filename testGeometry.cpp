@@ -426,6 +426,14 @@ void test_genPts3UnitCube() {
 	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
 
+void test_genPts3OrthogonalPlanes() {
+	std::cout << "testing genPts3OrthogonalPlanes() ..." << std::flush;
+	Geometry geo = Geometry();
+	std::vector< cv::Point3d > ptsSrc;
+	geo.genPts3OrthogonalPlanes(ptsSrc);
+	std::cout << "\b\b\bdone." << std::endl << std::flush;
+}
+
 int main (int argc, char *argv[]) {
 	test_angsDiff();
 	test_vec2Angs();
@@ -441,5 +449,6 @@ int main (int argc, char *argv[]) {
 	test_genPts3UnitSphere();
 	test_genPts3UnitCylinder();
 	test_genPts3UnitCube();
+	test_genPts3OrthogonalPlanes();
 	return 0;
 }

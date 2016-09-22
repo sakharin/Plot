@@ -486,3 +486,49 @@ void Geometry::genPts3UnitCube(std::vector< cv::Point3d >& pts, int numPts, doub
 		}
 	}
 }
+
+void Geometry::genPts3OrthogonalPlanes(std::vector< cv::Point3d >& pts, int numPts, double scale) {
+	// +x
+	for(int i = numPts - 1; i >= 0; i -= 1) {
+		double idxi = 1.0 * i / (numPts - 1) - 0.5;
+		for(int j = numPts - 1; j >= 0; j -= 1) {
+			double idxj = 1.0 * j / (numPts - 1) - 0.5;
+
+			cv::Point3d pt;
+			pt.x = 0.5 * scale;
+			pt.y = idxj * scale;
+			pt.z = idxi * scale;
+			pts.push_back(pt);
+		}
+	}
+
+	// +y
+	// No right
+	for(int i = numPts - 1; i >= 0; i -= 1) {
+		double idxi = 1.0 * i / (numPts - 1) - 0.5;
+		for(int j = numPts - 1; j >= 1; j -= 1) {
+			double idxj = 1.0 * j / (numPts - 1) - 0.5;
+
+			cv::Point3d pt;
+			pt.x = -idxj * scale;
+			pt.y = 0.5 * scale;
+			pt.z = idxi * scale;
+			pts.push_back(pt);
+		}
+	}
+
+	// +z
+	// No left, no bottom
+	for(int i = numPts - 1; i >= 1; i -= 1) {
+		double idxi = 1.0 * i / (numPts - 1) - 0.5;
+		for(int j = numPts - 2; j >= 0; j -= 1) {
+			double idxj = 1.0 * j / (numPts - 1) - 0.5;
+
+			cv::Point3d pt;
+			pt.x = -idxi * scale;
+			pt.y = idxj * scale;
+			pt.z = 0.5 * scale;
+			pts.push_back(pt);
+		}
+	}
+}
