@@ -396,7 +396,7 @@ void Geometry::genPts3UnitCylinder(std::vector< cv::Point3d >& pts, int numPts, 
 	}
 }
 
-void Geometry::genPts3UnitCube(std::vector< cv::Point3d >& pts, int numPts, double size) {
+void Geometry::genPts3UnitCube(std::vector< cv::Point3d >& pts, int numPts, double scale) {
 	// Top face, +z
 	for(int i = numPts - 1; i >= 0; i -= 1) {
 		double idxi = 1.0 * i / (numPts - 1) - 0.5;
@@ -404,9 +404,9 @@ void Geometry::genPts3UnitCube(std::vector< cv::Point3d >& pts, int numPts, doub
 			double idxj = 1.0 * j / (numPts - 1) - 0.5;
 
 			cv::Point3d pt;
-			pt.x = idxj * size;
-			pt.y = idxi * size;
-			pt.z = 0.5 * size;
+			pt.x = idxj * scale;
+			pt.y = idxi * scale;
+			pt.z = 0.5 * scale;
 			pts.push_back(pt);
 		}
 	}
@@ -419,9 +419,9 @@ void Geometry::genPts3UnitCube(std::vector< cv::Point3d >& pts, int numPts, doub
 			double idxj = 1.0 * j / (numPts - 1) - 0.5;
 
 			cv::Point3d pt;
-			pt.x = -idxj * size;
-			pt.y = 0.5 * size;
-			pt.z = idxi * size;
+			pt.x = -idxj * scale;
+			pt.y = 0.5 * scale;
+			pt.z = idxi * scale;
 			pts.push_back(pt);
 		}
 	}
@@ -434,9 +434,9 @@ void Geometry::genPts3UnitCube(std::vector< cv::Point3d >& pts, int numPts, doub
 			double idxj = 1.0 * j / (numPts - 1) - 0.5;
 
 			cv::Point3d pt;
-			pt.x = 0.5 * size;
-			pt.y = idxj * size;
-			pt.z = idxi * size;
+			pt.x = 0.5 * scale;
+			pt.y = idxj * scale;
+			pt.z = idxi * scale;
 			pts.push_back(pt);
 		}
 	}
@@ -449,9 +449,9 @@ void Geometry::genPts3UnitCube(std::vector< cv::Point3d >& pts, int numPts, doub
 			double idxj = 1.0 * j / (numPts - 1) - 0.5;
 
 			cv::Point3d pt;
-			pt.x = idxj * size;
-			pt.y = -0.5 * size;
-			pt.z = idxi * size;
+			pt.x = idxj * scale;
+			pt.y = -0.5 * scale;
+			pt.z = idxi * scale;
 			pts.push_back(pt);
 		}
 	}
@@ -464,9 +464,9 @@ void Geometry::genPts3UnitCube(std::vector< cv::Point3d >& pts, int numPts, doub
 			double idxj = 1.0 * j / (numPts - 1) - 0.5;
 
 			cv::Point3d pt;
-			pt.x = -0.5 * size;
-			pt.y = -idxj * size;
-			pt.z = idxi * size;
+			pt.x = -0.5 * scale;
+			pt.y = -idxj * scale;
+			pt.z = idxi * scale;
 			pts.push_back(pt);
 		}
 	}
@@ -479,9 +479,9 @@ void Geometry::genPts3UnitCube(std::vector< cv::Point3d >& pts, int numPts, doub
 			double idxj = 1.0 * j / (numPts - 1) - 0.5;
 
 			cv::Point3d pt;
-			pt.x = idxj * size;
-			pt.y = idxi * size;
-			pt.z = -0.5 * size;
+			pt.x = idxj * scale;
+			pt.y = idxi * scale;
+			pt.z = -0.5 * scale;
 			pts.push_back(pt);
 		}
 	}
