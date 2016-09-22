@@ -52,5 +52,6 @@ class Geometry {
 		void genPts3Random(std::vector< cv::Point3d >& pts, int numPts=100, double minDist=0.1, double maxDist=1);
 		void genPts3UnitSphere(std::vector< cv::Point3d >& pts, int numPts=100, double r=1.0);
 		void genPts3UnitCylinder(std::vector< cv::Point3d >& pts, int numPts=32, int h=5, double r=1.0);
+		void genPts3UnitCube(std::vector< cv::Point3d >& pts, int numPts=10, double size=1.0);
 };
 #endif

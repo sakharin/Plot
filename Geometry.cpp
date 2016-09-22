@@ -395,3 +395,94 @@ void Geometry::genPts3UnitCylinder(std::vector< cv::Point3d >& pts, int numPts, 
 		}
 	}
 }
+
+void Geometry::genPts3UnitCube(std::vector< cv::Point3d >& pts, int numPts, double size) {
+	// Top face, +z
+	for(int i = numPts - 1; i >= 0; i -= 1) {
+		double idxi = 1.0 * i / (numPts - 1) - 0.5;
+		for(int j = numPts - 1; j >= 0; j -= 1) {
+			double idxj = 1.0 * j / (numPts - 1) - 0.5;
+
+			cv::Point3d pt;
+			pt.x = idxj * size;
+			pt.y = idxi * size;
+			pt.z = 0.5 * size;
+			pts.push_back(pt);
+		}
+	}
+
+	// Left face, +y
+	// No top, no left
+	for(int i = numPts - 2; i >= 0; i -= 1) {
+		double idxi = 1.0 * i / (numPts - 1) - 0.5;
+		for(int j = numPts - 2; j >= 0; j -= 1) {
+			double idxj = 1.0 * j / (numPts - 1) - 0.5;
+
+			cv::Point3d pt;
+			pt.x = -idxj * size;
+			pt.y = 0.5 * size;
+			pt.z = idxi * size;
+			pts.push_back(pt);
+		}
+	}
+
+	// Front face, +x
+	// No top, no left
+	for(int i = numPts - 2; i >= 0; i -= 1) {
+		double idxi = 1.0 * i / (numPts - 1) - 0.5;
+		for(int j = numPts - 2; j >= 0; j -= 1) {
+			double idxj = 1.0 * j / (numPts - 1) - 0.5;
+
+			cv::Point3d pt;
+			pt.x = 0.5 * size;
+			pt.y = idxj * size;
+			pt.z = idxi * size;
+			pts.push_back(pt);
+		}
+	}
+
+	// Right face, -y
+	// No top, no left
+	for(int i = numPts - 2; i >= 0; i -= 1) {
+		double idxi = 1.0 * i / (numPts - 1) - 0.5;
+		for(int j = numPts - 2; j >= 0; j -= 1) {
+			double idxj = 1.0 * j / (numPts - 1) - 0.5;
+
+			cv::Point3d pt;
+			pt.x = idxj * size;
+			pt.y = -0.5 * size;
+			pt.z = idxi * size;
+			pts.push_back(pt);
+		}
+	}
+
+	// Back face, -x
+	// No top, no left
+	for(int i = numPts - 2; i >= 0; i -= 1) {
+		double idxi = 1.0 * i / (numPts - 1) - 0.5;
+		for(int j = numPts - 2; j >= 0; j -= 1) {
+			double idxj = 1.0 * j / (numPts - 1) - 0.5;
+
+			cv::Point3d pt;
+			pt.x = -0.5 * size;
+			pt.y = -idxj * size;
+			pt.z = idxi * size;
+			pts.push_back(pt);
+		}
+	}
+
+	// Bottom face, -z
+	// No top, no left, no right, no bottom
+	for(int i = numPts - 2; i >= 1; i -= 1) {
+		double idxi = 1.0 * i / (numPts - 1) - 0.5;
+		for(int j = numPts - 2; j >= 1; j -= 1) {
+			double idxj = 1.0 * j / (numPts - 1) - 0.5;
+
+			cv::Point3d pt;
+			pt.x = idxj * size;
+			pt.y = idxi * size;
+			pt.z = -0.5 * size;
+			pts.push_back(pt);
+		}
+	}
+}
