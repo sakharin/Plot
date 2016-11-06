@@ -55,6 +55,60 @@ classdef GeoTest < matlab.unittest.TestCase
                                  [resPhis, resThetas], 'AbsTol', 1e-6);
         end
 
+        function testEquiToPt3d(testCase)
+            % Test with single data
+            for i = 1:100
+                H = unifrnd(1, 1000);
+                W = H * 2;
+                equi = zeros(2, 1);
+                equi(1, 1) = unifrnd(0, W - 1);
+                equi(2, 1) = unifrnd(0, H - 1);
+                p = geouToPhi(equi(1, 1), W);
+                t = geovToTheta(equi(2, 1), H);
+                vec = geoAngsToVec(p, t);
+                testCase.verifyEqual(geoEquiToPt3d(equi, W, H), vec, 'AbsTol', 1e-6);
+            end
+
+            % Test with vector
+            for i = 1:100
+                H = unifrnd(1, 1000);
+                W = H * 2;
+                equi = zeros(2, 100);
+                equi(1, :) = unifrnd(0, W - 1, 1, 100);
+                equi(2, :) = unifrnd(0, H - 1, 1, 100);
+                p = geouToPhi(equi(1, :), W);
+                t = geovToTheta(equi(2, :), H);
+                vec = geoAngsToVec(p, t);
+                testCase.verifyEqual(geoEquiToPt3d(equi, W, H), vec, 'AbsTol', 1e-6);
+            end
+        end
+
+        function testPt3dToEqui(testCase)
+            % Test with single data
+            for i = 1:100
+                H = unifrnd(1, 1000);
+                W = H * 2;
+                vec = unifrnd(-100, 100, 3, 1);
+                [p, t] = geoVecToAngs(vec);
+                equi = zeros(2, 1);
+                equi(1, 1) = geoPhiTou(p, W);
+                equi(2, 1) = geoThetaTov(t, H);
+                testCase.verifyEqual(geoPts3dToEqui(vec, W, H), equi, 'AbsTol', 1e-6);
+            end
+
+            % Test with vector
+            for i = 1:100
+                H = unifrnd(1, 1000);
+                W = H * 2;
+                vecs = unifrnd(-100, 100, 3, 100);
+                [p, t] = geoVecToAngs(vecs);
+                equis = zeros(2, 100);
+                equis(1, :) = geoPhiTou(p, W);
+                equis(2, :) = geoThetaTov(t, H);
+                testCase.verifyEqual(geoPts3dToEqui(vecs, W, H), equis, 'AbsTol', 1e-6);
+            end
+        end
+
         function testEulToRotM(testCase)
             % Solution is not unique beyond 90 degree
             for i = 1:100
@@ -152,4 +206,4 @@ classdef GeoTest < matlab.unittest.TestCase
             testCase.verifyEqual(geoVecCrossToMatrix(vec), M, 'AbsTol', 1e-6);
         end
     end
-end 
+end
