@@ -1,7 +1,7 @@
 function projPts = geoProjPts(R, t, pts)
-% GEOPROJECTPTS Project point such that projectedPts = R * pts + t.
+% GEOPROJPTS Project points such that projPts = R * pts + t.
 %
-% Usage:   projPts = GEOPROJECTPTS(R, t, pts)
+% Usage:   projPts = GEOPROJPTS(R, t, pts)
 %
 % Arguments:
 %          R   - 3x3 rotation matrix.
