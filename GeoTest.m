@@ -109,8 +109,36 @@ classdef GeoTest < matlab.unittest.TestCase
             end
         end
 
+        function testEstRtFromE(testCase)
+            % Solutions of rotation are unique beyond 90 degrees, but
+            % checking its solution is not yet correct beyond 90 degrees
+
+            angRange = 90; % For random orientation of the camera
+            dispRange = 0.05; % For random position of the camera
+            featurePosRange = 1.0; % For random position of a feature
+            nTestPts = 100; % For check candidate solutions
+            for i = 1:100
+                % Generate ground truth
+                angs = unifrnd(deg2rad(-angRange), deg2rad(angRange), 3, 1);
+                R = geoEulToRotM(angs);
+                t = unifrnd(-dispRange, dispRange, 3, 1);
+                E = geoVecCrossToMatrix(t) * R;
+                pts = unifrnd(-featurePosRange, featurePosRange, 3, nTestPts);
+                projPts = geoProjPts(R, t, pts);
+
+                % Estimate R and t
+                [estR, estt] = geoEstRtFromE(E, pts, projPts);
+
+                % Check R and t
+                estAngs = geoRotMToEul(estR);
+                errTrans = sum(abs(geoAngBetween2Vecs(estt, t)));
+                testCase.verifyEqual(estAngs, angs, 'AbsTol', 1e-6);
+                testCase.verifyEqual(errTrans, 0, 'AbsTol', 1e-6);
+            end
+        end
+
         function testEulToRotM(testCase)
-            % Solution is not unique beyond 90 degree
+            % Solution is not unique beyond 90 degrees
             for i = 1:100
                 eul = deg2rad(unifrnd(0, 90, 3, 1));
                 testCase.verifyEqual(geoRotMToEul(geoEulToRotM(eul)), eul, 'AbsTol', 1e-6);
