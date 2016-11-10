@@ -2,39 +2,16 @@
 #include <cassert>
 #include <cmath>
 #include <limits>
+#include <gtest/gtest.h>
 
 #include "Geometry.hpp"
 
 #define H 100
 #define W 120
 
-#define compareFloat0(a) (((a) < FLT_EPSILON) && (-(a) > -FLT_EPSILON))
-
 #define NUMTEST 1000
 
-void test_angsDiff();
-
-void test_vec2Angs();
-void test_vec2Angs_Vec();
-void test_vec2Angs_Mat();
-
-void test_angs2Vec();
-
-void test_twoPts2Vec();
-void test_twoPts2Vec_PtPt();
-void test_twoPts2Vec_PtMat();
-
-void test_twoPts2Angs();
-void test_twoPts2Angs_PtPt();
-void test_twoPts2Angs_PtMat();
-
-void test_u2Phi();
-void test_v2Theta();
-void test_phi2u();
-void test_theta2v();
-
-void test_angsDiff() {
-	std::cout << "testing angsDiff() ..." << std::flush;
+TEST(angsDiffTest, All) {
 	Geometry geo = Geometry();
 	cv::Mat ang1 = cv::Mat(NUMTEST, 1, CV_32F);
 	cv::Mat ang2 = cv::Mat(NUMTEST, 1, CV_32F);
@@ -55,19 +32,11 @@ void test_angsDiff() {
 		if (diff2 < -PI) {
 			diff2 += TWOPI;
 		}
-		assert(compareFloat0(0.001 * (diff1 - diff2)));
+		ASSERT_FLOAT_EQ(diff1, diff2);
 	}
-	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
 
-void test_vec2Angs() {
-	std::cout << "testing vec2Angs() ..." << std::flush;
-	test_vec2Angs_Vec();
-	test_vec2Angs_Mat();
-	std::cout << "\b\b\bdone." << std::endl << std::flush;
-}
-
-void test_vec2Angs_Vec() {
+TEST(vec2AngTest, Vector) {
 	Geometry geo = Geometry();
 	cv::Mat vec = cv::Mat::zeros(3, 1, CV_32F);
 	float phi, theta;
@@ -78,8 +47,8 @@ void test_vec2Angs_Vec() {
 
 	geo.vec2Angs(vec, &phi, &theta);
 
-	assert(compareFloat0(phi));
-	assert(compareFloat0(theta));
+	ASSERT_FLOAT_EQ(phi, 0);
+	ASSERT_FLOAT_EQ(theta, 0);
 
 	cv::Mat pts = cv::Mat(NUMTEST, 3, CV_32F);
 	cv::randu(pts, cv::Scalar(-1000), cv::Scalar(1000));
@@ -95,12 +64,12 @@ void test_vec2Angs_Vec() {
 		geo.vec2Angs(vec, &phi, &theta);
 
 		float r = std::sqrt(x * x + y * y + z * z);
-		assert(compareFloat0(phi - std::atan2(y, x)));
-		assert(compareFloat0(theta - std::acos(z / r)));
+		ASSERT_FLOAT_EQ(phi, std::atan2(y, x));
+		ASSERT_FLOAT_EQ(theta, std::acos(z / r));
 	}
 }
 
-void test_vec2Angs_Mat() {
+TEST(vec2AngTest, Matrix) {
 	Geometry geo = Geometry();
 	cv::Mat vecs = cv::Mat::zeros(H, W, CV_32FC3);
 	cv::Mat phis = cv::Mat::zeros(H, W, CV_32F);
@@ -120,18 +89,17 @@ void test_vec2Angs_Mat() {
 
 			r = std::sqrt(x * x + y * y + z * z);
 			if(r == 0) {
-				assert(compareFloat0(phis.at<float>(i, j)));
-				assert(compareFloat0(thetas.at<float>(i, j)));
+				ASSERT_FLOAT_EQ(phis.at<float>(i, j), 0);
+				ASSERT_FLOAT_EQ(thetas.at<float>(i, j), 0);
 			} else {
-				assert(compareFloat0(phis.at<float>(i, j) - std::atan2(y, x)));
-				assert(compareFloat0(thetas.at<float>(i, j) - std::acos(z / r)));
+				ASSERT_FLOAT_EQ(phis.at<float>(i, j), std::atan2(y, x));
+				ASSERT_FLOAT_EQ(thetas.at<float>(i, j), std::acos(z / r));
 			}
 		}
 	}
 }
 
-void test_angs2Vec() {
-	std::cout << "testing angs2Vec() ..." << std::flush;
+TEST(angs2VeTest, All) {
 	Geometry geo = Geometry();
 	cv::Mat vec = cv::Mat::zeros(3, 1, CV_32F);
 	float phi, theta;
@@ -147,22 +115,14 @@ void test_angs2Vec() {
 			float y = x * std::sin(phi);
 			x = x * std::cos(phi);
 
-			assert(compareFloat0(vec.at<float>(0, 0) - x));
-			assert(compareFloat0(vec.at<float>(1, 0) - y));
-			assert(compareFloat0(vec.at<float>(2, 0) - z));
+			ASSERT_FLOAT_EQ(vec.at<float>(0, 0), x);
+			ASSERT_FLOAT_EQ(vec.at<float>(1, 0), y);
+			ASSERT_FLOAT_EQ(vec.at<float>(2, 0), z);
 		}
 	}
-	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
 
-void test_twoPts2Vec() {
-	std::cout << "testing twoPts2Vec() ..." << std::flush;
-	test_twoPts2Vec_PtPt();
-	test_twoPts2Vec_PtMat();
-	std::cout << "\b\b\bdone." << std::endl << std::flush;
-}
-
-void test_twoPts2Vec_PtPt() {
+TEST(twoPts2VecTest, PointPoint) {
 	Geometry geo = Geometry();
 	cv::Mat P1 = cv::Mat(3, 1, CV_32F);
 	cv::Mat P2 = cv::Mat(3, 1, CV_32F);
@@ -182,12 +142,12 @@ void test_twoPts2Vec_PtPt() {
 	y /= r;
 	z /= r;
 
-	assert(compareFloat0(vec.at<float>(0, 0) - x));
-	assert(compareFloat0(vec.at<float>(1, 0) - y));
-	assert(compareFloat0(vec.at<float>(2, 0) - z));
+	ASSERT_FLOAT_EQ(vec.at<float>(0, 0), x);
+	ASSERT_FLOAT_EQ(vec.at<float>(1, 0), y);
+	ASSERT_FLOAT_EQ(vec.at<float>(2, 0), z);
 }
 
-void test_twoPts2Vec_PtMat() {
+TEST(twoPts2VecTest, PointMatrix) {
 	Geometry geo = Geometry();
 	cv::Mat P1 = cv::Mat(3, 1, CV_32F);
 	cv::Mat P2 = cv::Mat(H, W, CV_32FC3);
@@ -220,9 +180,9 @@ void test_twoPts2Vec_PtMat() {
 			y /= r;
 			z /= r;
 
-			assert(compareFloat0(*x3 - x));
-			assert(compareFloat0(*y3 - y));
-			assert(compareFloat0(*z3 - z));
+			ASSERT_FLOAT_EQ(*x3, x);
+			ASSERT_FLOAT_EQ(*y3, y);
+			ASSERT_FLOAT_EQ(*z3, z);
 
 			x2 += 3;
 			y2 += 3;
@@ -235,14 +195,7 @@ void test_twoPts2Vec_PtMat() {
 	}
 }
 
-void test_twoPts2Angs() {
-	std::cout << "testing twoPts2Angs() ..." << std::flush;
-	test_twoPts2Angs_PtPt();
-	test_twoPts2Angs_PtMat();
-	std::cout << "\b\b\bdone." << std::endl << std::flush;
-}
-
-void test_twoPts2Angs_PtPt() {
+TEST(twoPts2AngsTest, PointPoint) {
 	Geometry geo = Geometry();
 	cv::Mat P1 = cv::Mat(3, 1, CV_32F);
 	cv::Mat P2 = cv::Mat(3, 1, CV_32F);
@@ -263,17 +216,17 @@ void test_twoPts2Angs_PtPt() {
 
 			r = std::sqrt(x * x + y * y + z * z);
 			if(r == 0) {
-				assert(compareFloat0(phi));
-				assert(compareFloat0(theta));
+				ASSERT_FLOAT_EQ(phi, 0);
+				ASSERT_FLOAT_EQ(theta, 0);
 			} else {
-				assert(compareFloat0(phi - std::atan2(y, x)));
-				assert(compareFloat0(theta - std::acos(z / r)));
+				ASSERT_FLOAT_EQ(phi, std::atan2(y, x));
+				ASSERT_FLOAT_EQ(theta, std::acos(z / r));
 			}
 		}
 	}
 }
 
-void test_twoPts2Angs_PtMat() {
+TEST(twoPts2AngsTest, PointMatrix) {
 	Geometry geo = Geometry();
 	cv::Mat P1 = cv::Mat(3, 1, CV_32F);
 	cv::Mat P2 = cv::Mat(H, W, CV_32FC3);
@@ -299,70 +252,62 @@ void test_twoPts2Angs_PtMat() {
 
 			r = std::sqrt(x * x + y * y + z * z);
 			if(r == 0) {
-				assert(compareFloat0(phis.at<float>(i, j)));
-				assert(compareFloat0(thetas.at<float>(i, j)));
+				ASSERT_FLOAT_EQ(phis.at<float>(i, j), 0);
+				ASSERT_FLOAT_EQ(thetas.at<float>(i, j), 0);
 			} else {
-				assert(compareFloat0(phis.at<float>(i, j) - std::fmod(std::atan2(y, x) + TWOPI, TWOPI)));
-				assert(compareFloat0(thetas.at<float>(i, j) - std::acos(z / r)));
+				ASSERT_FLOAT_EQ(phis.at<float>(i, j), std::atan2(y, x));
+				ASSERT_FLOAT_EQ(thetas.at<float>(i, j), std::acos(z / r));
 			}
 
 		}
 	}
 }
 
-void test_u2Phi() {
-	std::cout << "testing u2Phi() ..." << std::flush;
+TEST(u2PhiTest, All) {
 	Geometry geo = Geometry();
 	for(int i = 0; i < W; i++) {
 		float u = i;
 		float phi;
 		geo.u2Phi(u, W, &phi);
 		float p = u * -TWOPI / W + TWOPI;
-		assert(compareFloat0(phi -p));
+		ASSERT_FLOAT_EQ(phi, p);
 	}
-	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
 
-void test_v2Theta() {
-	std::cout << "testing v2Theta() ..." << std::flush;
+TEST(v2ThetaTest, All) {
 	Geometry geo = Geometry();
 	for(int i = 0; i < H; i++) {
 		float v = i;
 		float theta;
 		geo.v2Theta(v, H, &theta);
 		float t = v * PI / H;
-		assert(compareFloat0(theta - t));
+		ASSERT_FLOAT_EQ(theta, t);
 	}
-	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
 
-void test_phi2u() {
-	std::cout << "testing phi2u() ..." << std::flush;
+TEST(phi2uTest, All) {
 	Geometry geo = Geometry();
 	for(int i = 0; i < 360; i++) {
 		float phi = i / 360. * TWOPI;
 		float u;
 		geo.phi2u(phi, W, &u);
 		float u2 = std::fmod((phi - TWOPI) * W / -TWOPI, W);
-		assert(compareFloat0(u - u2));
+		ASSERT_FLOAT_EQ(u, u2);
 	}
-	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
-void test_theta2v() {
-	std::cout << "testing theta2v() ..." << std::flush;
+
+TEST(theta2vTest, All) {
 	Geometry geo = Geometry();
 	for(int i = 0; i < 180; i++) {
 		float theta = i / 180. * PI;
 		float v;
 		geo.theta2v(theta, H, &v);
 		float v2 = theta * H / PI;
-		assert(compareFloat0(v - v2));
+		ASSERT_FLOAT_EQ(v, v2);
 	}
-	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
 
-void test_writePts3_readPts3() {
-	std::cout << "testing writePts3(), readPts3() ..." << std::flush;
+TEST(writePts3_readPts3Test, All) {
 	Geometry geo = Geometry();
 
 	// Generate points
@@ -387,68 +332,43 @@ void test_writePts3_readPts3() {
 
 	// Compare data
 	for (int i = 0; i < NUMTEST; i++) {
-		assert(compareFloat0(ptsSrc[i].x - ptsDst[i].x));
-		assert(compareFloat0(ptsSrc[i].y - ptsDst[i].y));
-		assert(compareFloat0(ptsSrc[i].z - ptsDst[i].z));
+		ASSERT_FLOAT_EQ(ptsSrc[i].x, ptsDst[i].x);
+		ASSERT_FLOAT_EQ(ptsSrc[i].y, ptsDst[i].y);
+		ASSERT_FLOAT_EQ(ptsSrc[i].z, ptsDst[i].z);
 	}
-	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
 
-void test_genPts3Random() {
-	std::cout << "testing genPt3Random() ..." << std::flush;
+TEST(genPts3RandomTest, All) {
 	Geometry geo = Geometry();
 	std::vector< cv::Point3d > ptsSrc;
 	geo.genPts3Random(ptsSrc);
-	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
 
-void test_genPts3UnitSphere() {
-	std::cout << "testing genPt3UnitSphere() ..." << std::flush;
+TEST(genPts3UnitSphereTest, All) {
 	Geometry geo = Geometry();
 	std::vector< cv::Point3d > ptsSrc;
 	geo.genPts3UnitSphere(ptsSrc);
-	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
 
-void test_genPts3UnitCylinder() {
-	std::cout << "testing genPt3UnitCylinder() ..." << std::flush;
+TEST(genPts3UnitCylinderTest, All) {
 	Geometry geo = Geometry();
 	std::vector< cv::Point3d > ptsSrc;
 	geo.genPts3UnitCylinder(ptsSrc);
-	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
 
-void test_genPts3UnitCube() {
-	std::cout << "testing genPts3UnitCube() ..." << std::flush;
+TEST(genPts3UnitCubeTest, All) {
 	Geometry geo = Geometry();
 	std::vector< cv::Point3d > ptsSrc;
 	geo.genPts3UnitCube(ptsSrc);
-	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
 
-void test_genPts3OrthogonalPlanes() {
-	std::cout << "testing genPts3OrthogonalPlanes() ..." << std::flush;
+TEST(genPts3OrthogonalPlanesTest, All) {
 	Geometry geo = Geometry();
 	std::vector< cv::Point3d > ptsSrc;
 	geo.genPts3OrthogonalPlanes(ptsSrc);
-	std::cout << "\b\b\bdone." << std::endl << std::flush;
 }
 
-int main (int argc, char *argv[]) {
-	test_angsDiff();
-	test_vec2Angs();
-	test_angs2Vec();
-	test_twoPts2Vec();
-	test_twoPts2Angs();
-	test_u2Phi();
-	test_v2Theta();
-	test_phi2u();
-	test_theta2v();
-	test_writePts3_readPts3();
-	test_genPts3Random();
-	test_genPts3UnitSphere();
-	test_genPts3UnitCylinder();
-	test_genPts3UnitCube();
-	test_genPts3OrthogonalPlanes();
-	return 0;
+int main(int argc, char **argv) {
+	testing::InitGoogleTest(&argc, argv);
+	return RUN_ALL_TESTS();
 }
