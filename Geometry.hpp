@@ -47,6 +47,7 @@ class Geometry {
 		void theta2v(float theta, int H, float* v);
 
 		void writePts3(std::string fileName, std::vector< cv::Point3d >& pts);
+		void writeVector(std::string fileName, std::vector< double >& data);
 		void readPts3(std::string fileName, std::vector< cv::Point3d >& pts);
 
 		void genPts3Random(std::vector< cv::Point3d >& pts, int numPts=100, double minDist=0.1, double maxDist=1);

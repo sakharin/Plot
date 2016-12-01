@@ -314,6 +314,18 @@ void Geometry::writePts3(std::string fileName, std::vector< cv::Point3d >& pts) 
 	fs.close();
 }
 
+void Geometry::writeVector(std::string fileName, std::vector< double >& data) {
+	std::ofstream fs(fileName, std::ios_base::out | std::ios_base::trunc);
+	fs.precision(std::numeric_limits< double >::max_digits10);
+	for(double i : data) {
+		fs << i << ",";
+	}
+	// Remove the last comma
+	fs.seekp(-1, std::ios_base::end);
+	fs << "\n";
+	fs.close();
+}
+
 void Geometry::readPts3(std::string fileName, std::vector< cv::Point3d >& pts) {
 	std::ifstream fs(fileName, std::ios_base::in);
 	fs.precision(std::numeric_limits< double >::max_digits10);
