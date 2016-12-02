@@ -48,7 +48,10 @@ class Geometry {
 
 		void writePts3(std::string fileName, std::vector< cv::Point3d >& pts);
 		void writeVector(std::string fileName, std::vector< double >& data);
+		void writeVector(std::string fileName, std::vector< std::vector< double > >& data);
 		void readPts3(std::string fileName, std::vector< cv::Point3d >& pts);
+		void readVector(std::string fileName, std::vector< double >& data);
+		void readVector(std::string fileName, std::vector< std::vector< double > >& data);
 
 		void genPts3Random(std::vector< cv::Point3d >& pts, int numPts=100, double minDist=0.1, double maxDist=1);
 		void genPts3UnitSphere(std::vector< cv::Point3d >& pts, int numPts=100, double r=1.0);

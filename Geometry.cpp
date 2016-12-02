@@ -326,6 +326,20 @@ void Geometry::writeVector(std::string fileName, std::vector< double >& data) {
 	fs.close();
 }
 
+void Geometry::writeVector(std::string fileName, std::vector< std::vector< double > >& data) {
+	std::ofstream fs(fileName, std::ios_base::out | std::ios_base::trunc);
+	fs.precision(std::numeric_limits< double >::max_digits10);
+	for(std::vector< double > i : data) {
+		for(double j : i) {
+			fs << j << ",";
+		}
+		// Remove the last comma
+		fs.seekp(-1, std::ios_base::end);
+		fs << "\n";
+	}
+	fs.close();
+}
+
 void Geometry::readPts3(std::string fileName, std::vector< cv::Point3d >& pts) {
 	std::ifstream fs(fileName, std::ios_base::in);
 	fs.precision(std::numeric_limits< double >::max_digits10);
@@ -336,6 +350,40 @@ void Geometry::readPts3(std::string fileName, std::vector< cv::Point3d >& pts) {
 		std::sscanf(c, "%lf, %lf, %lf", &x, &y, &z);
 		cv::Point3d p(x, y, z);
 		pts.push_back(p);
+	}
+	fs.close();
+}
+
+void Geometry::readVector(std::string fileName, std::vector< double >& data) {
+	std::ifstream fs(fileName, std::ios_base::in);
+	fs.precision(std::numeric_limits< double >::max_digits10);
+	std::string line;
+	std::string element;
+	while(std::getline(fs, line)) {
+		std::istringstream ss(line);
+		while(std::getline(ss, element, ',')) {
+			double val = 0;
+			std::sscanf(element.c_str(), "%lf", &val);
+			data.push_back(val);
+		}
+	}
+	fs.close();
+}
+
+void Geometry::readVector(std::string fileName, std::vector< std::vector< double > >& data) {
+	std::ifstream fs(fileName, std::ios_base::in);
+	fs.precision(std::numeric_limits< double >::max_digits10);
+	std::string line;
+	std::string element;
+	while(std::getline(fs, line)) {
+		std::vector< double > d;
+		std::istringstream ss(line);
+		while(std::getline(ss, element, ',')) {
+			double val = 0;
+			std::sscanf(element.c_str(), "%lf", &val);
+			d.push_back(val);
+		}
+		data.push_back(d);
 	}
 	fs.close();
 }
