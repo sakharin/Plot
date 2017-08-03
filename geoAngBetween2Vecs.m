@@ -4,8 +4,8 @@ function ang = geoAngBetween2Vecs(vec1, vec2)
 % Usage:   ang = GEOANGBETWEEN2VECS(vec1, vec2)
 %
 % Arguments:
-%          vec1 - A vector as 3x1 array.
-%          vec2 - Another vector as 3x1 array.
+%          vec1 - A vector as 3xN array.
+%          vec2 - Another vector as 3xN array.
 %
 % Returns:
 %          ang - Angle between v1 and v2 in radian.
@@ -16,8 +16,8 @@ function ang = geoAngBetween2Vecs(vec1, vec2)
     end
     [M1, N1] = size(vec1);
     [M2, N2] = size(vec2);
-    if M1 ~= 3 || N1 ~= 1 || M1 ~= M2 || N1 ~= N2
-        error('Size of vec1 and vec2 must be exactly 3x1.')
+    if M1 ~= 3 || M1 ~= M2 || N1 ~= N2
+        error('Size of vec1 and vec2 must be exactly 3xN.')
     end
     ang = subspace(vec1, vec2);
 end

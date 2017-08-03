@@ -5,7 +5,7 @@ function theta = geovToTheta(v, H)
 %
 % Arguments:
 %          v - An array of pixel position.
-%          H     - A height of an equirectangular image.
+%          H - A height of an equirectangular image.
 %
 % Returns:
 %          theta - An array of tilt angles.
