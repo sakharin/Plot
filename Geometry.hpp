@@ -31,7 +31,12 @@ class Geometry {
 		void twoPts2VecPtMat(cv::Mat P1, cv::Mat P2, cv::Mat* P);
 	public:
 		Geometry();
+		float constrainAngle0360(float x);
+		float constrainAnglem180180(float x);
+		float constrainAngle02PI(float x);
+		float constrainAnglemPIPI(float x);
 		void getRMatrixEulerAngles(float X, float Y, float Z, cv::Mat* M);
+		void RMatrix2EulerAngles(cv::Mat M, float* X, float* Y, float* Z);
 		float angsDiff(float ang1, float ang2);
 		float normVec(cv::Mat vec);
 		void normalizedVec(cv::Mat vec, cv::Mat* outVec);

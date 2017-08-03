@@ -8,8 +8,40 @@
 
 #define H 100
 #define W 120
+#define FLOAT_NEAR 1e-3
 
 #define NUMTEST 1000
+
+TEST(RMatrixEulerAngles, All) {
+	Geometry geo = Geometry();
+	cv::Mat Xs = cv::Mat(NUMTEST, 1, CV_32F);
+	cv::Mat Ys = cv::Mat(NUMTEST, 1, CV_32F);
+	cv::Mat Zs = cv::Mat(NUMTEST, 1, CV_32F);
+	cv::randu(Xs, cv::Scalar(-1000), cv::Scalar(1000));
+	cv::randu(Ys, cv::Scalar(-1000), cv::Scalar(1000));
+	cv::randu(Zs, cv::Scalar(-1000), cv::Scalar(1000));
+	for (int i = 0; i < NUMTEST; i++) {
+		float x = Xs.at<float>(i, 0);
+		float y = Ys.at<float>(i, 0);
+		float z = Zs.at<float>(i, 0);
+
+		cv::Mat M = cv::Mat::zeros(3, 3, CV_32F);
+		geo.getRMatrixEulerAngles(x, y, z, &M);
+
+		float est_x, est_y, est_z;
+		geo.RMatrix2EulerAngles(M, &est_x, &est_y, &est_z);
+
+		ASSERT_NEAR(geo.constrainAngle02PI(x),
+						geo.constrainAngle02PI(est_x),
+						FLOAT_NEAR);
+		ASSERT_NEAR(geo.constrainAngle02PI(y),
+						geo.constrainAngle02PI(est_y),
+						FLOAT_NEAR);
+		ASSERT_NEAR(geo.constrainAngle02PI(z),
+						geo.constrainAngle02PI(est_z),
+						FLOAT_NEAR);
+  }
+}
 
 TEST(angsDiffTest, All) {
 	Geometry geo = Geometry();
@@ -32,7 +64,9 @@ TEST(angsDiffTest, All) {
 		if (diff2 < -PI) {
 			diff2 += TWOPI;
 		}
-		ASSERT_FLOAT_EQ(diff1, diff2);
+		diff1 = geo.constrainAngle02PI(diff1);
+		diff2 = geo.constrainAngle02PI(diff2);
+		ASSERT_NEAR(diff1, diff2, FLOAT_NEAR);
 	}
 }
 

@@ -3,6 +3,34 @@
 Geometry::Geometry() {
 }
 
+float Geometry::constrainAngle0360(float x){
+  x = fmod(x, 360);
+  if (x < 0)
+    x += 360;
+  return x;
+}
+
+float Geometry::constrainAnglem180180(float x){
+  x = fmod(x + 180, 360);
+  if (x < 0)
+    x += 360;
+  return x - 180;
+}
+
+float Geometry::constrainAngle02PI(float x){
+  x = fmod(x, TWOPI);
+  if (x < 0)
+    x += TWOPI;
+  return x;
+}
+
+float Geometry::constrainAnglemPIPI(float x){
+  x = fmod(x + PI, TWOPI);
+  if (x < 0)
+    x += TWOPI;
+  return x - PI;
+}
+
 void Geometry::getRMatrixEulerAngles(float X, float Y, float Z, cv::Mat *M) {
 	CV_Assert(M->data != NULL);
 	CV_Assert(M->rows == 3 && M->cols == 3);
@@ -33,6 +61,25 @@ void Geometry::getRMatrixEulerAngles(float X, float Y, float Z, cv::Mat *M) {
 
 	cv::Mat tmp = mrX * mrY * mrZ;
 	tmp.copyTo(*M);
+}
+
+void Geometry::RMatrix2EulerAngles(cv::Mat M, float* X, float* Y, float* Z) {
+  //http://www.geometrictools.com/Documentation/EulerAngles.pdf
+  if (M.at<float>(0, 2) < 1) {
+    if (M.at<float>(0, 2) > -1) {
+      *Y = asin(M.at<float>(0, 2));
+      *X = atan2(-M.at<float>(1, 2), M.at<float>(2, 2));
+      *Z = atan2(-M.at<float>(0, 1), M.at<float>(0, 0));
+    } else {
+      *Y = -PIOTWO;
+      *X = -atan2(M.at<float>(1, 0), M.at<float>(1, 1));
+      *Z = 0.0;
+    }
+  } else {
+    *Y = PIOTWO;
+    *X = atan2(M.at<float>(1, 0), M.at<float>(1, 1));
+    *Z = 0.0;
+  }
 }
 
 float Geometry::angsDiff(float ang1, float ang2) {
