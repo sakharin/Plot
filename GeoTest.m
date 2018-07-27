@@ -12,6 +12,14 @@ classdef GeoTest < matlab.unittest.TestCase
             testCase.verifyEqual(geoAngBetween2Vecs(vec1, vec2), pi / 2);
         end
 
+        function testAngsDiff(testCase)
+            % Angle between 2 angles;
+            ang1 = deg2rad([1, 359, 361, 721]);
+            ang2 = deg2rad([-1, -359, 1, 1]);
+            ang = deg2rad([2, -2, 0, 0]);
+            testCase.verifyEqual(geoAngsDiff(ang1, ang2), ang, 'AbsTol', 1e-6);
+        end
+
         function testAngsToVec(testCase)
             % Test with single data
             phis   = [ 0.0,  0.0,  0.0,  0.5,  1.0,  1.5,  2.0] * pi;
